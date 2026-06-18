@@ -49,6 +49,7 @@ export function WeeklyMarquee({ theme, picks }: { theme?: string; picks: Pick[] 
           ))}
         </div>
       </div>
+      <style>{`@keyframes marquee { to { transform: translateX(-50%); } }`}</style>
     </section>
   );
 }
