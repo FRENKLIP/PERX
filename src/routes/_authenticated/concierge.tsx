@@ -10,6 +10,10 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/concierge")({
   head: () => ({ meta: [{ title: "Concierge — Perka" }] }),
+  beforeLoad: async () => {
+    const { requireRole } = await import("@/lib/roles");
+    await requireRole("employee");
+  },
   component: Concierge,
 });
 
