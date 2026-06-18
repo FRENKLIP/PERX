@@ -1,60 +1,69 @@
-# Cinematic, scrollable landing page
+# Full app redesign — Emerald Prestige, glassy & futuristic
 
-Turn the single-fold landing into a long-scroll editorial site with a real 3D moment, keeping the existing editorial cream/ink/serif identity (no generic SaaS palette — that's what makes it feel cheap).
+A complete visual overhaul. Tear out the cream/ink/red "Claude" palette. Replace with deep emerald glass surfaces, soft gold accents, and quiet Urbanist/Epilogue type. The whole product moves from editorial magazine to after-hours premium banking, with glassmorphism, depth, and a single, beautifully restrained motion language.
 
-## New sections (top → bottom)
+## Design system rewrite
 
-1. **Sticky nav** — slim glass nav (PERX · For employees · For employers · For providers · Sign in). Logo wordmark scales down once you scroll past the hero.
-2. **Hero** — kept editorial headline, but the right column becomes a live **3D scene** (see below) instead of the auth card. Subtle scroll-cue chevron at the bottom.
-3. **Marquee** — slow horizontal ticker of provider names ("Iron Gym · Komiteti · Mullixhiu · Coolab · Destil · Kayo Yoga · …") to signal real Tirana ecosystem.
-4. **"How it works" triptych** — three big numbered cards (01 Browse, 02 Approve, 03 Get paid) that pin while a thin progress line draws between them on scroll.
-5. **Bento grid of value props** — 6 unequal tiles: tax-free by design, AI concierge, real local providers, employer dashboard with live spend, instant redemption codes, multi-language (sq/en). Mixed sizes for editorial rhythm.
-6. **Parallax editorial spread** — full-bleed Tirana golden-hour photo with a serif pull-quote sliding in at a slower scroll speed.
-7. **Numbers strip** — four oversized counters that animate from 0 on scroll (providers, neighborhoods, ALL paid to date, languages).
-8. **For each audience** — three stacked dark/light alternating panels (Employees / Employers / Providers) with a real product screenshot mock + 3-bullet pitch each.
-9. **FAQ accordion** — five questions (tax treatment, payments, onboarding, languages, security).
-10. **Sign-in / sign-up section** — the existing auth card, kept fully functional, lives in its own section near the bottom (anchor `#enter`). Nav "Sign in" smooth-scrolls here.
-11. **Footer** — bigger, two columns (brand + sitemap), unchanged copy + © line.
+**Color tokens (replaces all current ones in `src/styles.css`):**
+```
+--obsidian:   #050b0a     // base canvas (deepest)
+--forest:     #07211b     // primary surface
+--emerald:    #064e3b     // brand
+--emerald-2:  #0d7a5f     // brand lift
+--gold:       #c9a84c     // primary accent
+--gold-soft:  #f0d78c     // secondary accent
+--bone:       #f5f0e0     // text on dark
+--bone-soft:  rgba(245,240,224,0.62)
+--glass-line: rgba(245,240,224,0.10)
+--glass-fill: rgba(245,240,224,0.04)
+```
+Plus a single hero gradient (`--mesh`) — a soft conic blend of emerald → forest → gold used behind hero sections.
 
-## 3D animation
+Every existing utility (`bg-cream`, `text-ink`, `text-accent-red`, `bg-paper`, `hairline`, etc.) is **kept as an alias** mapped to the new tokens, so no component needs to be re-themed. `cream → bone`, `ink → bone`, `paper → forest`, `accent-red → gold`, `accent-orange → gold-soft`, `sage → emerald-2`, `border-soft → glass-line`. Backgrounds flip from light to dark globally with one swap.
 
-A real WebGL hero piece using **@react-three/fiber** + **@react-three/drei** (industry-standard, lightweight, plays well with React 19):
-- A floating soft-shaded **wallet object** (rounded-cube card stack) slowly orbiting, with three small "perk pills" (a tiny dumbbell, a coffee cup, a luggage tag — built from primitives) gently floating around it.
-- Soft studio lighting, contact shadow, subtle drift on mouse position.
-- `Suspense` fallback shows a static SVG of the same composition so first paint is instant and SSR doesn't break.
-- Wrapped in a client-only mount (no SSR) — keeps build fast and avoids `window` issues.
-- Plus a second lightweight 3D moment further down: a **parallax tilt card** of an offer detail UI inside the "For employees" panel — pure CSS 3D transforms reacting to scroll/mouse, no extra library.
+**Typography:** Urbanist for display (was Instrument Serif), Epilogue for body (was Manrope). Loaded via `@fontsource/urbanist` and `@fontsource/epilogue`. `font-serif` utility re-mapped to Urbanist so all existing serif headlines instantly inherit the new face — no per-file edits.
 
-## "Expensive web" craft
+**Surfaces:** every card becomes a glass plate — `bg-glass-fill` + `backdrop-blur-2xl` + 1px `border-glass-line` + soft inner gold glow on hover. Radii bump from `rounded-3xl` → `rounded-[28px]`. Shadows replaced with a layered emerald glow + subtle gold rim.
 
-- **Generous vertical rhythm** — sections breathe; min 120px gaps on desktop.
-- **Scroll-triggered fades** — every section uses `IntersectionObserver` to fade-up on entry (no jank, no extra deps).
-- **Cursor** — custom subtle ring that grows on hover over links/buttons (cream blend mode over photos).
-- **Micro details** — hairline rules with Issue 01 / 02 / 03 labels between sections (editorial framing), tabular numbers for stats, italic serif emphasis on accent words.
-- **Soft grain overlay** — barely-there noise texture over hero and editorial spreads for printed-magazine feel.
-- All within the existing tokens: cream / ink / ink-soft / accent-red / sage / accent-orange. No purple gradients, no glassmorphism cliches.
+**Motion language:** one move, used everywhere — a slow 700ms fade-up with a hairline gold underline drawing in from left on section reveal. Buttons use a gold sheen sweep on hover. No more red flashes.
 
-## Dependencies
+## New visual primitives (used across the app)
 
-- `three`, `@react-three/fiber`, `@react-three/drei` (only client-side import on landing).
-- No motion library needed — IntersectionObserver + CSS transitions handle entrance animations, and r3f handles the 3D drift.
+- **`MeshBackdrop`** — a fixed full-viewport conic-gradient mesh + animated noise + faint star field that sits behind every page. Built with CSS only (gradients + `mask-image`), no JS. Lives in `__root.tsx`.
+- **`GlassCard`** — drop-in replacement wrapper that gives any panel the new frosted look. Used by `StatTile`, dashboard cards, offer cards, auth card.
+- **`GoldUnderline`** — animated 1px gold rule used under section labels and active nav items.
+- **`AuroraOrb`** — a single GPU-cheap blurred emerald/gold blob that drifts behind the hero (CSS keyframes, no canvas). Replaces the heavier 3D scene when paired with it for low-end devices; the existing r3f hero stays but its materials switch to brushed-gold + emerald glass.
 
-## Files
+## Per-surface changes
 
-- `src/routes/index.tsx` — restructured into the long-scroll composition above; auth logic kept intact (form, demo accounts, redirect).
-- `src/components/landing/Hero3D.tsx` *(new, client-only)* — r3f wallet + floating perks scene with SVG fallback.
-- `src/components/landing/Marquee.tsx` *(new)* — provider ticker.
-- `src/components/landing/HowItWorks.tsx` *(new)* — pinned triptych with progress line.
-- `src/components/landing/BentoGrid.tsx` *(new)* — 6-tile value-prop grid.
-- `src/components/landing/CountersStrip.tsx` *(new)* — animated number counters.
-- `src/components/landing/AudiencePanels.tsx` *(new)* — three alternating panels with tilt card.
-- `src/components/landing/FAQ.tsx` *(new)* — accordion.
-- `src/components/landing/CursorRing.tsx` *(new)* — custom cursor (desktop only).
-- `src/components/landing/useReveal.ts` *(new)* — shared IntersectionObserver hook.
+- **Root shell (`__root.tsx`)** — body becomes `--obsidian`; mounts `MeshBackdrop` once; sets `<html class="dark">`.
+- **Landing (`/`)** — same long-scroll structure, restyled: nav becomes floating glass pill, hero copy in Urbanist, 3D wallet materials switched to emerald glass + brushed-gold pills, marquee on dark, bento tiles become glass plates with gold eyebrows, "editorial spread" parallax keeps the photo but overlays an emerald gradient + gold pull-quote, counters strip stays dark (already is) but numbers turn gold, audience panels alternate forest/obsidian (no more cream), FAQ on glass, footer obsidian.
+- **`AppShell`** — top nav becomes a centered floating glass pill (Arc-style). Mobile tab bar becomes a single floating glass dock with a gold active pill. All `bg-cream` headers → glass.
+- **Marketplace + employee app** — offer cards become glass plates; category chips gold-outline; search bar inset glass with a gold focus ring.
+- **Offer detail** — hero image gets emerald gradient wash + gold price tag; CTA button becomes a brushed-gold pill.
+- **Employer + provider dashboards** — `StatTile` rebuilt on `GlassCard`; KPI numbers in Urbanist gold; charts (recharts) re-themed: emerald-2 stroke, gold area gradient, glass tooltip. Tables become glass rows with hairline separators.
+- **Auth card** — single glass panel centered over the mesh backdrop; segmented "Sign in / Create account" toggle becomes a gold pill slider; demo accounts become three glass mini-cards with role icons.
+- **Saved page, Reviews, Favorites** — inherit automatically via token swap; only minor spacing polish.
+
+## Files touched
+
+- `src/styles.css` — full token rewrite, font swap, new utilities (`glass`, `gold-underline`, `mesh-bg`).
+- `src/routes/__root.tsx` — add `<html class="dark">`, mount `MeshBackdrop`.
+- `src/components/visual/MeshBackdrop.tsx` *(new)*
+- `src/components/visual/GlassCard.tsx` *(new)*
+- `src/components/visual/AuroraOrb.tsx` *(new)*
+- `src/components/landing/Hero3DScene.tsx` — material colors: card stack to emerald glass, pills to brushed gold/emerald/gold-soft, env preset to `night`.
+- `src/components/landing/AudiencePanels.tsx` — tone palette flips to forest/obsidian.
+- `src/components/landing/BentoGrid.tsx` — tile backgrounds → glass variants + gold accents.
+- `src/components/AppShell.tsx` — floating glass nav + dock.
+- `src/components/StatTile.tsx`, `src/components/DashboardCharts.tsx` — glass surfaces, recharts theme.
+- `src/routes/index.tsx` — minor copy/contrast tweaks (no structural change).
+- `src/routes/auth.tsx` and any other auth surface — wrap in `GlassCard`.
+- `package.json` — add `@fontsource/urbanist`, `@fontsource/epilogue`; drop unused Instrument Serif import.
 
 ## Notes
 
-- The 3D scene is the single hero animation — one well-timed moment beats scattered effects.
-- Mobile: the 3D scene is replaced with the SVG fallback (no GPU cost on phones); marquee and counters still play.
-- The whole page stays on the cream background; only the audience panels alternate to ink for contrast.
-- Existing routes, auth, and brand tokens stay untouched.
+- No new dependencies beyond the two `@fontsource` packages. No motion library, no extra 3D libs — the wallet scene already uses r3f.
+- Existing semantic Tailwind classes keep working because the rewrite happens at the token layer; this is a redesign, not a refactor.
+- The Cloud-managed shadcn `:root` color tokens at the bottom of `styles.css` flip to dark values so all shadcn components (buttons, dialogs, dropdowns) match the new theme automatically.
+- One coherent move, executed everywhere — no per-page bespoke styling that breaks the system.
