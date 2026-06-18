@@ -112,7 +112,7 @@ function AppHome() {
           </div>
           <div className="md:col-span-7 grid sm:grid-cols-3 gap-3">
             {(weekly?.picks ?? []).map((o) => (
-              <button key={o.id} onClick={() => addToCart(o.id)} className="text-left bg-cream/5 hover:bg-cream/10 transition-colors rounded-2xl overflow-hidden group">
+              <Link key={o.id} to="/offer/$offerId" params={{ offerId: o.id }} className="text-left bg-cream/5 hover:bg-cream/10 transition-colors rounded-2xl overflow-hidden group block">
                 <div className="aspect-[4/3] overflow-hidden">
                   {o.image_url && <img src={o.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />}
                 </div>
@@ -121,7 +121,7 @@ function AppHome() {
                   <div className="font-serif text-lg leading-tight mt-1 line-clamp-2">{o.title}</div>
                   <div className="text-xs mt-2 text-cream/70">{formatAll(o.price_all)} · {o.companies?.neighborhood ?? o.location}</div>
                 </div>
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -139,15 +139,17 @@ function AppHome() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {(data?.editors ?? []).map((o: any) => (
             <article key={o.id} className="group">
-              <div className="aspect-[4/5] rounded-2xl overflow-hidden hairline mb-3">
-                {o.image_url && <img src={o.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />}
-              </div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-red">{o.category_slug} · {o.companies?.neighborhood ?? o.location}</div>
-              <h3 className="font-serif text-2xl leading-tight mt-1">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
-              <p className="text-sm text-ink-soft mt-1 line-clamp-2">{locale === "sq" && o.description_sq ? o.description_sq : o.description}</p>
+              <Link to="/offer/$offerId" params={{ offerId: o.id }} className="block">
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden hairline mb-3">
+                  {o.image_url && <img src={o.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />}
+                </div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-red">{o.category_slug} · {o.companies?.neighborhood ?? o.location}</div>
+                <h3 className="font-serif text-2xl leading-tight mt-1 group-hover:text-accent-red transition-colors">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
+                <p className="text-sm text-ink-soft mt-1 line-clamp-2">{locale === "sq" && o.description_sq ? o.description_sq : o.description}</p>
+              </Link>
               <div className="flex items-center justify-between mt-3">
                 <span className="font-semibold">{formatAll(o.price_all)}</span>
-                <button onClick={() => addToCart(o.id)} className="size-9 rounded-full hairline grid place-items-center hover:bg-ink hover:text-cream hover:border-ink transition-colors">
+                <button onClick={() => addToCart(o.id)} aria-label="Add to cart" className="size-9 rounded-full hairline grid place-items-center hover:bg-ink hover:text-cream hover:border-ink transition-colors">
                   <Plus className="size-4" />
                 </button>
               </div>
