@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
-import { Sparkles, CheckCircle2, XCircle } from "lucide-react";
-import { BarChart, Bar, XAxis, ResponsiveContainer, Cell, Tooltip } from "recharts";
+import { Sparkles, CheckCircle2, XCircle, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { StatTile } from "@/components/StatTile";
+import { TrendArea, CategoryDonut, TopBars, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
 
 export const Route = createFileRoute("/_authenticated/employer")({
   head: () => ({ meta: [{ title: "Employer — PERX" }] }),
@@ -29,12 +30,20 @@ function EmployerDashboard() {
       const { data: roles } = await supabase.from("user_roles").select("company_id").eq("user_id", u.user.id).eq("role", "employer_admin");
       const companyIds = (roles ?? []).map((r) => r.company_id).filter(Boolean) as string[];
       if (companyIds.length === 0) return null;
-      const { data: requests } = await supabase.from("requests")
-        .select("*, request_items(*)")
-        .in("employer_company_id", companyIds).order("created_at", { ascending: false });
-      return { requests: requests ?? [], companyIds };
+      const [{ data: requests }, { data: employees }, { data: providers }] = await Promise.all([
+        supabase.from("requests")
+          .select("*, request_items(*)")
+          .in("employer_company_id", companyIds).order("created_at", { ascending: false }),
+        supabase.from("profiles")
+          .select("id, full_name, monthly_budget_all")
+          .in("employer_company_id", companyIds),
+        supabase.from("companies").select("id, name").eq("kind", "provider"),
+      ]);
+      return { requests: requests ?? [], employees: employees ?? [], providers: providers ?? [], companyIds };
     },
   });
+
+  const [period, setPeriod] = useState<7 | 30 | 90>(30);
 
   async function decide(reqId: string, status: "approved" | "rejected") {
     const { data: u } = await supabase.auth.getUser();
@@ -78,35 +87,170 @@ function EmployerDashboard() {
 
   const pending = (data?.requests ?? []).filter((r) => r.status === "pending");
   const approved = (data?.requests ?? []).filter((r) => r.status === "approved");
-  const totalApproved = approved.reduce((s, r) => s + r.total_all, 0);
+  const rejected = (data?.requests ?? []).filter((r) => r.status === "rejected");
 
+  const sinceMs = period * 24 * 60 * 60 * 1000;
+  const cutoff = Date.now() - sinceMs;
+  const approvedInPeriod = approved.filter((r) => new Date(r.decided_at ?? r.created_at).getTime() >= cutoff);
+  const totalApproved = approvedInPeriod.reduce((s, r) => s + r.total_all, 0);
+  const activeEmployees = new Set((data?.requests ?? []).filter((r) => new Date(r.created_at).getTime() >= cutoff).map((r) => r.employee_id)).size;
+  const avgTicket = approvedInPeriod.length ? Math.round(totalApproved / approvedInPeriod.length) : 0;
+  const totalBudget = (data?.employees ?? []).reduce((s, e: any) => s + (e.monthly_budget_all ?? 0), 0);
+  const utilization = totalBudget ? Math.min(100, Math.round((totalApproved / totalBudget) * 100)) : 0;
+
+  const trend = useMemo(() => trendBuckets(
+    approved.map((r) => ({ date: r.decided_at ?? r.created_at, value: r.total_all })),
+    period,
+  ), [approved, period]);
+
+  const categoryNames: Record<string, RegExp> = {
+    wellness: /(gym|yoga|spa|pool|sauna|pilates|massage|fitness)/i,
+    travel: /(ksamil|theth|dajti|dhërmi|llogara|trip|hotel|getaway|weekend)/i,
+    learning: /(coding|language|coolab|destil|course|class|workshop)/i,
+    food: /./,
+  };
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
-    (data?.requests ?? []).forEach((r) => {
+    approvedInPeriod.forEach((r) => {
       (r as any).request_items?.forEach((it: any) => {
-        // category isn't stored on item; group by simple keyword in title
-        const key = it.offer_title?.toLowerCase().includes("gym") || it.offer_title?.toLowerCase().includes("yoga") || it.offer_title?.toLowerCase().includes("spa") || it.offer_title?.toLowerCase().includes("pool") ? "wellness"
-          : it.offer_title?.toLowerCase().includes("ksamil") || it.offer_title?.toLowerCase().includes("theth") || it.offer_title?.toLowerCase().includes("dajti") || it.offer_title?.toLowerCase().includes("dhërmi") || it.offer_title?.toLowerCase().includes("llogara") ? "travel"
-          : it.offer_title?.toLowerCase().includes("coding") || it.offer_title?.toLowerCase().includes("language") || it.offer_title?.toLowerCase().includes("coolab") || it.offer_title?.toLowerCase().includes("destil") ? "learning"
-          : "food";
+        const title = it.offer_title ?? "";
+        let key = "food";
+        for (const [k, re] of Object.entries(categoryNames)) { if (re.test(title)) { key = k; break; } }
         map.set(key, (map.get(key) ?? 0) + (it.price_all ?? 0));
       });
     });
-    return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
+    return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [approvedInPeriod]);
+
+  const topProviders = useMemo(() => {
+    const map = new Map<string, number>();
+    approvedInPeriod.forEach((r) => {
+      (r as any).request_items?.forEach((it: any) => {
+        const key = it.provider_company_id ?? "—";
+        map.set(key, (map.get(key) ?? 0) + (it.price_all ?? 0));
+      });
+    });
+    const nameOf = new Map((data?.providers ?? []).map((p: any) => [p.id, p.name]));
+    return Array.from(map.entries())
+      .map(([id, value]) => ({ name: (nameOf.get(id) as string) ?? "Provider", value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+  }, [approvedInPeriod, data]);
+
+  const topEmployees = useMemo(() => {
+    const map = new Map<string, number>();
+    approvedInPeriod.forEach((r) => {
+      map.set(r.employee_id, (map.get(r.employee_id) ?? 0) + r.total_all);
+    });
+    const nameOf = new Map((data?.employees ?? []).map((e: any) => [e.id, e.full_name]));
+    return Array.from(map.entries())
+      .map(([id, value]) => ({ id, name: (nameOf.get(id) as string) ?? `Employee · ${id.slice(-4)}`, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+  }, [approvedInPeriod, data]);
+
+  const activity = useMemo(() => {
+    return (data?.requests ?? [])
+      .flatMap((r) => {
+        const evs: { type: "submitted" | "approved" | "rejected"; date: string; r: any }[] = [
+          { type: "submitted", date: r.created_at, r },
+        ];
+        if (r.decided_at && r.status === "approved") evs.push({ type: "approved", date: r.decided_at, r });
+        if (r.decided_at && r.status === "rejected") evs.push({ type: "rejected", date: r.decided_at, r });
+        return evs;
+      })
+      .sort((a, b) => +new Date(b.date) - +new Date(a.date))
+      .slice(0, 8);
   }, [data]);
-  const palette: Record<string, string> = { wellness: "#7a8b6f", food: "#c5503a", travel: "#171717", learning: "#d98b5f" };
 
   return (
     <div className="max-w-6xl mx-auto px-6 pt-10">
-      <div className="fade-up mb-10">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Employer</div>
-        <h1 className="font-serif text-5xl tracking-tight">How your team is spending their wellbeing.</h1>
+      <div className="flex items-end justify-between gap-6 mb-10 fade-up">
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Employer console</div>
+          <h1 className="font-serif text-5xl tracking-tight">How your team is spending their wellbeing.</h1>
+        </div>
+        <PeriodSwitcher value={period} onChange={setPeriod} />
       </div>
 
-      <div className="grid md:grid-cols-3 gap-px bg-border-soft hairline rounded-3xl overflow-hidden mb-10 fade-up">
-        <Stat label="Pending approvals" value={pending.length.toString()} />
-        <Stat label="Approved this period" value={approved.length.toString()} />
-        <Stat label="Total committed" value={formatAll(totalApproved)} />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-border-soft hairline rounded-3xl overflow-hidden mb-10 fade-up">
+        <StatTile label="Pending" value={pending.length.toString()} hint={pending.length ? "awaiting review" : "all clear"} accent="orange" />
+        <StatTile label={`Approved · ${period}d`} value={approvedInPeriod.length.toString()} hint={`${rejected.length} rejected total`} accent="sage" />
+        <StatTile label="Total committed" value={formatAll(totalApproved)} hint={`avg ${formatAll(avgTicket)} / req`} accent="ink" />
+        <StatTile label="Active employees" value={`${activeEmployees}`} hint={`of ${(data?.employees ?? []).length} on plan`} accent="ink" />
+        <StatTile label="Wallet utilization" value={`${utilization}%`} hint={totalBudget ? `${formatAll(totalBudget)} budgeted` : "no budgets set"} accent="red" />
+        <StatTile label="Avg ticket" value={formatAll(avgTicket)} hint={`${approvedInPeriod.length} approvals`} accent="ink" />
+      </div>
+
+      {/* Charts row */}
+      <div className="grid lg:grid-cols-12 gap-6 mb-10">
+        <div className="lg:col-span-7 hairline bg-white rounded-3xl p-6 fade-up">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft">Spend trend</div>
+              <h3 className="font-serif text-2xl mt-1">Last {period} days</h3>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft">Committed</div>
+              <div className="font-serif text-2xl">{formatAll(totalApproved)}</div>
+            </div>
+          </div>
+          <TrendArea data={trend} />
+        </div>
+        <div className="lg:col-span-5 hairline bg-white rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Category mix</div>
+          <h3 className="font-serif text-2xl mb-4">Where it goes</h3>
+          <CategoryDonut data={byCategory} />
+        </div>
+      </div>
+
+      {/* Leaderboards + activity */}
+      <div className="grid lg:grid-cols-12 gap-6 mb-10">
+        <div className="lg:col-span-5 hairline bg-white rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Top providers</div>
+          <h3 className="font-serif text-2xl mb-4">Where the money lands</h3>
+          <TopBars data={topProviders} color="#171717" />
+        </div>
+        <div className="lg:col-span-4 hairline bg-white rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Top employees</div>
+          <h3 className="font-serif text-2xl mb-4">Most active</h3>
+          {topEmployees.length === 0 ? (
+            <div className="text-sm text-ink-soft py-8 text-center">No approved requests yet.</div>
+          ) : (
+            <ol className="space-y-2.5">
+              {topEmployees.map((e, i) => (
+                <li key={e.id} className="flex items-center gap-3 text-sm">
+                  <span className="size-7 grid place-items-center rounded-full bg-paper font-serif text-sm">{i + 1}</span>
+                  <span className="flex-1 truncate">{e.name}</span>
+                  <span className="font-semibold tabular-nums">{formatAll(e.value)}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
+        <div className="lg:col-span-3 hairline bg-white rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Activity</div>
+          <h3 className="font-serif text-2xl mb-4">Latest events</h3>
+          {activity.length === 0 ? (
+            <div className="text-sm text-ink-soft py-8 text-center">Quiet for now.</div>
+          ) : (
+            <ul className="space-y-3">
+              {activity.map((a, i) => {
+                const Icon = a.type === "approved" ? ArrowUpRight : a.type === "rejected" ? ArrowDownRight : Clock;
+                const color = a.type === "approved" ? "text-sage" : a.type === "rejected" ? "text-accent-red" : "text-ink-soft";
+                return (
+                  <li key={i} className="flex items-start gap-2 text-xs">
+                    <Icon className={`size-3.5 mt-0.5 shrink-0 ${color}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate"><span className="font-semibold capitalize">{a.type}</span> · {formatAll(a.r.total_all)}</div>
+                      <div className="text-ink-soft mt-0.5">{new Date(a.date).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </div>
 
       <div className="grid md:grid-cols-5 gap-6 mb-10">
@@ -126,21 +270,26 @@ function EmployerDashboard() {
             <p className="text-sm text-cream/60">Click Generate to read this period in plain English.</p>
           )}
         </div>
-        <div className="md:col-span-2 hairline bg-white rounded-3xl p-6 fade-up">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-3">By category</div>
-          {byCategory.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={byCategory}>
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: any) => formatAll(v)} cursor={{ fill: "#17171708" }} />
-                <Bar dataKey="value" radius={[6,6,0,0]}>
-                  {byCategory.map((c) => <Cell key={c.name} fill={palette[c.name] ?? "#171717"} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[200px] grid place-items-center text-ink-soft text-sm">No spending yet.</div>
-          )}
+        <div className="md:col-span-2 hairline rounded-3xl p-6 fade-up bg-paper/50 flex flex-col justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Approval rate</div>
+            <div className="font-serif text-5xl">
+              {(approved.length + rejected.length) > 0 ? Math.round((approved.length / (approved.length + rejected.length)) * 100) : 0}%
+            </div>
+            <div className="text-xs text-ink-soft mt-1">{approved.length} approved · {rejected.length} rejected · {pending.length} waiting</div>
+          </div>
+          <div className="text-sm text-ink-soft pt-6 border-t border-border-soft mt-6">
+            Avg approval time:&nbsp;
+            <span className="text-ink font-semibold">
+              {(() => {
+                const decided = approved.filter((r) => r.decided_at);
+                if (decided.length === 0) return "—";
+                const avgMs = decided.reduce((s, r) => s + (+new Date(r.decided_at!) - +new Date(r.created_at)), 0) / decided.length;
+                const h = avgMs / 36e5;
+                return h < 24 ? `${h.toFixed(1)}h` : `${(h/24).toFixed(1)}d`;
+              })()}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -195,15 +344,6 @@ function EmployerDashboard() {
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-white p-6">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">{label}</div>
-      <div className="font-serif text-4xl">{value}</div>
     </div>
   );
 }
