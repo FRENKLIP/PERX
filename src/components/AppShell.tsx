@@ -53,11 +53,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-cream text-ink font-body">
-      <nav className="sticky top-0 z-50 bg-cream/85 backdrop-blur-md border-b border-border-soft">
+    <div className="min-h-screen text-bone font-body">
+      <nav className="sticky top-0 z-50 bg-forest/85 backdrop-blur-md border-b border-glass-line">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
           <Link to={homeTo as any} className="font-serif text-2xl tracking-tight">
-            PERX<span className="text-accent-red">.</span>
+            PERX<span className="text-gold">.</span>
           </Link>
           <div className="hidden md:flex items-center gap-1 text-sm">
             {isEmployee && <NavTab to="/app" label={t("home")} />}
@@ -72,13 +72,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => { setLocale(locale === "en" ? "sq" : "en"); force((n) => n + 1); }}
-              className="size-9 rounded-full hairline hover:bg-paper grid place-items-center"
+              className="size-9 rounded-full hairline hover:bg-obsidian grid place-items-center"
               title="Toggle language"
             >
               <Languages className="size-4" />
             </button>
-            <div className="size-9 rounded-full bg-ink text-cream grid place-items-center font-bold text-[11px]">{initials}</div>
-            <button onClick={signOut} className="size-9 rounded-full hover:bg-paper grid place-items-center" title={t("sign_out")}>
+            <div className="size-9 rounded-full bg-emerald-deep text-bone grid place-items-center font-bold text-[11px]">{initials}</div>
+            <button onClick={signOut} className="size-9 rounded-full hover:bg-obsidian grid place-items-center" title={t("sign_out")}>
               <LogOut className="size-4" />
             </button>
           </div>
@@ -88,7 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom tab bar — employees */}
       {isEmployee && (
-        <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-ink text-cream rounded-full px-2 py-2 flex items-center gap-1 shadow-xl">
+        <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-deep text-bone rounded-full px-2 py-2 flex items-center gap-1 shadow-xl">
           <BottomTab to="/app" icon={Home} />
           <BottomTab to="/marketplace" icon={Store} />
           <BottomTab to="/saved" icon={Heart} />
@@ -97,7 +97,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
       {(isEmployer || isProvider) && (
-        <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-ink text-cream rounded-full px-2 py-2 flex items-center gap-1 shadow-xl">
+        <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-deep text-bone rounded-full px-2 py-2 flex items-center gap-1 shadow-xl">
           {isEmployer && <BottomTab to="/employer" icon={BarChart3} />}
           {isProvider && <BottomTab to="/provider" icon={Wrench} />}
         </div>
@@ -110,8 +110,8 @@ function NavTab({ to, label }: { to: string; label: string }) {
   return (
     <Link
       to={to as any}
-      className="px-3 py-1.5 rounded-full text-ink-soft hover:text-ink transition-colors"
-      activeProps={{ className: "px-3 py-1.5 rounded-full text-ink underline underline-offset-8 decoration-accent-red decoration-2" }}
+      className="px-3 py-1.5 rounded-full text-bone-soft hover:text-bone transition-colors"
+      activeProps={{ className: "px-3 py-1.5 rounded-full text-bone underline underline-offset-8 decoration-accent-red decoration-2" }}
     >
       {label}
     </Link>
@@ -120,9 +120,9 @@ function NavTab({ to, label }: { to: string; label: string }) {
 
 function BottomTab({ to, icon: Icon, badge }: { to: string; icon: any; badge?: number }) {
   return (
-    <Link to={to as any} className="relative size-11 rounded-full grid place-items-center text-cream/60 hover:text-cream" activeProps={{ className: "relative size-11 rounded-full grid place-items-center bg-cream text-ink" }}>
+    <Link to={to as any} className="relative size-11 rounded-full grid place-items-center text-bone/60 hover:text-bone" activeProps={{ className: "relative size-11 rounded-full grid place-items-center bg-forest text-bone" }}>
       <Icon className="size-4" />
-      {badge && badge > 0 ? <span className="absolute -top-0.5 -right-0.5 size-4 rounded-full bg-accent-red text-[9px] font-bold grid place-items-center">{badge}</span> : null}
+      {badge && badge > 0 ? <span className="absolute -top-0.5 -right-0.5 size-4 rounded-full bg-gold text-[9px] font-bold grid place-items-center">{badge}</span> : null}
     </Link>
   );
 }

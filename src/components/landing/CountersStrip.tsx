@@ -27,19 +27,19 @@ function Counter({ target, suffix }: { target: number; suffix: string }) {
   }, [shown, target]);
   return (
     <div ref={ref} className="font-serif text-6xl md:text-8xl tracking-tight tabular-nums">
-      {v}<span className="text-accent-red">{suffix}</span>
+      {v}<span className="text-gold">{suffix}</span>
     </div>
   );
 }
 
 export default function CountersStrip() {
   return (
-    <section className="bg-ink text-cream">
+    <section className="bg-emerald-deep text-bone">
       <div className="max-w-7xl mx-auto px-6 py-28 grid grid-cols-2 md:grid-cols-4 gap-10">
         {STATS.map((s) => (
           <div key={s.label}>
             <Counter target={s.v} suffix={s.suf} />
-            <div className="text-cream/60 text-xs uppercase tracking-[0.2em] mt-4 font-semibold">{s.label}</div>
+            <div className="text-bone/60 text-xs uppercase tracking-[0.2em] mt-4 font-semibold">{s.label}</div>
           </div>
         ))}
       </div>

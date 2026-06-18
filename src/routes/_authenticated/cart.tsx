@@ -84,7 +84,7 @@ function Cart() {
   return (
     <div className="max-w-6xl mx-auto px-6 pt-10">
       <div className="fade-up mb-10">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Your selection</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2">Your selection</div>
         <h1 className="font-serif text-5xl tracking-tight">Ready when you are.</h1>
       </div>
 
@@ -93,22 +93,22 @@ function Cart() {
           {(data?.items ?? []).length === 0 ? (
             <div className="hairline rounded-3xl p-16 text-center">
               <p className="font-serif text-2xl mb-3">Empty cart, empty plans.</p>
-              <p className="text-ink-soft text-sm mb-6">Browse the marketplace or let the concierge help.</p>
-              <Link to="/marketplace" className="inline-block bg-ink text-cream rounded-full px-6 py-3 text-sm font-semibold hover:bg-accent-red">Browse marketplace</Link>
+              <p className="text-bone-soft text-sm mb-6">Browse the marketplace or let the concierge help.</p>
+              <Link to="/marketplace" className="inline-block bg-emerald-deep text-bone rounded-full px-6 py-3 text-sm font-semibold hover:bg-gold">Browse marketplace</Link>
             </div>
           ) : (
             (data?.items ?? []).map((it: any) => (
-              <div key={it.id} className="flex items-center hairline bg-white rounded-2xl p-3 gap-4 fade-up">
-                <div className="size-16 rounded-xl overflow-hidden shrink-0 bg-paper">
+              <div key={it.id} className="flex items-center hairline bg-forest rounded-2xl p-3 gap-4 fade-up">
+                <div className="size-16 rounded-xl overflow-hidden shrink-0 bg-obsidian">
                   {it.offers?.image_url && <img src={it.offers.image_url} alt="" className="w-full h-full object-cover" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-semibold text-accent-red uppercase tracking-[0.18em]">{it.offers?.category_slug}</div>
+                  <div className="text-[10px] font-semibold text-gold uppercase tracking-[0.18em]">{it.offers?.category_slug}</div>
                   <div className="font-serif text-lg leading-tight truncate">{locale === "sq" && it.offers?.title_sq ? it.offers.title_sq : it.offers?.title}</div>
-                  <div className="text-xs text-ink-soft">{it.offers?.companies?.name}</div>
+                  <div className="text-xs text-bone-soft">{it.offers?.companies?.name}</div>
                 </div>
                 <div className="font-semibold">{formatAll(it.offers?.price_all ?? 0)}</div>
-                <button onClick={() => remove(it.id)} className="size-9 rounded-full hover:bg-paper grid place-items-center text-ink-soft hover:text-accent-red">
+                <button onClick={() => remove(it.id)} className="size-9 rounded-full hover:bg-obsidian grid place-items-center text-bone-soft hover:text-gold">
                   <Trash2 className="size-4" />
                 </button>
               </div>
@@ -117,22 +117,22 @@ function Cart() {
         </div>
 
         <aside className="md:col-span-5">
-          <div className="md:sticky md:top-24 hairline bg-white rounded-3xl p-8 fade-up">
+          <div className="md:sticky md:top-24 hairline bg-forest rounded-3xl p-8 fade-up">
             <div className="flex justify-center mb-6">
               <WalletRing spent={total} budget={budget} size={180} />
             </div>
             <div className="text-center mb-6">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft">This request</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft">This request</div>
               <div className="font-serif text-4xl mt-1">{formatAll(total)}</div>
             </div>
             {(data?.items ?? []).length > 0 && (
               <>
-                <input value={packageName} onChange={(e) => setPackageName(e.target.value)} placeholder="Name this package (optional)" className="w-full bg-paper rounded-xl px-4 py-3 text-sm mb-3 outline-none placeholder:text-ink-soft/60" />
-                <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note to your employer (optional)" className="w-full bg-paper rounded-xl px-4 py-3 text-sm mb-4 outline-none placeholder:text-ink-soft/60" rows={2} />
-                <button onClick={submit} disabled={submitting || total > budget} className="w-full bg-ink text-cream rounded-full py-4 font-semibold disabled:opacity-50 hover:bg-accent-red transition-colors">
+                <input value={packageName} onChange={(e) => setPackageName(e.target.value)} placeholder="Name this package (optional)" className="w-full bg-obsidian rounded-xl px-4 py-3 text-sm mb-3 outline-none placeholder:text-bone-soft/60" />
+                <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note to your employer (optional)" className="w-full bg-obsidian rounded-xl px-4 py-3 text-sm mb-4 outline-none placeholder:text-bone-soft/60" rows={2} />
+                <button onClick={submit} disabled={submitting || total > budget} className="w-full bg-emerald-deep text-bone rounded-full py-4 font-semibold disabled:opacity-50 hover:bg-gold transition-colors">
                   {submitting ? "Sending…" : total > budget ? "Over budget" : t("submit_for_approval")}
                 </button>
-                <p className="text-xs text-ink-soft text-center mt-4">Your employer approves and payment routes directly to providers.</p>
+                <p className="text-xs text-bone-soft text-center mt-4">Your employer approves and payment routes directly to providers.</p>
               </>
             )}
           </div>

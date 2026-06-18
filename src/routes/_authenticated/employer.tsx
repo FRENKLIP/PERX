@@ -167,13 +167,13 @@ function EmployerDashboard() {
     <div className="max-w-6xl mx-auto px-6 pt-10">
       <div className="flex items-end justify-between gap-6 mb-10 fade-up">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Employer console</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2">Employer console</div>
           <h1 className="font-serif text-5xl tracking-tight">How your team is spending their wellbeing.</h1>
         </div>
         <PeriodSwitcher value={period} onChange={setPeriod} />
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-border-soft hairline rounded-3xl overflow-hidden mb-10 fade-up">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-glass-line hairline rounded-3xl overflow-hidden mb-10 fade-up">
         <StatTile label="Pending" value={pending.length.toString()} hint={pending.length ? "awaiting review" : "all clear"} accent="orange" />
         <StatTile label={`Approved · ${period}d`} value={approvedInPeriod.length.toString()} hint={`${rejected.length} rejected total`} accent="sage" />
         <StatTile label="Total committed" value={formatAll(totalApproved)} hint={`avg ${formatAll(avgTicket)} / req`} accent="ink" />
@@ -184,21 +184,21 @@ function EmployerDashboard() {
 
       {/* Charts row */}
       <div className="grid lg:grid-cols-12 gap-6 mb-10">
-        <div className="lg:col-span-7 hairline bg-white rounded-3xl p-6 fade-up">
+        <div className="lg:col-span-7 hairline bg-forest rounded-3xl p-6 fade-up">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft">Spend trend</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft">Spend trend</div>
               <h3 className="font-serif text-2xl mt-1">Last {period} days</h3>
             </div>
             <div className="text-right">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft">Committed</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft">Committed</div>
               <div className="font-serif text-2xl">{formatAll(totalApproved)}</div>
             </div>
           </div>
           <TrendArea data={trend} />
         </div>
-        <div className="lg:col-span-5 hairline bg-white rounded-3xl p-6 fade-up">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Category mix</div>
+        <div className="lg:col-span-5 hairline bg-forest rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-1">Category mix</div>
           <h3 className="font-serif text-2xl mb-4">Where it goes</h3>
           <CategoryDonut data={byCategory} />
         </div>
@@ -206,21 +206,21 @@ function EmployerDashboard() {
 
       {/* Leaderboards + activity */}
       <div className="grid lg:grid-cols-12 gap-6 mb-10">
-        <div className="lg:col-span-5 hairline bg-white rounded-3xl p-6 fade-up">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Top providers</div>
+        <div className="lg:col-span-5 hairline bg-forest rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-1">Top providers</div>
           <h3 className="font-serif text-2xl mb-4">Where the money lands</h3>
           <TopBars data={topProviders} color="#171717" />
         </div>
-        <div className="lg:col-span-4 hairline bg-white rounded-3xl p-6 fade-up">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Top employees</div>
+        <div className="lg:col-span-4 hairline bg-forest rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-1">Top employees</div>
           <h3 className="font-serif text-2xl mb-4">Most active</h3>
           {topEmployees.length === 0 ? (
-            <div className="text-sm text-ink-soft py-8 text-center">No approved requests yet.</div>
+            <div className="text-sm text-bone-soft py-8 text-center">No approved requests yet.</div>
           ) : (
             <ol className="space-y-2.5">
               {topEmployees.map((e, i) => (
                 <li key={e.id} className="flex items-center gap-3 text-sm">
-                  <span className="size-7 grid place-items-center rounded-full bg-paper font-serif text-sm">{i + 1}</span>
+                  <span className="size-7 grid place-items-center rounded-full bg-obsidian font-serif text-sm">{i + 1}</span>
                   <span className="flex-1 truncate">{e.name}</span>
                   <span className="font-semibold tabular-nums">{formatAll(e.value)}</span>
                 </li>
@@ -228,22 +228,22 @@ function EmployerDashboard() {
             </ol>
           )}
         </div>
-        <div className="lg:col-span-3 hairline bg-white rounded-3xl p-6 fade-up">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Activity</div>
+        <div className="lg:col-span-3 hairline bg-forest rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-1">Activity</div>
           <h3 className="font-serif text-2xl mb-4">Latest events</h3>
           {activity.length === 0 ? (
-            <div className="text-sm text-ink-soft py-8 text-center">Quiet for now.</div>
+            <div className="text-sm text-bone-soft py-8 text-center">Quiet for now.</div>
           ) : (
             <ul className="space-y-3">
               {activity.map((a, i) => {
                 const Icon = a.type === "approved" ? ArrowUpRight : a.type === "rejected" ? ArrowDownRight : Clock;
-                const color = a.type === "approved" ? "text-sage" : a.type === "rejected" ? "text-accent-red" : "text-ink-soft";
+                const color = a.type === "approved" ? "text-sage" : a.type === "rejected" ? "text-gold" : "text-bone-soft";
                 return (
                   <li key={i} className="flex items-start gap-2 text-xs">
                     <Icon className={`size-3.5 mt-0.5 shrink-0 ${color}`} />
                     <div className="min-w-0 flex-1">
                       <div className="truncate"><span className="font-semibold capitalize">{a.type}</span> · {formatAll(a.r.total_all)}</div>
-                      <div className="text-ink-soft mt-0.5">{new Date(a.date).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
+                      <div className="text-bone-soft mt-0.5">{new Date(a.date).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
                     </div>
                   </li>
                 );
@@ -254,33 +254,33 @@ function EmployerDashboard() {
       </div>
 
       <div className="grid md:grid-cols-5 gap-6 mb-10">
-        <div className="md:col-span-3 bg-ink text-cream rounded-3xl p-8 fade-up">
+        <div className="md:col-span-3 bg-emerald-deep text-bone rounded-3xl p-8 fade-up">
           <div className="flex items-start justify-between mb-4 gap-4">
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream/60 mb-2 flex items-center gap-2"><Sparkles className="size-3 text-accent-orange" /> PERX AI · Team insights</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone/60 mb-2 flex items-center gap-2"><Sparkles className="size-3 text-gold-soft" /> PERX AI · Team insights</div>
               <h3 className="font-serif text-2xl">What your people actually value.</h3>
             </div>
-            <button onClick={generateInsight} disabled={loadingInsight} className="bg-cream text-ink px-5 py-2.5 rounded-full font-semibold text-sm disabled:opacity-50 shrink-0">
+            <button onClick={generateInsight} disabled={loadingInsight} className="bg-forest text-bone px-5 py-2.5 rounded-full font-semibold text-sm disabled:opacity-50 shrink-0">
               {loadingInsight ? "Thinking…" : insight ? "Regenerate" : "Generate"}
             </button>
           </div>
           {insight ? (
             <p className="text-sm leading-relaxed opacity-90 whitespace-pre-wrap font-serif text-lg">{insight}</p>
           ) : (
-            <p className="text-sm text-cream/60">Click Generate to read this period in plain English.</p>
+            <p className="text-sm text-bone/60">Click Generate to read this period in plain English.</p>
           )}
         </div>
-        <div className="md:col-span-2 hairline rounded-3xl p-6 fade-up bg-paper/50 flex flex-col justify-between">
+        <div className="md:col-span-2 hairline rounded-3xl p-6 fade-up bg-obsidian/50 flex flex-col justify-between">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Approval rate</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2">Approval rate</div>
             <div className="font-serif text-5xl">
               {(approved.length + rejected.length) > 0 ? Math.round((approved.length / (approved.length + rejected.length)) * 100) : 0}%
             </div>
-            <div className="text-xs text-ink-soft mt-1">{approved.length} approved · {rejected.length} rejected · {pending.length} waiting</div>
+            <div className="text-xs text-bone-soft mt-1">{approved.length} approved · {rejected.length} rejected · {pending.length} waiting</div>
           </div>
-          <div className="text-sm text-ink-soft pt-6 border-t border-border-soft mt-6">
+          <div className="text-sm text-bone-soft pt-6 border-t border-glass-line mt-6">
             Avg approval time:&nbsp;
-            <span className="text-ink font-semibold">
+            <span className="text-bone font-semibold">
               {(() => {
                 const decided = approved.filter((r) => r.decided_at);
                 if (decided.length === 0) return "—";
@@ -295,31 +295,31 @@ function EmployerDashboard() {
 
       <h2 className="font-serif text-3xl mb-4">Pending approvals</h2>
       {pending.length === 0 ? (
-        <div className="hairline rounded-3xl p-12 text-center text-ink-soft mb-10">Nothing waiting.</div>
+        <div className="hairline rounded-3xl p-12 text-center text-bone-soft mb-10">Nothing waiting.</div>
       ) : (
         <div className="space-y-3 mb-10">
           {pending.map((r) => (
-            <div key={r.id} className="hairline bg-white rounded-3xl p-6 fade-up">
+            <div key={r.id} className="hairline bg-forest rounded-3xl p-6 fade-up">
               <div className="flex justify-between items-start mb-3 gap-4">
                 <div className="min-w-0">
                   <div className="font-serif text-xl">{r.ai_package_name || `Request · ${r.id.slice(0,8)}`}</div>
-                  <div className="text-xs text-ink-soft mt-0.5">{new Date(r.created_at).toLocaleString()}</div>
-                  {r.note && <p className="text-sm mt-2 italic text-ink-soft">"{r.note}"</p>}
+                  <div className="text-xs text-bone-soft mt-0.5">{new Date(r.created_at).toLocaleString()}</div>
+                  {r.note && <p className="text-sm mt-2 italic text-bone-soft">"{r.note}"</p>}
                 </div>
                 <div className="font-serif text-2xl shrink-0">{formatAll(r.total_all)}</div>
               </div>
               <div className="space-y-1 mb-4">
                 {(r as any).request_items?.map((it: any) => (
-                  <div key={it.id} className="flex justify-between text-sm py-1.5 border-t border-border-soft">
+                  <div key={it.id} className="flex justify-between text-sm py-1.5 border-t border-glass-line">
                     <span>{it.offer_title}</span><span className="font-semibold">{formatAll(it.price_all)}</span>
                   </div>
                 ))}
               </div>
               <div className="flex gap-2">
-                <button onClick={() => decide(r.id, "approved")} className="flex-1 bg-sage text-cream py-3 rounded-full font-semibold text-sm hover:bg-ink transition-colors flex items-center justify-center gap-2">
+                <button onClick={() => decide(r.id, "approved")} className="flex-1 bg-emerald-glow text-bone py-3 rounded-full font-semibold text-sm hover:bg-emerald-deep transition-colors flex items-center justify-center gap-2">
                   <CheckCircle2 className="size-4" /> Approve & pay providers
                 </button>
-                <button onClick={() => decide(r.id, "rejected")} className="px-5 hairline text-ink-soft py-3 rounded-full font-semibold text-sm hover:bg-accent-red hover:text-cream flex items-center gap-2">
+                <button onClick={() => decide(r.id, "rejected")} className="px-5 hairline text-bone-soft py-3 rounded-full font-semibold text-sm hover:bg-gold hover:text-bone flex items-center gap-2">
                   <XCircle className="size-4" /> Reject
                 </button>
               </div>
@@ -333,10 +333,10 @@ function EmployerDashboard() {
           <h2 className="font-serif text-3xl mb-4">Recent approvals</h2>
           <div className="space-y-2">
             {approved.slice(0, 6).map((r) => (
-              <div key={r.id} className="hairline bg-white rounded-2xl p-4 flex justify-between items-center">
+              <div key={r.id} className="hairline bg-forest rounded-2xl p-4 flex justify-between items-center">
                 <div>
                   <div className="font-medium text-sm">{r.ai_package_name || r.id.slice(0,8)}</div>
-                  <div className="text-xs text-ink-soft">{new Date(r.decided_at ?? r.created_at).toLocaleDateString()}</div>
+                  <div className="text-xs text-bone-soft">{new Date(r.decided_at ?? r.created_at).toLocaleDateString()}</div>
                 </div>
                 <div className="font-semibold">{formatAll(r.total_all)}</div>
               </div>

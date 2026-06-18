@@ -33,49 +33,49 @@ function Requests() {
   return (
     <div className="max-w-4xl mx-auto px-6 pt-10">
       <div className="fade-up mb-8">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Your requests</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2">Your requests</div>
         <h1 className="font-serif text-5xl tracking-tight">Everything you've asked for.</h1>
       </div>
 
       <div className="flex gap-2 mb-8">
         {(["all", "pending", "approved", "rejected"] as const).map((f) => (
-          <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 rounded-full text-xs font-semibold capitalize transition-colors ${filter === f ? "bg-ink text-cream" : "hairline bg-white hover:bg-paper"}`}>
+          <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 rounded-full text-xs font-semibold capitalize transition-colors ${filter === f ? "bg-emerald-deep text-bone" : "hairline bg-forest hover:bg-obsidian"}`}>
             {f} {f !== "all" && data ? `· ${data.filter((r) => r.status === f).length}` : ""}
           </button>
         ))}
       </div>
 
       {items.length === 0 ? (
-        <div className="hairline rounded-3xl p-16 text-center text-ink-soft">Nothing here yet.</div>
+        <div className="hairline rounded-3xl p-16 text-center text-bone-soft">Nothing here yet.</div>
       ) : (
-        <ol className="relative border-l border-border-soft pl-6 space-y-6">
+        <ol className="relative border-l border-glass-line pl-6 space-y-6">
           {items.map((r) => (
             <li key={r.id} className="relative fade-up">
-              <span className="absolute -left-[31px] top-2 size-3 rounded-full bg-ink" />
-              <article className="hairline bg-white rounded-3xl p-6">
+              <span className="absolute -left-[31px] top-2 size-3 rounded-full bg-emerald-deep" />
+              <article className="hairline bg-forest rounded-3xl p-6">
                 <div className="flex justify-between items-start mb-4 gap-4">
                   <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft">{new Date(r.created_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-bone-soft">{new Date(r.created_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</div>
                     <div className="font-serif text-2xl mt-1">{r.ai_package_name || `Request · ${r.id.slice(0,8)}`}</div>
-                    {r.note && <p className="text-sm text-ink-soft italic mt-2">"{r.note}"</p>}
+                    {r.note && <p className="text-sm text-bone-soft italic mt-2">"{r.note}"</p>}
                   </div>
                   <StatusBadge status={r.status} />
                 </div>
                 <div className="space-y-1 mb-4">
                   {(r as any).request_items?.map((it: any) => (
-                    <div key={it.id} className="flex items-center justify-between text-sm py-2 border-t border-border-soft">
+                    <div key={it.id} className="flex items-center justify-between text-sm py-2 border-t border-glass-line">
                       <div>
                         <div className="font-medium">{it.offer_title}</div>
                         {it.redemption_code && (
-                          <div className="text-xs text-accent-red font-mono mt-0.5">Code · {it.redemption_code}</div>
+                          <div className="text-xs text-gold font-mono mt-0.5">Code · {it.redemption_code}</div>
                         )}
                       </div>
                       <span className="font-semibold">{formatAll(it.price_all)}</span>
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between items-center pt-4 border-t border-border-soft">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft">Total</span>
+                <div className="flex justify-between items-center pt-4 border-t border-glass-line">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-bone-soft">Total</span>
                   <span className="font-serif text-2xl">{formatAll(r.total_all)}</span>
                 </div>
               </article>
@@ -89,9 +89,9 @@ function Requests() {
 
 function StatusBadge({ status }: { status: string }) {
   const map = {
-    pending: { Icon: Clock, label: "Pending", cls: "bg-accent-orange/15 text-accent-orange" },
-    approved: { Icon: CheckCircle2, label: "Approved", cls: "bg-sage/15 text-sage" },
-    rejected: { Icon: XCircle, label: "Rejected", cls: "bg-accent-red/15 text-accent-red" },
+    pending: { Icon: Clock, label: "Pending", cls: "bg-gold-soft/15 text-gold-soft" },
+    approved: { Icon: CheckCircle2, label: "Approved", cls: "bg-emerald-glow/15 text-sage" },
+    rejected: { Icon: XCircle, label: "Rejected", cls: "bg-gold/15 text-gold" },
   } as const;
   const m = map[status as keyof typeof map] ?? map.pending;
   return (

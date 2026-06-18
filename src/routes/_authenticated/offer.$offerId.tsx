@@ -13,14 +13,14 @@ export const Route = createFileRoute("/_authenticated/offer/$offerId")({
   errorComponent: ({ error }) => (
     <div className="max-w-3xl mx-auto px-6 py-20 text-center">
       <h1 className="font-serif text-3xl">Couldn't load offer</h1>
-      <p className="text-ink-soft mt-2">{error.message}</p>
-      <Link to="/marketplace" className="inline-block mt-6 text-accent-red font-semibold">← Back to marketplace</Link>
+      <p className="text-bone-soft mt-2">{error.message}</p>
+      <Link to="/marketplace" className="inline-block mt-6 text-gold font-semibold">← Back to marketplace</Link>
     </div>
   ),
   notFoundComponent: () => (
     <div className="max-w-3xl mx-auto px-6 py-20 text-center">
       <h1 className="font-serif text-3xl">Offer not found</h1>
-      <Link to="/marketplace" className="inline-block mt-6 text-accent-red font-semibold">← Back to marketplace</Link>
+      <Link to="/marketplace" className="inline-block mt-6 text-gold font-semibold">← Back to marketplace</Link>
     </div>
   ),
 });
@@ -55,13 +55,13 @@ function OfferDetail() {
   }
 
   if (isLoading) {
-    return <div className="max-w-7xl mx-auto px-6 py-20 text-ink-soft">Loading…</div>;
+    return <div className="max-w-7xl mx-auto px-6 py-20 text-bone-soft">Loading…</div>;
   }
   if (error || !data) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-20 text-center">
         <h1 className="font-serif text-3xl">Offer not found</h1>
-        <Link to="/marketplace" className="inline-block mt-6 text-accent-red font-semibold">← Back to marketplace</Link>
+        <Link to="/marketplace" className="inline-block mt-6 text-gold font-semibold">← Back to marketplace</Link>
       </div>
     );
   }
@@ -76,7 +76,7 @@ function OfferDetail() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 fade-up">
-      <Link to="/marketplace" className="inline-flex items-center gap-2 text-sm text-ink-soft hover:text-ink mb-8">
+      <Link to="/marketplace" className="inline-flex items-center gap-2 text-sm text-bone-soft hover:text-bone mb-8">
         <ArrowLeft className="size-4" /> Back to marketplace
       </Link>
 
@@ -86,7 +86,7 @@ function OfferDetail() {
           <div className="relative aspect-[4/3] rounded-3xl overflow-hidden hairline">
             {o.image_url
               ? <img src={o.image_url} alt={title} className="w-full h-full object-cover" />
-              : <div className="w-full h-full bg-paper" />}
+              : <div className="w-full h-full bg-obsidian" />}
             <div className="absolute top-4 right-4">
               <FavoriteButton offerId={offerId} size="lg" />
             </div>
@@ -94,7 +94,7 @@ function OfferDetail() {
           {o.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-5">
               {o.tags.map((t: string) => (
-                <span key={t} className="text-[10px] font-bold uppercase tracking-[0.18em] hairline px-3 py-1.5 rounded-full bg-white text-ink-soft">
+                <span key={t} className="text-[10px] font-bold uppercase tracking-[0.18em] hairline px-3 py-1.5 rounded-full bg-forest text-bone-soft">
                   {t}
                 </span>
               ))}
@@ -105,29 +105,29 @@ function OfferDetail() {
         {/* Sticky info card */}
         <aside className="lg:col-span-5">
           <div className="lg:sticky lg:top-10">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent-red mb-3">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold mb-3">
               {o.category_slug}{company?.neighborhood ? ` · ${company.neighborhood}` : o.location ? ` · ${o.location}` : ""}
               {o.is_seasonal && " · Seasonal"}
             </div>
             <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[1.05]">{title}</h1>
             {company && (
-              <div className="mt-3 text-sm text-ink-soft">
-                by <span className="font-semibold text-ink">{company.name}</span>
+              <div className="mt-3 text-sm text-bone-soft">
+                by <span className="font-semibold text-bone">{company.name}</span>
               </div>
             )}
 
-            <div className="hairline rounded-3xl p-6 mt-8 bg-white">
+            <div className="hairline rounded-3xl p-6 mt-8 bg-forest">
               <div className="flex items-baseline justify-between">
                 <span className="font-serif text-4xl">{formatAll(o.price_all)}</span>
-                <span className="text-xs text-ink-soft uppercase tracking-widest">per redemption</span>
+                <span className="text-xs text-bone-soft uppercase tracking-widest">per redemption</span>
               </div>
-              <button onClick={add} className="mt-5 w-full bg-ink text-cream rounded-2xl py-4 font-bold hover:bg-accent-red transition-colors inline-flex items-center justify-center gap-2">
+              <button onClick={add} className="mt-5 w-full bg-emerald-deep text-bone rounded-2xl py-4 font-bold hover:bg-gold transition-colors inline-flex items-center justify-center gap-2">
                 <Plus className="size-4" /> Add to cart
               </button>
-              <button onClick={() => navigate({ to: "/concierge" })} className="mt-2 w-full hairline bg-cream rounded-2xl py-3.5 font-semibold text-sm hover:border-ink/30 transition-colors inline-flex items-center justify-center gap-2">
+              <button onClick={() => navigate({ to: "/concierge" })} className="mt-2 w-full hairline bg-forest rounded-2xl py-3.5 font-semibold text-sm hover:border-gold/40/30 transition-colors inline-flex items-center justify-center gap-2">
                 <Sparkles className="size-4" /> Ask the concierge
               </button>
-              <p className="text-[11px] text-ink-soft mt-3 leading-relaxed">
+              <p className="text-[11px] text-bone-soft mt-3 leading-relaxed">
                 Funded by your employer wallet. Pay nothing at checkout — your provider gets paid directly when the request is approved.
               </p>
             </div>
@@ -138,23 +138,23 @@ function OfferDetail() {
       {/* About */}
       <section className="mt-16 grid lg:grid-cols-12 gap-10">
         <div className="lg:col-span-7">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-3">About this offer</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-3">About this offer</div>
           <p className="font-serif text-2xl leading-snug text-pretty">{description}</p>
         </div>
         {company && (
           <div className="lg:col-span-5">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-3">About the provider</div>
-            <div className="hairline rounded-3xl p-6 bg-white">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-3">About the provider</div>
+            <div className="hairline rounded-3xl p-6 bg-forest">
               <h3 className="font-serif text-2xl">{company.name}</h3>
-              {company.description && <p className="text-sm text-ink-soft mt-2 leading-relaxed">{company.description}</p>}
+              {company.description && <p className="text-sm text-bone-soft mt-2 leading-relaxed">{company.description}</p>}
               {(company.address || company.city) && (
-                <div className="mt-4 flex items-start gap-2 text-sm text-ink-soft">
+                <div className="mt-4 flex items-start gap-2 text-sm text-bone-soft">
                   <MapPin className="size-4 mt-0.5 shrink-0" />
                   <span>{[company.address, company.neighborhood, company.city].filter(Boolean).join(", ")}</span>
                 </div>
               )}
               {mapUrl && (
-                <a href={mapUrl} target="_blank" rel="noreferrer" className="text-xs font-semibold text-accent-red hover:underline mt-3 inline-block">
+                <a href={mapUrl} target="_blank" rel="noreferrer" className="text-xs font-semibold text-gold hover:underline mt-3 inline-block">
                   Open in maps →
                 </a>
               )}
