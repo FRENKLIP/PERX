@@ -22,7 +22,7 @@ import { Route as AuthenticatedConciergeRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiPublicSeedDemoRouteImport } from './routes/api/public/seed-demo'
-import { Route as AuthenticatedOfferRouteImport } from './routes/_authenticated/offer.'
+import { Route as AuthenticatedOfferOfferIdRouteImport } from './routes/_authenticated/offer.$offerId'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -89,11 +89,12 @@ const ApiPublicSeedDemoRoute = ApiPublicSeedDemoRouteImport.update({
   path: '/api/public/seed-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedOfferRoute = AuthenticatedOfferRouteImport.update({
-  id: '/offer/',
-  path: '/offer/',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
+const AuthenticatedOfferOfferIdRoute =
+  AuthenticatedOfferOfferIdRouteImport.update({
+    id: '/offer/$offerId',
+    path: '/offer/$offerId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -107,7 +108,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/api/insights': typeof ApiInsightsRoute
   '/api/weekly-drop': typeof ApiWeeklyDropRoute
-  '/offer/': typeof AuthenticatedOfferRoute
+  '/offer/$offerId': typeof AuthenticatedOfferOfferIdRoute
   '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRoutesByTo {
@@ -122,7 +123,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/api/insights': typeof ApiInsightsRoute
   '/api/weekly-drop': typeof ApiWeeklyDropRoute
-  '/offer': typeof AuthenticatedOfferRoute
+  '/offer/$offerId': typeof AuthenticatedOfferOfferIdRoute
   '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRoutesById {
@@ -139,7 +140,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/api/insights': typeof ApiInsightsRoute
   '/api/weekly-drop': typeof ApiWeeklyDropRoute
-  '/_authenticated/offer/': typeof AuthenticatedOfferRoute
+  '/_authenticated/offer/$offerId': typeof AuthenticatedOfferOfferIdRoute
   '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRouteTypes {
@@ -156,7 +157,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/insights'
     | '/api/weekly-drop'
-    | '/offer/'
+    | '/offer/$offerId'
     | '/api/public/seed-demo'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -171,7 +172,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/insights'
     | '/api/weekly-drop'
-    | '/offer'
+    | '/offer/$offerId'
     | '/api/public/seed-demo'
   id:
     | '__root__'
@@ -187,7 +188,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/insights'
     | '/api/weekly-drop'
-    | '/_authenticated/offer/'
+    | '/_authenticated/offer/$offerId'
     | '/api/public/seed-demo'
   fileRoutesById: FileRoutesById
 }
@@ -293,11 +294,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSeedDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/offer/': {
-      id: '/_authenticated/offer/'
-      path: '/offer'
-      fullPath: '/offer/'
-      preLoaderRoute: typeof AuthenticatedOfferRouteImport
+    '/_authenticated/offer/$offerId': {
+      id: '/_authenticated/offer/$offerId'
+      path: '/offer/$offerId'
+      fullPath: '/offer/$offerId'
+      preLoaderRoute: typeof AuthenticatedOfferOfferIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
   }
@@ -311,7 +312,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMarketplaceRoute: typeof AuthenticatedMarketplaceRoute
   AuthenticatedProviderRoute: typeof AuthenticatedProviderRoute
   AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
-  AuthenticatedOfferRoute: typeof AuthenticatedOfferRoute
+  AuthenticatedOfferOfferIdRoute: typeof AuthenticatedOfferOfferIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -322,7 +323,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMarketplaceRoute: AuthenticatedMarketplaceRoute,
   AuthenticatedProviderRoute: AuthenticatedProviderRoute,
   AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
-  AuthenticatedOfferRoute: AuthenticatedOfferRoute,
+  AuthenticatedOfferOfferIdRoute: AuthenticatedOfferOfferIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
