@@ -8,6 +8,10 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/marketplace")({
   head: () => ({ meta: [{ title: "Marketplace — Perka" }] }),
+  beforeLoad: async () => {
+    const { requireRole } = await import("@/lib/roles");
+    await requireRole("employee");
+  },
   component: Marketplace,
 });
 
