@@ -52,8 +52,8 @@ function AuthPage() {
         // Controlled signup: one server-side function handles company + role assignment
         const { error: setupErr } = await supabase.rpc("signup_setup_account", {
           p_role: role,
-          p_company_name: companyName || null,
-          p_full_name: fullName || null,
+          p_company_name: companyName || undefined,
+          p_full_name: fullName || undefined,
         });
         if (setupErr) throw setupErr;
         toast.success("Account created");
