@@ -6,7 +6,7 @@ const dict = {
   en: {
     greeting_morning: "Good morning",
     greeting_evening: "Good evening",
-    ask_perka: "Ask Perka: find me a gym near Blloku or a weekend retreat...",
+    ask_perx: "Ask PERX: find me a gym near Blloku or a weekend retreat...",
     monthly_wallet: "Monthly wallet",
     add_to_cart: "Add",
     in_cart: "In cart",
@@ -30,7 +30,7 @@ const dict = {
   sq: {
     greeting_morning: "Mirëmëngjes",
     greeting_evening: "Mirëmbrëma",
-    ask_perka: "Pyet Perkën: gjej një palestër pranë Bllokut ose një fundjavë...",
+    ask_perx: "Pyet PERX: gjej një palestër pranë Bllokut ose një fundjavë...",
     monthly_wallet: "Portofoli mujor",
     add_to_cart: "Shto",
     in_cart: "Në shportë",
@@ -60,7 +60,7 @@ const listeners = new Set<(l: Locale) => void>();
 
 export function setLocale(l: Locale) {
   currentLocale = l;
-  if (typeof window !== "undefined") localStorage.setItem("perka_locale", l);
+  if (typeof window !== "undefined") localStorage.setItem("perx_locale", l);
   listeners.forEach((fn) => fn(l));
 }
 
@@ -68,7 +68,7 @@ export function useLocale() {
   const [locale, set] = useState<Locale>(currentLocale);
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const stored = (localStorage.getItem("perka_locale") as Locale | null) ?? "en";
+      const stored = (localStorage.getItem("perx_locale") as Locale | null) ?? "en";
       if (stored !== currentLocale) {
         currentLocale = stored;
         set(stored);

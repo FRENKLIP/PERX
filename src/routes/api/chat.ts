@@ -23,7 +23,7 @@ export const Route = createFileRoute("/api/chat")({
 
         const result = streamText({
           model,
-          system: `You are Perka, a warm, witty AI concierge for an employee benefits marketplace in Albania.
+          system: `You are PERX, a warm, witty AI concierge for an employee benefits marketplace in Albania.
 You help employees pick tax-free benefits using their monthly wallet (typically 25,000 ALL).
 Prices are always Albanian Lek (ALL). Speak in English unless user uses Albanian.
 Categories: wellness, food, travel, learning, family, tech, lifestyle.
@@ -33,7 +33,7 @@ Be concise — 1-2 short sentences max, then let the offer cards do the talking.
           stopWhen: stepCountIs(50),
           tools: {
             search_offers: tool({
-              description: "Search the Perka marketplace for offers. Use when the user asks for recommendations, packages, or browses by category/budget.",
+              description: "Search the PERX marketplace for offers. Use when the user asks for recommendations, packages, or browses by category/budget.",
               inputSchema: z.object({
                 query: z.string().optional().describe("Free text search across titles/descriptions"),
                 category: z.enum(["wellness", "food", "travel", "learning", "family", "tech", "lifestyle"]).optional(),

@@ -7,7 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/marketplace")({
-  head: () => ({ meta: [{ title: "Marketplace — Perka" }] }),
+  head: () => ({ meta: [{ title: "Marketplace — PERX" }] }),
   beforeLoad: async () => {
     const { requireRole } = await import("@/lib/roles");
     await requireRole("employee");

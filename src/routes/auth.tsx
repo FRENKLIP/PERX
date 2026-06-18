@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { getMyRoles, landingFor } from "@/lib/roles";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign in — Perka" }] }),
+  head: () => ({ meta: [{ title: "Sign in — PERX" }] }),
   component: AuthPage,
 });
 
@@ -76,9 +76,9 @@ function AuthPage() {
   async function demoLogin(kind: "employee" | "employer" | "provider") {
     setLoading(true);
     const creds = {
-      employee: { email: "era@perka.demo", password: "PerkaDemo!2026" },
-      employer: { email: "boss@perka.demo", password: "PerkaDemo!2026" },
-      provider: { email: "gym@perka.demo", password: "PerkaDemo!2026" },
+      employee: { email: "era@perx.demo", password: "PerxDemo!2026" },
+      employer: { email: "boss@perx.demo", password: "PerxDemo!2026" },
+      provider: { email: "gym@perx.demo", password: "PerxDemo!2026" },
     }[kind];
     const { error } = await supabase.auth.signInWithPassword(creds);
     if (error) {
@@ -92,7 +92,7 @@ function AuthPage() {
   return (
     <div className="min-h-screen bg-cream text-ink font-body grid md:grid-cols-2">
       <div className="hidden md:flex flex-col justify-between p-12 bg-accent-orange/10 border-r border-border-soft">
-        <span className="font-display text-2xl font-extrabold tracking-tighter uppercase">Perka<span className="text-accent-red">.</span></span>
+        <span className="font-display text-2xl font-extrabold tracking-tighter uppercase">PERX<span className="text-accent-red">.</span></span>
         <div>
           <h2 className="font-display text-4xl tracking-tight leading-tight mb-4">Mirëmëngjes.</h2>
           <p className="text-foreground/60 max-w-sm text-pretty mb-8">A modern, tax-efficient benefits marketplace built for Tirana — and ready for any city next.</p>
@@ -118,7 +118,7 @@ function AuthPage() {
         <form onSubmit={submit} className="w-full max-w-sm space-y-5">
           <div>
             <h1 className="font-display text-3xl tracking-tight mb-1">{mode === "signin" ? "Welcome back" : "Create account"}</h1>
-            <p className="text-sm text-foreground/60">{mode === "signin" ? "Sign in to your Perka wallet." : "Choose how you'll use Perka."}</p>
+            <p className="text-sm text-foreground/60">{mode === "signin" ? "Sign in to your PERX wallet." : "Choose how you'll use PERX."}</p>
           </div>
 
           {mode === "signup" && (

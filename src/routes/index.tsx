@@ -4,9 +4,9 @@ import { ArrowRight, Sparkles, ShoppingBag, Briefcase, Store } from "lucide-reac
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Perka — Tax-free benefits your team actually wants" },
-      { name: "description", content: "Perka turns company welfare into something employees love — gyms, meals, travel and learning, funded as tax-efficient benefits, paid straight to providers." },
-      { property: "og:title", content: "Perka — Benefits employees actually open" },
+      { title: "PERX — Tax-free benefits your team actually wants" },
+      { name: "description", content: "PERX turns company welfare into something employees love — gyms, meals, travel and learning, funded as tax-efficient benefits, paid straight to providers." },
+      { property: "og:title", content: "PERX — Benefits employees actually open" },
       { property: "og:description", content: "An AI-powered marketplace bringing modern tax-efficient benefits to Albania." },
     ],
   }),
@@ -17,7 +17,7 @@ function Landing() {
   return (
     <div className="min-h-screen bg-cream text-ink font-body">
       <nav className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
-        <span className="font-display text-xl font-extrabold tracking-tighter uppercase">Perka<span className="text-accent-red">.</span></span>
+        <span className="font-display text-xl font-extrabold tracking-tighter uppercase">PERX<span className="text-accent-red">.</span></span>
         <Link to="/auth" className="text-sm font-semibold px-5 py-2 rounded-full border border-ink/10 hover:bg-ink/5">Sign in</Link>
       </nav>
 

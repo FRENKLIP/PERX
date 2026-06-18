@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/app")({
-  head: () => ({ meta: [{ title: "Home — Perka" }] }),
+  head: () => ({ meta: [{ title: "Home — PERX" }] }),
   beforeLoad: async () => {
     const { requireRole } = await import("@/lib/roles");
     await requireRole("employee");
@@ -56,7 +56,7 @@ function AppHome() {
           </div>
           <div className="relative pointer-events-none">
             <div className="w-full bg-cream border border-border-soft rounded-2xl py-5 px-6 text-sm font-medium text-foreground/40 pr-16">
-              {t("ask_perka")}
+              {t("ask_perx")}
             </div>
             <div className="absolute right-3 top-3 size-11 bg-ink rounded-xl flex items-center justify-center">
               <Sparkles className="size-5 text-accent-orange" />
