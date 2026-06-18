@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import { Link } from "@tanstack/react-router";
 import { formatAll } from "@/lib/i18n";
 
 const categoryEmoji: Record<string, string> = {
@@ -57,6 +58,9 @@ export function TiranaMap({ pins, onAdd }: { pins: Pin[]; onAdd: (id: string) =>
                 <strong>{formatAll(p.price_all)}</strong>
                 <button onClick={() => onAdd(p.id)} style={{ background: "#171717", color: "#faf7f2", border: "none", padding: "6px 12px", borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Add</button>
               </div>
+              <Link to="/offer/$offerId" params={{ offerId: p.id }} style={{ display: "block", textAlign: "center", marginTop: 8, fontSize: 11, fontWeight: 700, color: "#c5503a", textDecoration: "none" }}>
+                View details →
+              </Link>
             </div>
           </Popup>
         </Marker>
