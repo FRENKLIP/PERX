@@ -5,7 +5,7 @@ import { formatAll, useLocale } from "@/lib/i18n";
 import { ArrowLeft, Plus, Sparkles, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/offer/")({
+export const Route = createFileRoute("/_authenticated/offer/$offerId")({
   head: () => ({ meta: [{ title: "Offer — PERX" }] }),
   component: OfferDetail,
   errorComponent: ({ error }) => (
