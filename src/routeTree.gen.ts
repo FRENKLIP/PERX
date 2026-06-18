@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiWeeklyDropRouteImport } from './routes/api/weekly-drop'
 import { Route as ApiInsightsRouteImport } from './routes/api/insights'
@@ -29,7 +29,7 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -56,38 +56,38 @@ const ApiChatRoute = ApiChatRouteImport.update({
 const AuthenticatedRequestsRoute = AuthenticatedRequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedProviderRoute = AuthenticatedProviderRouteImport.update({
   id: '/provider',
   path: '/provider',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedMarketplaceRoute =
   AuthenticatedMarketplaceRouteImport.update({
     id: '/marketplace',
     path: '/marketplace',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedEmployerRoute = AuthenticatedEmployerRouteImport.update({
   id: '/employer',
   path: '/employer',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedConciergeRoute = AuthenticatedConciergeRouteImport.update({
   id: '/concierge',
   path: '/concierge',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedCartRoute = AuthenticatedCartRouteImport.update({
   id: '/cart',
   path: '/cart',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const ApiPublicSeedDemoRoute = ApiPublicSeedDemoRouteImport.update({
   id: '/api/public/seed-demo',
@@ -128,7 +128,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/cart': typeof AuthenticatedCartRoute
@@ -193,7 +193,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiInsightsRoute: typeof ApiInsightsRoute
@@ -214,7 +214,7 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -250,49 +250,49 @@ declare module '@tanstack/react-router' {
       path: '/requests'
       fullPath: '/requests'
       preLoaderRoute: typeof AuthenticatedRequestsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/provider': {
       id: '/_authenticated/provider'
       path: '/provider'
       fullPath: '/provider'
       preLoaderRoute: typeof AuthenticatedProviderRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/marketplace': {
       id: '/_authenticated/marketplace'
       path: '/marketplace'
       fullPath: '/marketplace'
       preLoaderRoute: typeof AuthenticatedMarketplaceRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/employer': {
       id: '/_authenticated/employer'
       path: '/employer'
       fullPath: '/employer'
       preLoaderRoute: typeof AuthenticatedEmployerRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/concierge': {
       id: '/_authenticated/concierge'
       path: '/concierge'
       fullPath: '/concierge'
       preLoaderRoute: typeof AuthenticatedConciergeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/cart': {
       id: '/_authenticated/cart'
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof AuthenticatedCartRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/app': {
       id: '/_authenticated/app'
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/api/public/seed-demo': {
       id: '/api/public/seed-demo'
@@ -304,7 +304,7 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
+interface AuthenticatedRouteChildren {
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
   AuthenticatedConciergeRoute: typeof AuthenticatedConciergeRoute
@@ -314,7 +314,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
 }
 
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRoute,
   AuthenticatedCartRoute: AuthenticatedCartRoute,
   AuthenticatedConciergeRoute: AuthenticatedConciergeRoute,
@@ -324,12 +324,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
 }
 
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
   ApiInsightsRoute: ApiInsightsRoute,
