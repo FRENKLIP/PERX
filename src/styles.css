@@ -18,10 +18,15 @@
   --color-obsidian: #050b0a;
   --color-forest: #07211b;
   --color-emerald: #064e3b;
+  --color-emerald-deep: #064e3b;
+  --color-emerald-glow: #0d7a5f;
   --color-emerald-2: #0d7a5f;
   --color-gold: #c9a84c;
   --color-gold-soft: #f0d78c;
   --color-bone: #f5f0e0;
+  --color-bone-soft: rgba(245, 240, 224, 0.62);
+  --color-glass: rgba(245, 240, 224, 0.04);
+  --color-glass-line: rgba(245, 240, 224, 0.10);
 
   /* Legacy alias names — kept so components don't need edits */
   --color-cream: #f5f0e0;          /* was light cream → bone on dark */
