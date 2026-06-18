@@ -42,6 +42,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const roles = ctx?.roles ?? [];
   const isEmployer = roles.some((r) => r.role === "employer_admin");
   const isProvider = roles.some((r) => r.role === "provider_admin");
+  const isEmployee = roles.length === 0 || roles.some((r) => r.role === "employee");
+  const homeTo = isEmployer ? "/employer" : isProvider ? "/provider" : "/app";
 
   const initials = (profile?.full_name ?? ctx?.user?.email ?? "??").slice(0, 2).toUpperCase();
 
@@ -56,24 +58,24 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-cream text-ink font-body">
       <nav className="sticky top-0 z-50 bg-cream/85 backdrop-blur-md border-b border-border-soft px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link to="/app" className="font-display text-xl font-extrabold tracking-tighter uppercase">
+          <Link to={homeTo as any} className="font-display text-xl font-extrabold tracking-tighter uppercase">
             Perka<span className="text-accent-red">.</span>
           </Link>
           <div className="hidden md:flex items-center gap-1 text-xs font-semibold">
-            <NavTab to="/app" label={t("home")} />
-            <NavTab to="/marketplace" label={t("marketplace")} />
-            <NavTab to="/concierge" label={t("concierge")} />
-            <NavTab to="/cart" label={`${t("cart")}${ctx?.cartCount ? ` (${ctx.cartCount})` : ""}`} />
-            <NavTab to="/requests" label={t("requests")} />
+            {isEmployee && <NavTab to="/app" label={t("home")} />}
+            {isEmployee && <NavTab to="/marketplace" label={t("marketplace")} />}
+            {isEmployee && <NavTab to="/concierge" label={t("concierge")} />}
+            {isEmployee && <NavTab to="/cart" label={`${t("cart")}${ctx?.cartCount ? ` (${ctx.cartCount})` : ""}`} />}
+            {isEmployee && <NavTab to="/requests" label={t("requests")} />}
             {isEmployer && <NavTab to="/employer" label={t("employer_dashboard")} />}
             {isProvider && <NavTab to="/provider" label={t("provider_dashboard")} />}
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 bg-accent-orange/10 border border-accent-orange/20 px-3 py-1.5 rounded-full">
+          {isEmployee && <div className="hidden sm:flex items-center gap-2 bg-accent-orange/10 border border-accent-orange/20 px-3 py-1.5 rounded-full">
             <div className="size-2 bg-accent-orange rounded-full animate-pulse" />
             <span className="text-xs font-bold">{formatAll(remaining)} <span className="opacity-60 font-medium">{t("of")} {formatAll(budget)}</span></span>
-          </div>
+          </div>}
           <button
             onClick={() => { setLocale(locale === "en" ? "sq" : "en"); force((n) => n + 1); }}
             className="size-9 rounded-full bg-white border border-border-soft hover:bg-cream grid place-items-center text-xs font-bold"
