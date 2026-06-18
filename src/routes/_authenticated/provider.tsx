@@ -33,7 +33,7 @@ function ProviderDashboard() {
       if (companyIds.length === 0) return null;
       const [{ data: offers }, { data: items }, { data: cats }] = await Promise.all([
         supabase.from("offers").select("*").in("provider_company_id", companyIds).order("created_at", { ascending: false }),
-        supabase.from("request_items").select("*, requests(status, decided_at, created_at)").in("provider_company_id", companyIds).order("id", { ascending: false }),
+        supabase.from("request_items").select("*, requests(status, decided_at, created_at, employer_company_id)").in("provider_company_id", companyIds).order("id", { ascending: false }),
         supabase.from("categories").select("*"),
       ]);
       return { offers: offers ?? [], items: items ?? [], companyIds, cats: cats ?? [] };
