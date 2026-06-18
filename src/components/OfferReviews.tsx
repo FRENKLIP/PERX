@@ -17,7 +17,7 @@ export function OfferReviews({ offerId }: { offerId: string }) {
       const { data: u } = await supabase.auth.getUser();
       const { data: reviews } = await supabase
         .from("offer_reviews")
-        .select("id, rating, body, created_at, user_id, profiles:user_id(full_name, avatar_url)")
+        .select("id, rating, body, created_at, user_id")
         .eq("offer_id", offerId)
         .order("created_at", { ascending: false });
       const list = reviews ?? [];
@@ -112,10 +112,10 @@ export function OfferReviews({ offerId }: { offerId: string }) {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
                   <div className="size-9 rounded-full bg-ink text-cream grid place-items-center text-[11px] font-bold">
-                    {(r.profiles?.full_name ?? "??").slice(0, 2).toUpperCase()}
+                    {r.user_id === data?.userId ? "YOU" : "PX"}
                   </div>
                   <div>
-                    <div className="text-sm font-semibold">{r.profiles?.full_name ?? "Anonymous"}</div>
+                    <div className="text-sm font-semibold">{r.user_id === data?.userId ? "You" : "PERX member"}</div>
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((n) => (
                         <Star key={n} className={`size-3 ${n <= r.rating ? "fill-accent-red text-accent-red" : "text-ink-soft/30"}`} />
