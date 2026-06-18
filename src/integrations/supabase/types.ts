@@ -382,6 +382,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      signup_setup_account: {
+        Args: {
+          p_company_name?: string
+          p_full_name?: string
+          p_role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "employee" | "employer_admin" | "provider_admin"
