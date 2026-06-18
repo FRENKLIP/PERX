@@ -16,15 +16,15 @@ function Wallet() {
       {/* card stack */}
       <mesh position={[0, -0.15, -0.12]} castShadow>
         <boxGeometry args={[2.2, 1.4, 0.08]} />
-        <meshStandardMaterial color="#171717" roughness={0.5} />
+        <meshStandardMaterial color="#050b0a" roughness={0.35} metalness={0.4} />
       </mesh>
       <mesh position={[0.08, 0, -0.04]} rotation={[0, 0, 0.04]} castShadow>
         <boxGeometry args={[2.2, 1.4, 0.08]} />
-        <meshStandardMaterial color="#c5503a" roughness={0.45} />
+        <meshStandardMaterial color="#064e3b" roughness={0.25} metalness={0.55} />
       </mesh>
       <mesh position={[-0.06, 0.18, 0.06]} rotation={[0, 0, -0.05]} castShadow>
         <boxGeometry args={[2.2, 1.4, 0.08]} />
-        <meshStandardMaterial color="#faf7f2" roughness={0.55} />
+        <meshStandardMaterial color="#c9a84c" roughness={0.2} metalness={0.85} />
       </mesh>
     </group>
   );
@@ -54,15 +54,16 @@ export default function Hero3DScene() {
       camera={{ position: [0, 0.4, 4.2], fov: 38 }}
       gl={{ antialias: true, alpha: true }}
     >
-      <color attach="background" args={["#f3efe7"]} />
-      <ambientLight intensity={0.55} />
-      <directionalLight position={[3, 4, 3]} intensity={1.2} castShadow shadow-mapSize={[1024, 1024]} />
+      <color attach="background" args={["#07211b"]} />
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[3, 4, 3]} intensity={1.4} castShadow shadow-mapSize={[1024, 1024]} color="#f0d78c" />
+      <pointLight position={[-3, -2, 2]} intensity={0.6} color="#0d7a5f" />
       <Wallet />
-      <Pill position={[-1.7, 0.9, 0.2]} color="#7a8b6f" />
-      <Pill position={[1.8, 0.6, 0.1]} color="#d98b5f" />
-      <Pill position={[1.5, -1.1, 0.3]} color="#c5503a" />
+      <Pill position={[-1.7, 0.9, 0.2]} color="#c9a84c" />
+      <Pill position={[1.8, 0.6, 0.1]} color="#0d7a5f" />
+      <Pill position={[1.5, -1.1, 0.3]} color="#f0d78c" />
       <ContactShadows position={[0, -1.1, 0]} opacity={0.35} scale={6} blur={2.4} far={2} />
-      <Environment preset="apartment" />
+      <Environment preset="night" />
     </Canvas>
   );
 }
