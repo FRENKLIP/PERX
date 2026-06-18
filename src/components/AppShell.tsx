@@ -56,17 +56,17 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-cream text-ink font-body">
       <nav className="sticky top-0 z-50 bg-cream/85 backdrop-blur-md border-b border-border-soft px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link to="/_authenticated/app" className="font-display text-xl font-extrabold tracking-tighter uppercase">
+          <Link to="/app" className="font-display text-xl font-extrabold tracking-tighter uppercase">
             Perka<span className="text-accent-red">.</span>
           </Link>
           <div className="hidden md:flex items-center gap-1 text-xs font-semibold">
-            <NavTab to="/_authenticated/app" label={t("home")} />
-            <NavTab to="/_authenticated/marketplace" label={t("marketplace")} />
-            <NavTab to="/_authenticated/concierge" label={t("concierge")} />
-            <NavTab to="/_authenticated/cart" label={`${t("cart")}${ctx?.cartCount ? ` (${ctx.cartCount})` : ""}`} />
-            <NavTab to="/_authenticated/requests" label={t("requests")} />
-            {isEmployer && <NavTab to="/_authenticated/employer" label={t("employer_dashboard")} />}
-            {isProvider && <NavTab to="/_authenticated/provider" label={t("provider_dashboard")} />}
+            <NavTab to="/app" label={t("home")} />
+            <NavTab to="/marketplace" label={t("marketplace")} />
+            <NavTab to="/concierge" label={t("concierge")} />
+            <NavTab to="/cart" label={`${t("cart")}${ctx?.cartCount ? ` (${ctx.cartCount})` : ""}`} />
+            <NavTab to="/requests" label={t("requests")} />
+            {isEmployer && <NavTab to="/employer" label={t("employer_dashboard")} />}
+            {isProvider && <NavTab to="/provider" label={t("provider_dashboard")} />}
           </div>
         </div>
         <div className="flex items-center gap-3">

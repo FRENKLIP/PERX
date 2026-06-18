@@ -22,7 +22,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/_authenticated/app" });
+      if (data.user) navigate({ to: "/app" });
     });
   }, [navigate]);
 
@@ -34,7 +34,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back");
-        navigate({ to: "/_authenticated/app" });
+        navigate({ to: "/app" });
       } else {
         const { data, error } = await supabase.auth.signUp({
           email, password,
@@ -59,7 +59,7 @@ function AuthPage() {
           await supabase.from("user_roles").insert({ user_id: userId, role: "provider_admin", company_id: c.id });
         }
         toast.success("Account created");
-        navigate({ to: role === "employer_admin" ? "/_authenticated/employer" : role === "provider_admin" ? "/_authenticated/provider" : "/_authenticated/app" });
+        navigate({ to: role === "employer_admin" ? "/employer" : role === "provider_admin" ? "/provider" : "/app" });
       }
     } catch (err: any) {
       toast.error(err?.message ?? "Something went wrong");
@@ -81,7 +81,7 @@ function AuthPage() {
       setLoading(false);
       return;
     }
-    navigate({ to: kind === "employer" ? "/_authenticated/employer" : kind === "provider" ? "/_authenticated/provider" : "/_authenticated/app" });
+    navigate({ to: kind === "employer" ? "/employer" : kind === "provider" ? "/provider" : "/app" });
   }
 
   return (
