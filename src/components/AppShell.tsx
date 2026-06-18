@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-forest text-bone font-body">
+    <div className="min-h-screen text-bone font-body">
       <nav className="sticky top-0 z-50 bg-forest/85 backdrop-blur-md border-b border-glass-line">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
           <Link to={homeTo as any} className="font-serif text-2xl tracking-tight">

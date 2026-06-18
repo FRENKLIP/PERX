@@ -102,7 +102,7 @@ function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-forest text-bone font-body">
+    <div className="min-h-screen text-bone font-body">
       <CursorRing />
 
       <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? "bg-forest/85 backdrop-blur-md border-b border-glass-line" : "bg-transparent"}`}>
