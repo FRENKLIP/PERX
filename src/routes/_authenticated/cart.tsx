@@ -30,7 +30,7 @@ function Cart() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
       const [{ data: items }, { data: profile }] = await Promise.all([
-        supabase.from("cart_items").select("id, qty, offers(id,title,title_sq,price_all,category_slug,provider_company_id,companies:provider_company_id(name))").eq("user_id", u.user.id),
+        supabase.from("cart_items").select("id, qty, offers(id,title,title_sq,price_all,category_slug,provider_company_id,image_url,companies:provider_company_id(name))").eq("user_id", u.user.id),
         supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle(),
       ]);
       return { items: items ?? [], profile, userId: u.user.id };
