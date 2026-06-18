@@ -3,6 +3,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getMyRoles, landingFor } from "@/lib/roles";
+import Hero3D from "@/components/landing/Hero3D";
+import Marquee from "@/components/landing/Marquee";
+import HowItWorks, { SectionLabel } from "@/components/landing/HowItWorks";
+import BentoGrid from "@/components/landing/BentoGrid";
+import CountersStrip from "@/components/landing/CountersStrip";
+import AudiencePanels from "@/components/landing/AudiencePanels";
+import FAQ from "@/components/landing/FAQ";
+import CursorRing from "@/components/landing/CursorRing";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,6 +35,7 @@ function Landing() {
   const [role, setRole] = useState<Role>("employee");
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -36,6 +45,12 @@ function Landing() {
       }
     });
   }, [navigate]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,39 +103,88 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-cream text-ink font-body">
-      <nav className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <span className="font-serif text-2xl tracking-tight">PERX<span className="text-accent-red">.</span></span>
-        <a href="#enter" className="text-sm font-semibold hover:text-accent-red transition-colors">Sign in ↓</a>
+      <CursorRing />
+
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? "bg-cream/85 backdrop-blur-md border-b border-border-soft" : "bg-transparent"}`}>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <a href="#top" className={`font-serif tracking-tight transition-all ${scrolled ? "text-xl" : "text-2xl"}`}>
+            PERX<span className="text-accent-red">.</span>
+          </a>
+          <div className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-[0.18em] text-ink-soft">
+            <a href="#how" className="hover:text-ink transition-colors">How</a>
+            <a href="#what" className="hover:text-ink transition-colors">Product</a>
+            <a href="#who" className="hover:text-ink transition-colors">For you</a>
+            <a href="#faq" className="hover:text-ink transition-colors">FAQ</a>
+          </div>
+          <a href="#enter" className="text-xs font-bold uppercase tracking-[0.2em] bg-ink text-cream px-4 py-2.5 rounded-full hover:bg-accent-red transition-colors">
+            Sign in
+          </a>
+        </div>
       </nav>
 
-      <section className="max-w-7xl mx-auto px-6 pt-10 md:pt-16 pb-20 grid lg:grid-cols-12 gap-10 lg:gap-16 items-start fade-up">
-        {/* LEFT — editorial */}
+      {/* HERO */}
+      <section id="top" className="max-w-7xl mx-auto px-6 pt-32 md:pt-40 pb-24 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center fade-up">
         <div className="lg:col-span-7">
           <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-6">Issue 01 · Tirana, 2026</div>
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight text-balance">
+          <h1 className="font-serif text-6xl md:text-8xl lg:text-[9rem] leading-[0.92] tracking-tight text-balance">
             Benefits that <em className="text-accent-red">feel</em> like a Friday in Blloku.
           </h1>
           <p className="text-ink-soft text-lg max-w-md mt-8 text-pretty">
             Tax-efficient gyms, meals, weekends and courses — picked by your team, paid straight to local providers.
           </p>
-
-          <div className="mt-10 relative aspect-[5/3] rounded-3xl overflow-hidden hairline max-w-xl">
-            <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1200" alt="A Tirana cafe at golden hour" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-ink/70 to-transparent">
-              <div className="text-cream/70 text-[10px] uppercase tracking-[0.18em] font-semibold mb-1">Featured</div>
-              <div className="text-cream font-serif text-2xl leading-tight">Komiteti, Pazari i Ri</div>
-            </div>
-          </div>
-
-          <div className="mt-10 grid md:grid-cols-3 gap-px bg-border-soft hairline rounded-3xl overflow-hidden max-w-xl">
-            <Row title="Employees" body="Browse real Tirana providers. Build packages with AI." />
-            <Row title="Employers" body="Set budgets, approve in a click. Tax-efficient by design." />
-            <Row title="Providers" body="List your space. Get paid when employers approve." />
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <a href="#enter" className="bg-ink text-cream px-7 py-4 rounded-full font-bold text-sm hover:bg-accent-red transition-colors">
+              Start free
+            </a>
+            <a href="#how" className="text-sm font-semibold hover:text-accent-red transition-colors story-link">
+              See how it works
+            </a>
           </div>
         </div>
+        <div className="lg:col-span-5">
+          <Hero3D />
+        </div>
+      </section>
 
-        {/* RIGHT — auth */}
-        <div id="enter" className="lg:col-span-5 lg:sticky lg:top-10">
+      <Marquee />
+
+      <div id="how"><HowItWorks /></div>
+      <div id="what"><BentoGrid /></div>
+
+      {/* Editorial parallax spread */}
+      <section className="relative h-[70vh] overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center scale-110"
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1800')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-transparent" />
+        <div className="relative max-w-5xl mx-auto px-6 h-full flex flex-col justify-end pb-20">
+          <div className="text-cream/70 text-[10px] uppercase tracking-[0.24em] font-bold mb-4">Editor's note</div>
+          <p className="font-serif text-4xl md:text-6xl text-cream leading-[1.05] max-w-3xl text-balance">
+            "A salary tells you what a company can afford. A perk tells you who they <em className="text-accent-orange">are</em>."
+          </p>
+        </div>
+      </section>
+
+      <CountersStrip />
+
+      <div id="who"><AudiencePanels /></div>
+
+      <div id="faq"><FAQ /></div>
+
+      {/* AUTH */}
+      <section id="enter" className="bg-paper py-32">
+        <div className="max-w-6xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-start">
+          <div className="lg:col-span-6">
+            <SectionLabel index="06" label="Get in" />
+            <h2 className="font-serif text-5xl md:text-7xl tracking-tight mt-6 leading-[1]">
+              Open your <em className="text-accent-red">PERX</em>.
+            </h2>
+            <p className="text-ink-soft text-lg max-w-md mt-6">
+              One account, three doors: employee wallet, HR control room, or provider listing.
+            </p>
+          </div>
+          <div className="lg:col-span-6">
           <div className="bg-white border border-border-soft rounded-3xl p-7 md:p-9 shadow-[0_30px_60px_-30px_rgba(20,15,10,0.18)]">
             <div className="flex items-center gap-1 p-1 rounded-full bg-cream border border-border-soft w-fit mb-6">
               {(["signin","signup"] as const).map((m) => (
@@ -183,22 +247,49 @@ function Landing() {
               </div>
             </div>
           </div>
+          </div>
         </div>
       </section>
 
-      <footer className="max-w-7xl mx-auto px-6 py-10 text-xs text-ink-soft flex justify-between hairline border-t">
-        <span>PERX · Made in Tirana</span>
-        <span>© 2026</span>
+      <footer className="bg-ink text-cream">
+        <div className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-10">
+          <div>
+            <div className="font-serif text-4xl tracking-tight">PERX<span className="text-accent-red">.</span></div>
+            <p className="text-cream/60 mt-4 max-w-sm text-sm">Tax-efficient benefits, paid straight to local providers. Made in Tirana for teams that care.</p>
+          </div>
+          <div className="grid grid-cols-3 gap-6 text-xs uppercase tracking-[0.18em] font-bold">
+            <div>
+              <div className="text-cream/40 mb-3">Product</div>
+              <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
+                <li><a href="#how" className="hover:text-accent-orange">How it works</a></li>
+                <li><a href="#what" className="hover:text-accent-orange">Features</a></li>
+                <li><a href="#faq" className="hover:text-accent-orange">FAQ</a></li>
+              </ul>
+            </div>
+            <div>
+              <div className="text-cream/40 mb-3">For</div>
+              <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
+                <li><a href="#who" className="hover:text-accent-orange">Employees</a></li>
+                <li><a href="#who" className="hover:text-accent-orange">Employers</a></li>
+                <li><a href="#who" className="hover:text-accent-orange">Providers</a></li>
+              </ul>
+            </div>
+            <div>
+              <div className="text-cream/40 mb-3">Company</div>
+              <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
+                <li>Tirana, AL</li>
+                <li>hello@perx.al</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-cream/10">
+          <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between text-xs text-cream/50">
+            <span>PERX · Made in Tirana</span>
+            <span>© 2026</span>
+          </div>
+        </div>
       </footer>
-    </div>
-  );
-}
-
-function Row({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="bg-cream p-5">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-red mb-2">{title}</div>
-      <p className="font-serif text-base leading-snug text-pretty">{body}</p>
     </div>
   );
 }
