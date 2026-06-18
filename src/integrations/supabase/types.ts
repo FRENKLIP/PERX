@@ -121,6 +121,70 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          created_at: string
+          offer_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          offer_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          offer_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_reviews: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          offer_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          offer_id: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          offer_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_reviews_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offers: {
         Row: {
           category_slug: string
