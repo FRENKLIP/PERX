@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
 import { ArrowLeft, Plus, Sparkles, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { OfferReviews } from "@/components/OfferReviews";
 
 export const Route = createFileRoute("/_authenticated/offer/$offerId")({
   head: () => ({ meta: [{ title: "Offer — PERX" }] }),
@@ -81,10 +83,13 @@ function OfferDetail() {
       <div className="grid lg:grid-cols-12 gap-10">
         {/* Hero image */}
         <div className="lg:col-span-7">
-          <div className="aspect-[4/3] rounded-3xl overflow-hidden hairline">
+          <div className="relative aspect-[4/3] rounded-3xl overflow-hidden hairline">
             {o.image_url
               ? <img src={o.image_url} alt={title} className="w-full h-full object-cover" />
               : <div className="w-full h-full bg-paper" />}
+            <div className="absolute top-4 right-4">
+              <FavoriteButton offerId={offerId} size="lg" />
+            </div>
           </div>
           {o.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-5">
@@ -157,6 +162,8 @@ function OfferDetail() {
           </div>
         )}
       </section>
+
+      <OfferReviews offerId={offerId} />
     </div>
   );
 }
