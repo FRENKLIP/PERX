@@ -8,6 +8,10 @@ import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Home — Perka" }] }),
+  beforeLoad: async () => {
+    const { requireRole } = await import("@/lib/roles");
+    await requireRole("employee");
+  },
   component: AppHome,
 });
 
