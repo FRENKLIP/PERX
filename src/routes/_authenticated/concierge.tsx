@@ -48,9 +48,9 @@ function Concierge() {
   return (
     <div className="max-w-3xl mx-auto px-6 pt-10 pb-32 md:pb-12 flex flex-col" style={{ minHeight: "calc(100vh - 96px)" }}>
       <header className="mb-8 fade-up">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 flex items-center gap-2"><Sparkles className="size-3.5 text-accent-red" /> AI concierge</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2 flex items-center gap-2"><Sparkles className="size-3.5 text-gold" /> AI concierge</div>
         <h1 className="font-serif text-5xl tracking-tight leading-tight">What are you in the mood for?</h1>
-        <p className="text-ink-soft mt-3 max-w-lg">Describe a craving — a slow weekend, a date night, a course you've been postponing — and I'll match it to your wallet.</p>
+        <p className="text-bone-soft mt-3 max-w-lg">Describe a craving — a slow weekend, a date night, a course you've been postponing — and I'll match it to your wallet.</p>
       </header>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-6 mb-6 -mx-2 px-2">
@@ -63,7 +63,7 @@ function Concierge() {
               "I want a weekend out of the city",
             ].map((s) => (
               <button key={s} onClick={() => setInput(s)}
-                className="text-left hairline rounded-2xl p-4 hover:bg-paper transition-colors text-sm font-serif text-lg italic leading-snug">
+                className="text-left hairline rounded-2xl p-4 hover:bg-obsidian transition-colors text-sm font-serif text-lg italic leading-snug">
                 "{s}"
               </button>
             ))}
@@ -71,24 +71,24 @@ function Concierge() {
         )}
         {messages.map((m) => (
           <div key={m.id} className={m.role === "user" ? "flex justify-end" : ""}>
-            <div className={m.role === "user" ? "bg-ink text-cream rounded-2xl rounded-br-sm px-5 py-3 max-w-[80%]" : "max-w-full"}>
+            <div className={m.role === "user" ? "bg-emerald-deep text-bone rounded-2xl rounded-br-sm px-5 py-3 max-w-[80%]" : "max-w-full"}>
               {m.parts.map((p, i) => {
                 if (p.type === "text") return <div key={i} className={m.role === "user" ? "text-sm leading-relaxed whitespace-pre-wrap" : "text-base font-serif leading-relaxed whitespace-pre-wrap"}>{p.text}</div>;
                 if (p.type.startsWith("tool-")) {
                   const tp: any = p;
-                  if (tp.state !== "output-available") return <div key={i} className="text-xs text-ink-soft mt-2 italic">Searching Tirana…</div>;
+                  if (tp.state !== "output-available") return <div key={i} className="text-xs text-bone-soft mt-2 italic">Searching Tirana…</div>;
                   const output = tp.output;
                   if (output?.offers) {
                     return (
                       <div key={i} className="grid sm:grid-cols-2 gap-3 mt-4">
                         {output.offers.map((o: any) => (
-                          <div key={o.id} className="hairline bg-white rounded-2xl p-4">
-                            <div className="text-[10px] font-semibold text-accent-red uppercase tracking-[0.18em] mb-1">{o.category}</div>
+                          <div key={o.id} className="hairline bg-forest rounded-2xl p-4">
+                            <div className="text-[10px] font-semibold text-gold uppercase tracking-[0.18em] mb-1">{o.category}</div>
                             <div className="font-serif text-lg leading-tight mb-1">{o.title}</div>
-                            <div className="text-xs text-ink-soft mb-3">{o.provider} · {o.location}</div>
+                            <div className="text-xs text-bone-soft mb-3">{o.provider} · {o.location}</div>
                             <div className="flex justify-between items-center">
                               <span className="font-semibold">{formatAll(o.price_all)}</span>
-                              <button onClick={() => handleAddToCart(o.id)} className="size-8 rounded-full hairline grid place-items-center hover:bg-ink hover:text-cream hover:border-ink transition-colors">
+                              <button onClick={() => handleAddToCart(o.id)} className="size-8 rounded-full hairline grid place-items-center hover:bg-emerald-deep hover:text-bone hover:border-gold/40 transition-colors">
                                 <Plus className="size-4" />
                               </button>
                             </div>
@@ -105,11 +105,11 @@ function Concierge() {
           </div>
         ))}
         {(status === "submitted" || status === "streaming") && (
-          <div className="text-sm text-ink-soft italic">Thinking…</div>
+          <div className="text-sm text-bone-soft italic">Thinking…</div>
         )}
       </div>
 
-      <div className="sticky bottom-20 md:bottom-4 bg-cream/90 backdrop-blur-md hairline rounded-3xl p-3 flex items-end gap-2">
+      <div className="sticky bottom-20 md:bottom-4 bg-forest/90 backdrop-blur-md hairline rounded-3xl p-3 flex items-end gap-2">
         <textarea
           ref={inputRef}
           value={input}
@@ -119,7 +119,7 @@ function Concierge() {
           className="flex-1 resize-none px-3 py-2.5 outline-none text-sm bg-transparent max-h-32"
           rows={1}
         />
-        <button onClick={submit} disabled={!input.trim() || status === "submitted" || status === "streaming"} className="size-11 bg-ink text-cream rounded-full grid place-items-center disabled:opacity-40 shrink-0 hover:bg-accent-red transition-colors">
+        <button onClick={submit} disabled={!input.trim() || status === "submitted" || status === "streaming"} className="size-11 bg-emerald-deep text-bone rounded-full grid place-items-center disabled:opacity-40 shrink-0 hover:bg-gold transition-colors">
           <Send className="size-4" />
         </button>
       </div>

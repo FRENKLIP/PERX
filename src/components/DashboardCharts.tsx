@@ -44,7 +44,7 @@ export function CategoryDonut({ data, height = 220 }: { data: { name: string; va
         </ResponsiveContainer>
         <div className="absolute inset-0 grid place-items-center text-center pointer-events-none">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-ink-soft">Total</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-bone-soft">Total</div>
             <div className="font-serif text-2xl leading-none mt-1">{formatAll(total)}</div>
           </div>
         </div>
@@ -54,17 +54,17 @@ export function CategoryDonut({ data, height = 220 }: { data: { name: string; va
           <li key={d.name} className="flex items-center gap-2 text-sm">
             <span className="size-2.5 rounded-sm shrink-0" style={{ background: PALETTE[i % PALETTE.length] }} />
             <span className="flex-1 truncate capitalize">{d.name}</span>
-            <span className="text-ink-soft text-xs tabular-nums">{total ? Math.round((d.value / total) * 100) : 0}%</span>
+            <span className="text-bone-soft text-xs tabular-nums">{total ? Math.round((d.value / total) * 100) : 0}%</span>
           </li>
         ))}
-        {data.length === 0 && <li className="text-sm text-ink-soft">No data yet.</li>}
+        {data.length === 0 && <li className="text-sm text-bone-soft">No data yet.</li>}
       </ul>
     </div>
   );
 }
 
 export function TopBars({ data, color = "#171717", height = 220 }: { data: { name: string; value: number }[]; color?: string; height?: number }) {
-  if (data.length === 0) return <div className="grid place-items-center text-sm text-ink-soft" style={{ height }}>No data yet.</div>;
+  if (data.length === 0) return <div className="grid place-items-center text-sm text-bone-soft" style={{ height }}>No data yet.</div>;
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} layout="vertical" margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
@@ -83,12 +83,12 @@ export function TopBars({ data, color = "#171717", height = 220 }: { data: { nam
 
 export function PeriodSwitcher({ value, onChange }: { value: 7 | 30 | 90; onChange: (v: 7 | 30 | 90) => void }) {
   return (
-    <div className="hairline rounded-full p-1 bg-paper inline-flex">
+    <div className="hairline rounded-full p-1 bg-obsidian inline-flex">
       {[7, 30, 90].map((d) => (
         <button
           key={d}
           onClick={() => onChange(d as 7 | 30 | 90)}
-          className={`px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-colors ${value === d ? "bg-ink text-cream" : "text-ink-soft hover:text-ink"}`}
+          className={`px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-colors ${value === d ? "bg-emerald-deep text-bone" : "text-bone-soft hover:text-bone"}`}
         >
           {d}d
         </button>

@@ -44,9 +44,9 @@ export function FavoriteButton({ offerId, size = "md" }: { offerId: string; size
     <button
       onClick={toggle}
       aria-label={isFav ? "Remove from saved" : "Save"}
-      className={`${dim} rounded-full hairline grid place-items-center bg-white/90 backdrop-blur hover:bg-white transition-colors`}
+      className={`${dim} rounded-full hairline grid place-items-center bg-forest/90 backdrop-blur hover:bg-forest transition-colors`}
     >
-      <Heart className={`${icon} ${isFav ? "fill-accent-red text-accent-red" : "text-ink"}`} />
+      <Heart className={`${icon} ${isFav ? "fill-accent-red text-gold" : "text-bone"}`} />
     </button>
   );
 }

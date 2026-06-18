@@ -33,7 +33,7 @@ export default function Hero3D() {
   const ref = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={ref} className="relative w-full aspect-square rounded-[2rem] overflow-hidden bg-paper hairline">
+    <div ref={ref} className="relative w-full aspect-square rounded-[2rem] overflow-hidden bg-obsidian hairline">
       {mounted && !isMobile ? (
         <Suspense fallback={<HeroFallback />}>
           <Scene />
@@ -43,7 +43,7 @@ export default function Hero3D() {
       )}
       <div className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-[0.06]"
            style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }} />
-      <div className="absolute bottom-5 left-5 text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft">
+      <div className="absolute bottom-5 left-5 text-[10px] font-bold uppercase tracking-[0.22em] text-bone-soft">
         Live · WebGL
       </div>
     </div>

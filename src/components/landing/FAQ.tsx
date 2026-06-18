@@ -15,9 +15,9 @@ export default function FAQ() {
     <section className="max-w-4xl mx-auto px-6 py-32">
       <SectionLabel index="05" label="Questions" />
       <h2 className="font-serif text-5xl md:text-7xl tracking-tight mt-6 leading-[1]">
-        Things worth <em className="text-accent-red">asking.</em>
+        Things worth <em className="text-gold">asking.</em>
       </h2>
-      <div className="mt-16 divide-y divide-border-soft border-y border-border-soft">
+      <div className="mt-16 divide-y divide-border-soft border-y border-glass-line">
         {ITEMS.map((it, i) => {
           const isOpen = open === i;
           return (
@@ -27,11 +27,11 @@ export default function FAQ() {
                 className="w-full py-7 flex items-center justify-between gap-6 text-left group"
               >
                 <span className="font-serif text-2xl md:text-3xl leading-tight">{it.q}</span>
-                <span className={`text-accent-red text-2xl transition-transform ${isOpen ? "rotate-45" : ""}`}>+</span>
+                <span className={`text-gold text-2xl transition-transform ${isOpen ? "rotate-45" : ""}`}>+</span>
               </button>
               <div className={`grid transition-all duration-500 ${isOpen ? "grid-rows-[1fr] opacity-100 pb-7" : "grid-rows-[0fr] opacity-0"}`}>
                 <div className="overflow-hidden">
-                  <p className="text-ink-soft max-w-2xl leading-relaxed">{it.a}</p>
+                  <p className="text-bone-soft max-w-2xl leading-relaxed">{it.a}</p>
                 </div>
               </div>
             </div>
