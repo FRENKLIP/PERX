@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import { Plus, Map as MapIcon, LayoutGrid } from "lucide-react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
+
+const TiranaMap = lazy(() => import("@/components/TiranaMap").then((m) => ({ default: m.TiranaMap })));
 
 export const Route = createFileRoute("/_authenticated/marketplace")({
   head: () => ({ meta: [{ title: "Marketplace — PERX" }] }),
@@ -17,14 +19,18 @@ export const Route = createFileRoute("/_authenticated/marketplace")({
 
 function Marketplace() {
   const { t, locale } = useLocale();
+  const qc = useQueryClient();
   const [cat, setCat] = useState<string | null>(null);
+  const [view, setView] = useState<"list" | "map">("list");
+  const [neighborhood, setNeighborhood] = useState<string | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number>(25000);
 
   const { data } = useQuery({
     queryKey: ["marketplace", cat],
     queryFn: async () => {
       const [{ data: cats }, q] = await Promise.all([
         supabase.from("categories").select("*").order("sort_order"),
-        supabase.from("offers").select("*, companies:provider_company_id(name,city)").eq("is_active", true).order("created_at", { ascending: false }),
+        supabase.from("offers").select("*, companies:provider_company_id(name,city,address,neighborhood,lat,lng)").eq("is_active", true).order("created_at", { ascending: false }),
       ]);
       let offers = q.data ?? [];
       if (cat) offers = offers.filter((o) => o.category_slug === cat);
@@ -32,46 +38,108 @@ function Marketplace() {
     },
   });
 
+  const neighborhoods = useMemo(() => {
+    const set = new Set<string>();
+    (data?.offers ?? []).forEach((o: any) => { if (o.companies?.neighborhood) set.add(o.companies.neighborhood); });
+    return Array.from(set).sort();
+  }, [data]);
+
+  const filtered = useMemo(() => {
+    return (data?.offers ?? []).filter((o: any) =>
+      (!neighborhood || o.companies?.neighborhood === neighborhood) &&
+      o.price_all <= maxPrice
+    );
+  }, [data, neighborhood, maxPrice]);
+
   async function add(offerId: string) {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
     const { error } = await supabase.from("cart_items").upsert({ user_id: u.user.id, offer_id: offerId, qty: 1 }, { onConflict: "user_id,offer_id" });
-    if (error) toast.error(error.message); else toast.success("Added");
+    if (error) toast.error(error.message);
+    else { toast.success("Added"); qc.invalidateQueries({ queryKey: ["app-context"] }); }
   }
 
   return (
     <div className="max-w-7xl mx-auto px-6 pt-10">
-      <h1 className="font-display text-4xl tracking-tight mb-6">{t("marketplace")}</h1>
-      <div className="flex flex-wrap gap-2 mb-8">
-        <Chip active={cat === null} onClick={() => setCat(null)}>{t("all_categories")}</Chip>
-        {(data?.cats ?? []).map((c) => (
-          <Chip key={c.slug} active={cat === c.slug} onClick={() => setCat(c.slug)}>
-            {locale === "sq" ? c.name_sq : c.name_en}
-          </Chip>
-        ))}
+      <div className="flex items-end justify-between mb-8 fade-up">
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Marketplace</div>
+          <h1 className="font-serif text-5xl tracking-tight">{filtered.length} places to go in Tirana</h1>
+        </div>
+        <div className="hidden md:flex hairline rounded-full p-1 bg-paper">
+          <button onClick={() => setView("list")} className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-colors ${view==="list" ? "bg-ink text-cream" : "text-ink-soft"}`}><LayoutGrid className="size-3.5" /> List</button>
+          <button onClick={() => setView("map")} className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-colors ${view==="map" ? "bg-ink text-cream" : "text-ink-soft"}`}><MapIcon className="size-3.5" /> Map</button>
+        </div>
       </div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {(data?.offers ?? []).map((o) => (
-          <div key={o.id} className="bento-item bg-white border border-border-soft rounded-3xl overflow-hidden">
-            <div className="aspect-[16/10] bg-gradient-to-br from-accent-orange/25 to-accent-red/15 grid place-items-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-ink/30">{(o as any).companies?.name}</span>
-            </div>
-            <div className="p-5">
-              <div className="flex justify-between mb-1">
-                <span className="text-[10px] font-bold text-accent-red uppercase">{o.category_slug}</span>
-                <span className="font-display font-extrabold">{formatAll(o.price_all)}</span>
-              </div>
-              <h3 className="font-display text-lg mb-1">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
-              <p className="text-xs text-foreground/50 mb-4 line-clamp-2">{locale === "sq" && o.description_sq ? o.description_sq : o.description}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold opacity-60 uppercase">{o.location}</span>
-                <button onClick={() => add(o.id)} className="size-9 rounded-full bg-cream border border-border-soft hover:bg-accent-red hover:text-white hover:border-accent-red grid place-items-center">
-                  <Plus className="size-4" />
-                </button>
-              </div>
+
+      <div className="grid md:grid-cols-12 gap-8">
+        {/* Filter rail */}
+        <aside className="md:col-span-3 space-y-6 fade-up">
+          <div>
+            <h4 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-3">Category</h4>
+            <div className="flex flex-wrap gap-2">
+              <Chip active={cat === null} onClick={() => setCat(null)}>{t("all_categories")}</Chip>
+              {(data?.cats ?? []).map((c) => (
+                <Chip key={c.slug} active={cat === c.slug} onClick={() => setCat(c.slug)}>
+                  {locale === "sq" ? c.name_sq : c.name_en}
+                </Chip>
+              ))}
             </div>
           </div>
-        ))}
+          {neighborhoods.length > 0 && (
+            <div>
+              <h4 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-3">Neighborhood</h4>
+              <div className="flex flex-wrap gap-2">
+                <Chip active={neighborhood === null} onClick={() => setNeighborhood(null)}>Any</Chip>
+                {neighborhoods.map((n) => (
+                  <Chip key={n} active={neighborhood === n} onClick={() => setNeighborhood(n)}>{n}</Chip>
+                ))}
+              </div>
+            </div>
+          )}
+          <div>
+            <h4 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-3">Max price</h4>
+            <input type="range" min={1000} max={25000} step={500} value={maxPrice} onChange={(e) => setMaxPrice(parseInt(e.target.value))} className="w-full accent-accent-red" />
+            <div className="text-xs text-ink-soft mt-2">Up to <strong className="text-ink">{formatAll(maxPrice)}</strong></div>
+          </div>
+          <div className="md:hidden hairline rounded-full p-1 bg-paper flex">
+            <button onClick={() => setView("list")} className={`flex-1 px-4 py-2 rounded-full text-xs font-semibold ${view==="list" ? "bg-ink text-cream" : "text-ink-soft"}`}>List</button>
+            <button onClick={() => setView("map")} className={`flex-1 px-4 py-2 rounded-full text-xs font-semibold ${view==="map" ? "bg-ink text-cream" : "text-ink-soft"}`}>Map</button>
+          </div>
+        </aside>
+
+        {/* Main area */}
+        <div className="md:col-span-9">
+          {view === "list" ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((o: any) => (
+                <article key={o.id} className="group fade-up">
+                  <div className="aspect-[4/5] rounded-2xl overflow-hidden hairline mb-3">
+                    {o.image_url && <img src={o.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />}
+                  </div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-red">{o.category_slug} · {o.companies?.neighborhood ?? o.location}</div>
+                  <h3 className="font-serif text-xl leading-tight mt-1">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
+                  <div className="text-xs text-ink-soft mt-1">{o.companies?.name}</div>
+                  <div className="flex items-center justify-between mt-3">
+                    <span className="font-semibold">{formatAll(o.price_all)}</span>
+                    <button onClick={() => add(o.id)} className="size-9 rounded-full hairline grid place-items-center hover:bg-ink hover:text-cream hover:border-ink transition-colors">
+                      <Plus className="size-4" />
+                    </button>
+                  </div>
+                </article>
+              ))}
+              {filtered.length === 0 && (
+                <div className="col-span-full hairline rounded-3xl p-16 text-center text-ink-soft">No offers match your filters.</div>
+              )}
+            </div>
+          ) : (
+            <div className="h-[640px] hairline rounded-3xl overflow-hidden">
+              <Suspense fallback={<div className="w-full h-full grid place-items-center text-ink-soft">Loading map…</div>}>
+                <TiranaMap pins={filtered as any} onAdd={add} />
+              </Suspense>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -79,7 +147,7 @@ function Marketplace() {
 
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className={`px-4 py-2 rounded-full text-xs font-bold border ${active ? "bg-ink text-cream border-ink" : "bg-white border-border-soft hover:border-ink/30"}`}>
+    <button onClick={onClick} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${active ? "bg-ink text-cream" : "hairline bg-white hover:bg-paper"}`}>
       {children}
     </button>
   );
