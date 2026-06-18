@@ -34,7 +34,7 @@ export default function CursorRing() {
   return (
     <div
       ref={ref}
-      className={`pointer-events-none fixed top-0 left-0 z-[100] rounded-full border border-gold/40 mix-blend-difference transition-[width,height] duration-200 ${hover ? "w-12 h-12" : "w-6 h-6"}`}
+      className={`pointer-events-none fixed top-0 left-0 z-[100] rounded-full border border-ink mix-blend-difference transition-[width,height] duration-200 ${hover ? "w-12 h-12" : "w-6 h-6"}`}
       style={{ borderColor: "#faf7f2" }}
     />
   );

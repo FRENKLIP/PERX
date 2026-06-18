@@ -124,18 +124,18 @@ function ProviderDashboard() {
     <div className="max-w-6xl mx-auto px-6 pt-10">
       <div className="flex justify-between items-end mb-10 fade-up gap-4 flex-wrap">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2">Provider studio</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Provider studio</div>
           <h1 className="font-serif text-5xl tracking-tight">Your offers, your orders.</h1>
         </div>
         <div className="flex items-center gap-3">
           <PeriodSwitcher value={period} onChange={setPeriod} />
-          <button onClick={() => setShowNew((v) => !v)} className="bg-emerald-deep text-bone px-5 py-3 rounded-full font-semibold text-sm flex items-center gap-2 hover:bg-gold transition-colors shrink-0">
+          <button onClick={() => setShowNew((v) => !v)} className="bg-ink text-cream px-5 py-3 rounded-full font-semibold text-sm flex items-center gap-2 hover:bg-accent-red transition-colors shrink-0">
             <Plus className="size-4" /> New offer
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-glass-line hairline rounded-3xl overflow-hidden mb-10 fade-up">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-border-soft hairline rounded-3xl overflow-hidden mb-10 fade-up">
         <StatTile label="Live offers" value={`${activeOffers}`} hint={`${(data?.offers ?? []).length} total`} accent="ink" />
         <StatTile label="Paid orders" value={paid.length.toString()} hint={`${pending.length} pending`} accent="sage" />
         <StatTile label="Revenue" value={formatAll(revenue)} hint={`paid out`} accent="red" />
@@ -146,56 +146,56 @@ function ProviderDashboard() {
 
       {/* Charts row */}
       <div className="grid lg:grid-cols-12 gap-6 mb-10">
-        <div className="lg:col-span-7 hairline bg-forest rounded-3xl p-6 fade-up">
+        <div className="lg:col-span-7 hairline bg-white rounded-3xl p-6 fade-up">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft">Revenue trend</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft">Revenue trend</div>
               <h3 className="font-serif text-2xl mt-1">Last {period} days</h3>
             </div>
             <div className="text-right">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft">Paid</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft">Paid</div>
               <div className="font-serif text-2xl">{formatAll(trend.reduce((s, t) => s + t.value, 0))}</div>
             </div>
           </div>
           <TrendArea data={trend} color="#c5503a" />
         </div>
-        <div className="lg:col-span-5 hairline bg-forest rounded-3xl p-6 fade-up">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-1">Order status</div>
+        <div className="lg:col-span-5 hairline bg-white rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Order status</div>
           <h3 className="font-serif text-2xl mb-4">Paid vs pending</h3>
-          {statusMix.length > 0 ? <CategoryDonut data={statusMix} /> : <div className="h-[220px] grid place-items-center text-sm text-bone-soft">No orders yet.</div>}
+          {statusMix.length > 0 ? <CategoryDonut data={statusMix} /> : <div className="h-[220px] grid place-items-center text-sm text-ink-soft">No orders yet.</div>}
         </div>
       </div>
 
       <div className="grid lg:grid-cols-12 gap-6 mb-10">
-        <div className="lg:col-span-7 hairline bg-forest rounded-3xl p-6 fade-up">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-1">Top offers</div>
+        <div className="lg:col-span-7 hairline bg-white rounded-3xl p-6 fade-up">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Top offers</div>
           <h3 className="font-serif text-2xl mb-4">Your bestsellers</h3>
           <TopBars data={topOffers} color="#c5503a" />
         </div>
-        <div className="lg:col-span-5 grid grid-cols-2 gap-px bg-glass-line hairline rounded-3xl overflow-hidden fade-up self-start">
-          <div className="bg-forest p-6">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2">Employers reached</div>
+        <div className="lg:col-span-5 grid grid-cols-2 gap-px bg-border-soft hairline rounded-3xl overflow-hidden fade-up self-start">
+          <div className="bg-white p-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Employers reached</div>
             <div className="font-serif text-5xl">{distinctEmployers}</div>
-            <div className="text-xs text-bone-soft mt-2">Companies sending orders to you</div>
+            <div className="text-xs text-ink-soft mt-2">Companies sending orders to you</div>
           </div>
-          <div className="bg-forest p-6">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2">Total bookings</div>
+          <div className="bg-white p-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Total bookings</div>
             <div className="font-serif text-5xl">{totalOrders}</div>
-            <div className="text-xs text-bone-soft mt-2">Across all your offers</div>
+            <div className="text-xs text-ink-soft mt-2">Across all your offers</div>
           </div>
-          <div className="bg-forest p-6 col-span-2 border-t border-glass-line">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-3">Recent redemption codes</div>
+          <div className="bg-white p-6 col-span-2 border-t border-border-soft">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-3">Recent redemption codes</div>
             {recentCodes.length === 0 ? (
-              <div className="text-sm text-bone-soft py-2">No paid orders yet.</div>
+              <div className="text-sm text-ink-soft py-2">No paid orders yet.</div>
             ) : (
               <ul className="grid sm:grid-cols-2 gap-2">
                 {recentCodes.map((it: any) => (
-                  <li key={it.id} className="flex items-center gap-2 bg-obsidian rounded-xl px-3 py-2">
+                  <li key={it.id} className="flex items-center gap-2 bg-paper rounded-xl px-3 py-2">
                     <div className="min-w-0 flex-1">
                       <div className="text-xs truncate">{it.offer_title}</div>
-                      <div className="font-mono text-[11px] text-bone-soft">{it.redemption_code}</div>
+                      <div className="font-mono text-[11px] text-ink-soft">{it.redemption_code}</div>
                     </div>
-                    <button onClick={() => copyCode(it.redemption_code)} className="size-7 grid place-items-center rounded-full hover:bg-forest" title="Copy">
+                    <button onClick={() => copyCode(it.redemption_code)} className="size-7 grid place-items-center rounded-full hover:bg-white" title="Copy">
                       <Copy className="size-3.5" />
                     </button>
                   </li>
@@ -207,63 +207,63 @@ function ProviderDashboard() {
       </div>
 
       {showNew && (
-        <form onSubmit={createOffer} className="hairline bg-forest rounded-3xl p-6 mb-10 grid sm:grid-cols-2 gap-4 fade-up">
+        <form onSubmit={createOffer} className="hairline bg-white rounded-3xl p-6 mb-10 grid sm:grid-cols-2 gap-4 fade-up">
           <Field label="Title" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
           <Field label="Price (ALL)" value={form.price} onChange={(v) => setForm({ ...form, price: v })} type="number" />
           <Field label="Location" value={form.location} onChange={(v) => setForm({ ...form, location: v })} />
           <label className="block">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2 block">Category</span>
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full bg-obsidian rounded-2xl px-4 py-3 outline-none">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Category</span>
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none">
               {(data?.cats ?? []).map((c) => <option key={c.slug} value={c.slug}>{c.name_en}</option>)}
             </select>
           </label>
           <label className="block sm:col-span-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2 block">Description</span>
-            <textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full bg-obsidian rounded-2xl px-4 py-3 outline-none" rows={3} />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Description</span>
+            <textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none" rows={3} />
           </label>
-          <button type="submit" className="sm:col-span-2 bg-emerald-deep text-bone py-3 rounded-full font-semibold hover:bg-gold transition-colors">Publish</button>
+          <button type="submit" className="sm:col-span-2 bg-ink text-cream py-3 rounded-full font-semibold hover:bg-accent-red transition-colors">Publish</button>
         </form>
       )}
 
       <h2 className="font-serif text-3xl mb-4">Incoming orders</h2>
       <div className="space-y-2 mb-10">
         {(data?.items ?? []).slice(0, 10).map((it: any) => (
-          <div key={it.id} className="hairline bg-forest rounded-2xl p-4 flex items-center gap-4">
+          <div key={it.id} className="hairline bg-white rounded-2xl p-4 flex items-center gap-4">
             <div className="flex-1 min-w-0">
               <div className="font-medium text-sm truncate">{it.offer_title}</div>
-              <div className="text-xs text-bone-soft">{it.requests?.status} · {new Date(it.requests?.created_at).toLocaleDateString()}</div>
+              <div className="text-xs text-ink-soft">{it.requests?.status} · {new Date(it.requests?.created_at).toLocaleDateString()}</div>
             </div>
-            {it.redemption_code && <span className="text-xs font-mono bg-obsidian px-2 py-1 rounded">{it.redemption_code}</span>}
-            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${it.payment_status === "simulated_paid" ? "bg-emerald-glow/15 text-sage" : "bg-gold-soft/15 text-gold-soft"}`}>
+            {it.redemption_code && <span className="text-xs font-mono bg-paper px-2 py-1 rounded">{it.redemption_code}</span>}
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${it.payment_status === "simulated_paid" ? "bg-sage/15 text-sage" : "bg-accent-orange/15 text-accent-orange"}`}>
               {it.payment_status === "simulated_paid" ? "Paid" : "Pending"}
             </span>
             <span className="font-semibold">{formatAll(it.price_all)}</span>
           </div>
         ))}
-        {(data?.items ?? []).length === 0 && <div className="hairline rounded-3xl p-12 text-center text-bone-soft">No orders yet.</div>}
+        {(data?.items ?? []).length === 0 && <div className="hairline rounded-3xl p-12 text-center text-ink-soft">No orders yet.</div>}
       </div>
 
       <h2 className="font-serif text-3xl mb-4">Your offers</h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {(data?.offers ?? []).map((o: any) => (
-          <article key={o.id} className={`hairline bg-forest rounded-3xl overflow-hidden ${o.is_active === false ? "opacity-60" : ""}`}>
+          <article key={o.id} className={`hairline bg-white rounded-3xl overflow-hidden ${o.is_active === false ? "opacity-60" : ""}`}>
             {o.image_url && (
               <div className="relative aspect-[4/3] overflow-hidden">
                 <img src={o.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
-                <span className={`absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${o.is_active === false ? "bg-emerald-deep/80 text-bone" : "bg-emerald-glow/90 text-bone"}`}>
+                <span className={`absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${o.is_active === false ? "bg-ink/80 text-cream" : "bg-sage/90 text-cream"}`}>
                   {o.is_active === false ? "Paused" : "Live"}
                 </span>
               </div>
             )}
             <div className="p-5">
-              <div className="text-[10px] font-semibold text-gold uppercase tracking-[0.18em] mb-1">{o.category_slug}</div>
+              <div className="text-[10px] font-semibold text-accent-red uppercase tracking-[0.18em] mb-1">{o.category_slug}</div>
               <h3 className="font-serif text-xl leading-tight mb-1">{o.title}</h3>
-              <p className="text-xs text-bone-soft mb-3 line-clamp-2">{o.description}</p>
+              <p className="text-xs text-ink-soft mb-3 line-clamp-2">{o.description}</p>
               <div className="flex justify-between items-center">
                 <span className="font-semibold">{formatAll(o.price_all)}</span>
                 <button
                   onClick={() => toggleActive(o.id, o.is_active !== false)}
-                  className="text-[11px] font-semibold flex items-center gap-1.5 text-bone-soft hover:text-bone"
+                  className="text-[11px] font-semibold flex items-center gap-1.5 text-ink-soft hover:text-ink"
                   title={o.is_active === false ? "Activate" : "Pause"}
                 >
                   {o.is_active === false ? <><Power className="size-3.5" /> Activate</> : <><PowerOff className="size-3.5" /> Pause</>}
@@ -280,8 +280,8 @@ function ProviderDashboard() {
 function Field({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   return (
     <label className="block">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-2 block">{label}</span>
-      <input required type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-obsidian rounded-2xl px-4 py-3 outline-none" />
+      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">{label}</span>
+      <input required type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none" />
     </label>
   );
 }

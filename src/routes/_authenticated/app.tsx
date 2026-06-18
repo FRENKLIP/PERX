@@ -70,21 +70,21 @@ function AppHome() {
       {/* Greeting + wallet */}
       <section className="grid md:grid-cols-12 gap-10 items-center pb-12 fade-up">
         <div className="md:col-span-7">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-4">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-4">
             {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
           </div>
           <h1 className="font-serif text-5xl md:text-6xl leading-[0.98] tracking-tight text-balance">
             {greeting}, {data?.firstName ?? "Era"}.<br />
-            <em className="text-gold">What sounds good today?</em>
+            <em className="text-accent-red">What sounds good today?</em>
           </h1>
-          <p className="text-bone-soft text-lg mt-6 max-w-md text-pretty">
+          <p className="text-ink-soft text-lg mt-6 max-w-md text-pretty">
             Your tax-free wallet refreshes on the 1st. Spend it on something you'd actually want.
           </p>
           <div className="flex gap-3 mt-8">
-            <Link to="/concierge" className="inline-flex items-center gap-2 bg-emerald-deep text-bone px-6 py-3 rounded-full text-sm font-semibold hover:bg-gold transition-colors">
+            <Link to="/concierge" className="inline-flex items-center gap-2 bg-ink text-cream px-6 py-3 rounded-full text-sm font-semibold hover:bg-accent-red transition-colors">
               <Sparkles className="size-4" /> Ask concierge
             </Link>
-            <Link to="/marketplace" className="inline-flex items-center gap-2 hairline rounded-full px-6 py-3 text-sm font-semibold hover:bg-obsidian">
+            <Link to="/marketplace" className="inline-flex items-center gap-2 hairline rounded-full px-6 py-3 text-sm font-semibold hover:bg-paper">
               Browse marketplace <ArrowRight className="size-4" />
             </Link>
           </div>
@@ -97,30 +97,30 @@ function AppHome() {
       {/* Provider stories */}
       {data?.stories && data.stories.length > 0 && (
         <section className="py-6 fade-up">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-4">Tirana right now</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-4">Tirana right now</div>
           <ProviderStories stories={data.stories as any} onAdd={addToCart} />
         </section>
       )}
 
       {/* AI weekly drop */}
       <section className="my-10 fade-up">
-        <div className="rounded-3xl bg-emerald-deep text-bone p-8 md:p-10 grid md:grid-cols-12 gap-8 items-end">
+        <div className="rounded-3xl bg-ink text-cream p-8 md:p-10 grid md:grid-cols-12 gap-8 items-end">
           <div className="md:col-span-5">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-bone/60 mb-3">PERX AI · Weekly drop</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream/60 mb-3">PERX AI · Weekly drop</div>
             <h2 className="font-serif text-3xl md:text-4xl leading-tight">
               {weekly?.theme ?? "Loading this week's pick..."}
             </h2>
           </div>
           <div className="md:col-span-7 grid sm:grid-cols-3 gap-3">
             {(weekly?.picks ?? []).map((o) => (
-              <Link key={o.id} to="/offer/$offerId" params={{ offerId: o.id }} className="text-left bg-forest/5 hover:bg-forest/10 transition-colors rounded-2xl overflow-hidden group block">
+              <Link key={o.id} to="/offer/$offerId" params={{ offerId: o.id }} className="text-left bg-cream/5 hover:bg-cream/10 transition-colors rounded-2xl overflow-hidden group block">
                 <div className="aspect-[4/3] overflow-hidden">
                   {o.image_url && <img src={o.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />}
                 </div>
                 <div className="p-3">
-                  <div className="text-[10px] uppercase tracking-widest text-bone/50">{o.category_slug}</div>
+                  <div className="text-[10px] uppercase tracking-widest text-cream/50">{o.category_slug}</div>
                   <div className="font-serif text-lg leading-tight mt-1 line-clamp-2">{o.title}</div>
-                  <div className="text-xs mt-2 text-bone/70">{formatAll(o.price_all)} · {o.companies?.neighborhood ?? o.location}</div>
+                  <div className="text-xs mt-2 text-cream/70">{formatAll(o.price_all)} · {o.companies?.neighborhood ?? o.location}</div>
                 </div>
               </Link>
             ))}
@@ -132,10 +132,10 @@ function AppHome() {
       <section className="my-14 fade-up">
         <div className="flex items-end justify-between mb-6">
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-bone-soft mb-1">Editor's picks</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Editor's picks</div>
             <h2 className="font-serif text-3xl">Fresh from Tirana</h2>
           </div>
-          <Link to="/marketplace" className="text-sm font-semibold text-gold hover:underline">All offers →</Link>
+          <Link to="/marketplace" className="text-sm font-semibold text-accent-red hover:underline">All offers →</Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {(data?.editors ?? []).map((o: any) => (
@@ -147,13 +147,13 @@ function AppHome() {
                     <FavoriteButton offerId={o.id} />
                   </div>
                 </div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gold">{o.category_slug} · {o.companies?.neighborhood ?? o.location}</div>
-                <h3 className="font-serif text-2xl leading-tight mt-1 group-hover:text-gold transition-colors">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
-                <p className="text-sm text-bone-soft mt-1 line-clamp-2">{locale === "sq" && o.description_sq ? o.description_sq : o.description}</p>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-red">{o.category_slug} · {o.companies?.neighborhood ?? o.location}</div>
+                <h3 className="font-serif text-2xl leading-tight mt-1 group-hover:text-accent-red transition-colors">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
+                <p className="text-sm text-ink-soft mt-1 line-clamp-2">{locale === "sq" && o.description_sq ? o.description_sq : o.description}</p>
               </Link>
               <div className="flex items-center justify-between mt-3">
                 <span className="font-semibold">{formatAll(o.price_all)}</span>
-                <button onClick={() => addToCart(o.id)} aria-label="Add to cart" className="size-9 rounded-full hairline grid place-items-center hover:bg-emerald-deep hover:text-bone hover:border-gold/40 transition-colors">
+                <button onClick={() => addToCart(o.id)} aria-label="Add to cart" className="size-9 rounded-full hairline grid place-items-center hover:bg-ink hover:text-cream hover:border-ink transition-colors">
                   <Plus className="size-4" />
                 </button>
               </div>

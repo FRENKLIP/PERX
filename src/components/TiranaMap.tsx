@@ -36,7 +36,7 @@ type Pin = {
 export function TiranaMap({ pins, onAdd }: { pins: Pin[]; onAdd: (id: string) => void }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  if (!mounted) return <div className="w-full h-full bg-obsidian rounded-2xl" />;
+  if (!mounted) return <div className="w-full h-full bg-paper rounded-2xl" />;
 
   const valid = pins.filter((p) => p.companies?.lat != null && p.companies?.lng != null);
 

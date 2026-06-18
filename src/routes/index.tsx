@@ -102,21 +102,21 @@ function Landing() {
   }
 
   return (
-    <div className="min-h-screen text-bone font-body">
+    <div className="min-h-screen bg-cream text-ink font-body">
       <CursorRing />
 
-      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? "bg-forest/85 backdrop-blur-md border-b border-glass-line" : "bg-transparent"}`}>
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? "bg-cream/85 backdrop-blur-md border-b border-border-soft" : "bg-transparent"}`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <a href="#top" className={`font-serif tracking-tight transition-all ${scrolled ? "text-xl" : "text-2xl"}`}>
-            PERX<span className="text-gold">.</span>
+            PERX<span className="text-accent-red">.</span>
           </a>
-          <div className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-[0.18em] text-bone-soft">
-            <a href="#how" className="hover:text-bone transition-colors">How</a>
-            <a href="#what" className="hover:text-bone transition-colors">Product</a>
-            <a href="#who" className="hover:text-bone transition-colors">For you</a>
-            <a href="#faq" className="hover:text-bone transition-colors">FAQ</a>
+          <div className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-[0.18em] text-ink-soft">
+            <a href="#how" className="hover:text-ink transition-colors">How</a>
+            <a href="#what" className="hover:text-ink transition-colors">Product</a>
+            <a href="#who" className="hover:text-ink transition-colors">For you</a>
+            <a href="#faq" className="hover:text-ink transition-colors">FAQ</a>
           </div>
-          <a href="#enter" className="text-xs font-bold uppercase tracking-[0.2em] bg-emerald-deep text-bone px-4 py-2.5 rounded-full hover:bg-gold transition-colors">
+          <a href="#enter" className="text-xs font-bold uppercase tracking-[0.2em] bg-ink text-cream px-4 py-2.5 rounded-full hover:bg-accent-red transition-colors">
             Sign in
           </a>
         </div>
@@ -125,18 +125,18 @@ function Landing() {
       {/* HERO */}
       <section id="top" className="max-w-7xl mx-auto px-6 pt-32 md:pt-40 pb-24 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center fade-up">
         <div className="lg:col-span-7">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-bone-soft mb-6">Issue 01 · Tirana, 2026</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-6">Issue 01 · Tirana, 2026</div>
           <h1 className="font-serif text-6xl md:text-8xl lg:text-[9rem] leading-[0.92] tracking-tight text-balance">
-            Benefits that <em className="text-gold">feel</em> like a Friday in Blloku.
+            Benefits that <em className="text-accent-red">feel</em> like a Friday in Blloku.
           </h1>
-          <p className="text-bone-soft text-lg max-w-md mt-8 text-pretty">
+          <p className="text-ink-soft text-lg max-w-md mt-8 text-pretty">
             Tax-efficient gyms, meals, weekends and courses — picked by your team, paid straight to local providers.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <a href="#enter" className="bg-emerald-deep text-bone px-7 py-4 rounded-full font-bold text-sm hover:bg-gold transition-colors">
+            <a href="#enter" className="bg-ink text-cream px-7 py-4 rounded-full font-bold text-sm hover:bg-accent-red transition-colors">
               Start free
             </a>
-            <a href="#how" className="text-sm font-semibold hover:text-gold transition-colors story-link">
+            <a href="#how" className="text-sm font-semibold hover:text-accent-red transition-colors story-link">
               See how it works
             </a>
           </div>
@@ -159,9 +159,9 @@ function Landing() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-transparent" />
         <div className="relative max-w-5xl mx-auto px-6 h-full flex flex-col justify-end pb-20">
-          <div className="text-bone/70 text-[10px] uppercase tracking-[0.24em] font-bold mb-4">Editor's note</div>
-          <p className="font-serif text-4xl md:text-6xl text-bone leading-[1.05] max-w-3xl text-balance">
-            "A salary tells you what a company can afford. A perk tells you who they <em className="text-gold-soft">are</em>."
+          <div className="text-cream/70 text-[10px] uppercase tracking-[0.24em] font-bold mb-4">Editor's note</div>
+          <p className="font-serif text-4xl md:text-6xl text-cream leading-[1.05] max-w-3xl text-balance">
+            "A salary tells you what a company can afford. A perk tells you who they <em className="text-accent-orange">are</em>."
           </p>
         </div>
       </section>
@@ -173,23 +173,23 @@ function Landing() {
       <div id="faq"><FAQ /></div>
 
       {/* AUTH */}
-      <section id="enter" className="bg-obsidian py-32">
+      <section id="enter" className="bg-paper py-32">
         <div className="max-w-6xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-6">
             <SectionLabel index="06" label="Get in" />
             <h2 className="font-serif text-5xl md:text-7xl tracking-tight mt-6 leading-[1]">
-              Open your <em className="text-gold">PERX</em>.
+              Open your <em className="text-accent-red">PERX</em>.
             </h2>
-            <p className="text-bone-soft text-lg max-w-md mt-6">
+            <p className="text-ink-soft text-lg max-w-md mt-6">
               One account, three doors: employee wallet, HR control room, or provider listing.
             </p>
           </div>
           <div className="lg:col-span-6">
-          <div className="bg-forest border border-glass-line rounded-3xl p-7 md:p-9 shadow-[0_30px_60px_-30px_rgba(20,15,10,0.18)]">
-            <div className="flex items-center gap-1 p-1 rounded-full bg-forest border border-glass-line w-fit mb-6">
+          <div className="bg-white border border-border-soft rounded-3xl p-7 md:p-9 shadow-[0_30px_60px_-30px_rgba(20,15,10,0.18)]">
+            <div className="flex items-center gap-1 p-1 rounded-full bg-cream border border-border-soft w-fit mb-6">
               {(["signin","signup"] as const).map((m) => (
                 <button key={m} type="button" onClick={() => setMode(m)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${mode===m?"bg-emerald-deep text-bone":"text-bone-soft hover:text-bone"}`}>
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${mode===m?"bg-ink text-cream":"text-ink-soft hover:text-ink"}`}>
                   {m === "signin" ? "Sign in" : "Create account"}
                 </button>
               ))}
@@ -198,7 +198,7 @@ function Landing() {
             <h2 className="font-serif text-3xl tracking-tight mb-1">
               {mode === "signin" ? "Welcome back." : "Join PERX."}
             </h2>
-            <p className="text-sm text-bone-soft mb-6">
+            <p className="text-sm text-ink-soft mb-6">
               {mode === "signin" ? "Open your wallet, your team, or your shop." : "Pick how you'll use PERX."}
             </p>
 
@@ -207,11 +207,11 @@ function Landing() {
                 <>
                   <Field label="Full name" value={fullName} onChange={setFullName} />
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-bone-soft mb-2 block">I'm joining as</label>
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-soft mb-2 block">I'm joining as</label>
                     <div className="grid grid-cols-3 gap-2">
                       {(["employee","employer_admin","provider_admin"] as const).map((r) => (
                         <button type="button" key={r} onClick={() => setRole(r)}
-                          className={`text-xs font-bold px-2 py-2.5 rounded-xl border transition-colors ${role===r?"bg-emerald-deep text-bone border-gold/40":"bg-forest border-glass-line hover:border-gold/40/30"}`}>
+                          className={`text-xs font-bold px-2 py-2.5 rounded-xl border transition-colors ${role===r?"bg-ink text-cream border-ink":"bg-cream border-border-soft hover:border-ink/30"}`}>
                           {r === "employee" ? "Employee" : r === "employer_admin" ? "Employer" : "Provider"}
                         </button>
                       ))}
@@ -225,13 +225,13 @@ function Landing() {
               <Field label="Email" type="email" value={email} onChange={setEmail} />
               <Field label="Password" type="password" value={password} onChange={setPassword} />
 
-              <button type="submit" disabled={loading} className="w-full bg-emerald-deep text-bone rounded-2xl py-4 font-bold hover:bg-gold transition-colors disabled:opacity-50">
+              <button type="submit" disabled={loading} className="w-full bg-ink text-cream rounded-2xl py-4 font-bold hover:bg-accent-red transition-colors disabled:opacity-50">
                 {loading ? "..." : mode === "signin" ? "Sign in" : "Create account"}
               </button>
             </form>
 
-            <div className="mt-7 pt-6 border-t border-glass-line">
-              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-bone-soft mb-3">Try a demo account</div>
+            <div className="mt-7 pt-6 border-t border-border-soft">
+              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-soft mb-3">Try a demo account</div>
               <div className="grid grid-cols-3 gap-2">
                 {([
                   { k: "employee", label: "Era", sub: "Employee" },
@@ -239,8 +239,8 @@ function Landing() {
                   { k: "provider", label: "Iron Gym", sub: "Provider" },
                 ] as const).map((d) => (
                   <button key={d.k} type="button" onClick={() => demoLogin(d.k)} disabled={loading}
-                    className="text-left bg-forest border border-glass-line rounded-2xl p-3 hover:border-accent-red transition-colors disabled:opacity-50">
-                    <div className="text-[9px] font-bold text-gold uppercase tracking-widest">{d.sub}</div>
+                    className="text-left bg-cream border border-border-soft rounded-2xl p-3 hover:border-accent-red transition-colors disabled:opacity-50">
+                    <div className="text-[9px] font-bold text-accent-red uppercase tracking-widest">{d.sub}</div>
                     <div className="text-xs font-semibold mt-0.5">{d.label}</div>
                   </button>
                 ))}
@@ -251,32 +251,32 @@ function Landing() {
         </div>
       </section>
 
-      <footer className="bg-emerald-deep text-bone">
+      <footer className="bg-ink text-cream">
         <div className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-10">
           <div>
-            <div className="font-serif text-4xl tracking-tight">PERX<span className="text-gold">.</span></div>
-            <p className="text-bone/60 mt-4 max-w-sm text-sm">Tax-efficient benefits, paid straight to local providers. Made in Tirana for teams that care.</p>
+            <div className="font-serif text-4xl tracking-tight">PERX<span className="text-accent-red">.</span></div>
+            <p className="text-cream/60 mt-4 max-w-sm text-sm">Tax-efficient benefits, paid straight to local providers. Made in Tirana for teams that care.</p>
           </div>
           <div className="grid grid-cols-3 gap-6 text-xs uppercase tracking-[0.18em] font-bold">
             <div>
-              <div className="text-bone/40 mb-3">Product</div>
-              <ul className="space-y-2 text-bone/80 normal-case tracking-normal font-medium">
-                <li><a href="#how" className="hover:text-gold-soft">How it works</a></li>
-                <li><a href="#what" className="hover:text-gold-soft">Features</a></li>
-                <li><a href="#faq" className="hover:text-gold-soft">FAQ</a></li>
+              <div className="text-cream/40 mb-3">Product</div>
+              <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
+                <li><a href="#how" className="hover:text-accent-orange">How it works</a></li>
+                <li><a href="#what" className="hover:text-accent-orange">Features</a></li>
+                <li><a href="#faq" className="hover:text-accent-orange">FAQ</a></li>
               </ul>
             </div>
             <div>
-              <div className="text-bone/40 mb-3">For</div>
-              <ul className="space-y-2 text-bone/80 normal-case tracking-normal font-medium">
-                <li><a href="#who" className="hover:text-gold-soft">Employees</a></li>
-                <li><a href="#who" className="hover:text-gold-soft">Employers</a></li>
-                <li><a href="#who" className="hover:text-gold-soft">Providers</a></li>
+              <div className="text-cream/40 mb-3">For</div>
+              <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
+                <li><a href="#who" className="hover:text-accent-orange">Employees</a></li>
+                <li><a href="#who" className="hover:text-accent-orange">Employers</a></li>
+                <li><a href="#who" className="hover:text-accent-orange">Providers</a></li>
               </ul>
             </div>
             <div>
-              <div className="text-bone/40 mb-3">Company</div>
-              <ul className="space-y-2 text-bone/80 normal-case tracking-normal font-medium">
+              <div className="text-cream/40 mb-3">Company</div>
+              <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
                 <li>Tirana, AL</li>
                 <li>hello@perx.al</li>
               </ul>
@@ -284,7 +284,7 @@ function Landing() {
           </div>
         </div>
         <div className="border-t border-cream/10">
-          <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between text-xs text-bone/50">
+          <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between text-xs text-cream/50">
             <span>PERX · Made in Tirana</span>
             <span>© 2026</span>
           </div>
@@ -297,9 +297,9 @@ function Landing() {
 function Field({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   return (
     <label className="block">
-      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-bone-soft mb-2 block">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-soft mb-2 block">{label}</span>
       <input type={type} required value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-forest border border-glass-line rounded-2xl px-5 py-3.5 outline-none focus:border-gold/40 transition-colors text-sm" />
+        className="w-full bg-cream border border-border-soft rounded-2xl px-5 py-3.5 outline-none focus:border-ink transition-colors text-sm" />
     </label>
   );
 }

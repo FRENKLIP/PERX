@@ -37,9 +37,9 @@ export function WalletRing({ spent, budget, size = 220 }: { spent: number; budge
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center">
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-bone-soft">Remaining</div>
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft">Remaining</div>
           <div className="font-serif text-3xl mt-1">{formatAll(remaining)}</div>
-          <div className="text-xs text-bone-soft mt-1">of {formatAll(budget)}</div>
+          <div className="text-xs text-ink-soft mt-1">of {formatAll(budget)}</div>
         </div>
       </div>
     </div>

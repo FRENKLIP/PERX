@@ -1,46 +1,24 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import "@fontsource/urbanist/400.css";
-@import "@fontsource/urbanist/500.css";
-@import "@fontsource/urbanist/600.css";
-@import "@fontsource/urbanist/700.css";
-@import "@fontsource/epilogue/400.css";
-@import "@fontsource/epilogue/500.css";
-@import "@fontsource/epilogue/600.css";
-@import "@fontsource/epilogue/700.css";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
 @import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* White-dominant palette with coral + emerald + warm sand accents */
-  --color-obsidian: #ffffff;            /* root surface */
-  --color-forest: #fafaf7;              /* soft off-white panel */
-  --color-emerald: #0f7a5f;
-  --color-emerald-deep: #0a5a45;
-  --color-emerald-glow: #14a37a;
-  --color-emerald-2: #14a37a;
-  --color-gold: #f0b429;                /* warm amber */
-  --color-gold-soft: #fce8b3;
-  --color-bone: #0a0a0a;                /* text on white */
-  --color-bone-soft: rgba(10, 10, 10, 0.62);
-  --color-glass: rgba(10, 10, 10, 0.03);
-  --color-glass-line: rgba(10, 10, 10, 0.08);
-
-  /* Legacy alias names — kept so components don't need edits */
-  --color-cream: #fafaf7;
-  --color-paper: #ffffff;
-  --color-ink: #0a0a0a;
-  --color-ink-soft: rgba(10, 10, 10, 0.62);
-  --color-accent-red: #ff5b3d;          /* signature coral */
-  --color-accent-orange: #ff8a5b;
-  --color-sage: #0f7a5f;
-  --color-border-soft: rgba(10, 10, 10, 0.08);
-
-  --font-display: "Urbanist", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Urbanist", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Epilogue", ui-sans-serif, system-ui, sans-serif;
+  --color-cream: #faf7f2;
+  --color-paper: #f3efe7;
+  --color-ink: #171717;
+  --color-ink-soft: #5a5754;
+  --color-accent-red: #c5503a;
+  --color-accent-orange: #d98b5f;
+  --color-sage: #7a8b6f;
+  --color-border-soft: #17171712;
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -52,67 +30,16 @@
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
-@keyframes orb-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(40px, -30px) scale(1.08); }
-}
-@keyframes gold-sheen {
-  0% { background-position: -150% 0; }
-  100% { background-position: 250% 0; }
-}
-@keyframes underline-draw {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
 .fade-up { animation: entrance 0.7s var(--ease-out-expo) both; }
-.hairline { border: 1px solid rgba(10, 10, 10, 0.08); }
-.font-serif { font-family: var(--font-serif); letter-spacing: -0.015em; }
-.skeleton { background: linear-gradient(90deg, rgba(10,10,10,0.04) 0%, rgba(10,10,10,0.08) 50%, rgba(10,10,10,0.04) 100%); background-size: 200% 100%; animation: shimmer 1.6s linear infinite; }
-
-/* Glass primitives */
-@utility glass {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid rgba(10, 10, 10, 0.08);
-}
-@utility glass-strong {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(10, 10, 10, 0.10);
-}
-@utility gold-sheen {
-  background: linear-gradient(110deg, transparent 25%, rgba(255, 91, 61, 0.25) 50%, transparent 75%);
-  background-size: 200% 100%;
-  animation: gold-sheen 2.4s ease-in-out infinite;
-}
-
-/* Mesh / aurora backdrop — soft pastel orbs on white */
-.mesh-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(ellipse 50% 40% at 12% 8%, rgba(255, 91, 61, 0.10), transparent 65%),
-    radial-gradient(ellipse 45% 35% at 88% 18%, rgba(15, 122, 95, 0.08), transparent 70%),
-    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(240, 180, 41, 0.07), transparent 70%),
-    linear-gradient(180deg, #ffffff 0%, #fafaf7 100%);
-}
-.mesh-backdrop::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.5'/></svg>");
-  opacity: 0.035;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
+.hairline { border: 1px solid var(--color-border-soft); }
+.font-serif { font-family: var(--font-serif); }
+.skeleton { background: linear-gradient(90deg, #00000008 0%, #00000014 50%, #00000008 100%); background-size: 200% 100%; animation: shimmer 1.6s linear infinite; }
 
 /* Leaflet polish */
-.leaflet-container { font-family: var(--font-body); background: #fafaf7; }
-.leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 8px 24px rgba(10,10,10,0.10); background: rgba(255, 255, 255, 0.96); color: #0a0a0a; backdrop-filter: blur(10px); }
-.leaflet-popup-tip { box-shadow: 0 8px 24px rgba(10,10,10,0.10); background: rgba(255, 255, 255, 0.96); }
-.perx-pin { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: #ff5b3d; color: #ffffff; font-size: 14px; box-shadow: 0 4px 14px rgba(255, 91, 61, 0.4); border: 2px solid #ffffff; }
+.leaflet-container { font-family: var(--font-body); background: var(--color-paper); }
+.leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.leaflet-popup-tip { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.perx-pin { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: var(--color-ink); color: var(--color-cream); font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); border: 2px solid var(--color-cream); }
 
 /*
  * Design system definition.
@@ -173,26 +100,25 @@
 
 :root {
   --radius: 0.625rem;
-  /* Light white-dominant theme with coral primary */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.16 0.01 0);
-  --card: oklch(0.99 0.003 90);
-  --card-foreground: oklch(0.16 0.01 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.01 0);
-  --primary: oklch(0.68 0.20 30);          /* coral */
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.96 0.005 90);
-  --secondary-foreground: oklch(0.16 0.01 0);
-  --muted: oklch(0.96 0.005 90);
-  --muted-foreground: oklch(0.45 0.01 0);
-  --accent: oklch(0.55 0.12 165);          /* emerald */
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.62 0.20 27);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.16 0.01 0 / 10%);
-  --input: oklch(0.16 0.01 0 / 12%);
-  --ring: oklch(0.68 0.20 30);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.208 0.042 265.755);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -249,9 +175,7 @@
   }
 
   body {
-    background-color: #ffffff;
-    color: #0a0a0a;
-    font-family: var(--font-body);
-    -webkit-font-smoothing: antialiased;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
   }
 }

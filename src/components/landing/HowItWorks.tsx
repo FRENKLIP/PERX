@@ -12,18 +12,18 @@ export default function HowItWorks() {
     <section ref={ref} className="max-w-7xl mx-auto px-6 py-32">
       <SectionLabel index="02" label="How it works" />
       <h2 className="font-serif text-5xl md:text-7xl tracking-tight max-w-3xl mt-6 leading-[1]">
-        Three moves. <em className="text-gold">No paperwork.</em>
+        Three moves. <em className="text-accent-red">No paperwork.</em>
       </h2>
-      <div className="mt-20 grid md:grid-cols-3 gap-px bg-glass-line hairline rounded-[2rem] overflow-hidden">
+      <div className="mt-20 grid md:grid-cols-3 gap-px bg-border-soft hairline rounded-[2rem] overflow-hidden">
         {STEPS.map((s, i) => (
           <div
             key={s.n}
-            className={`bg-forest p-10 md:p-12 transition-all duration-700 ${shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+            className={`bg-cream p-10 md:p-12 transition-all duration-700 ${shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
             style={{ transitionDelay: `${i * 140}ms` }}
           >
-            <div className="text-gold font-serif text-6xl mb-8 tabular-nums">{s.n}</div>
+            <div className="text-accent-red font-serif text-6xl mb-8 tabular-nums">{s.n}</div>
             <h3 className="font-serif text-2xl mb-3 leading-tight">{s.title}</h3>
-            <p className="text-bone-soft text-sm leading-relaxed">{s.body}</p>
+            <p className="text-ink-soft text-sm leading-relaxed">{s.body}</p>
           </div>
         ))}
       </div>
@@ -33,9 +33,9 @@ export default function HowItWorks() {
 
 export function SectionLabel({ index, label }: { index: string; label: string }) {
   return (
-    <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-[0.24em] text-bone-soft">
-      <span className="text-gold tabular-nums">Issue {index}</span>
-      <span className="h-px flex-1 max-w-32 bg-glass-line" />
+    <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-[0.24em] text-ink-soft">
+      <span className="text-accent-red tabular-nums">Issue {index}</span>
+      <span className="h-px flex-1 max-w-32 bg-border-soft" />
       <span>{label}</span>
     </div>
   );
