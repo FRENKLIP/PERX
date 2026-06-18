@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { WalletRing } from "@/components/WalletRing";
 import { ProviderStories } from "@/components/ProviderStories";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Home — PERX" }] }),
@@ -140,8 +141,11 @@ function AppHome() {
           {(data?.editors ?? []).map((o: any) => (
             <article key={o.id} className="group">
               <Link to="/offer/$offerId" params={{ offerId: o.id }} className="block">
-                <div className="aspect-[4/5] rounded-2xl overflow-hidden hairline mb-3">
+                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden hairline mb-3">
                   {o.image_url && <img src={o.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />}
+                  <div className="absolute top-3 right-3">
+                    <FavoriteButton offerId={o.id} />
+                  </div>
                 </div>
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-red">{o.category_slug} · {o.companies?.neighborhood ?? o.location}</div>
                 <h3 className="font-serif text-2xl leading-tight mt-1 group-hover:text-accent-red transition-colors">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
