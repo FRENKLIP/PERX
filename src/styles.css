@@ -4,6 +4,28 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-cream: #fefaf3;
+  --color-ink: #1a1a1a;
+  --color-accent-red: #e63946;
+  --color-accent-orange: #f4a261;
+  --color-border-soft: #1a1a1a15;
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes entrance {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.bento-item { animation: entrance 0.6s var(--ease-out-expo) both; }
+.animate-marquee { animation: marquee 30s linear infinite; }
+
 /*
  * Design system definition.
  *
