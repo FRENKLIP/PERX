@@ -49,20 +49,13 @@ function AuthPage() {
         const userId = data.user?.id;
         if (!userId) throw new Error("No user");
 
-        // Assign role + company
-        if (role === "employee") {
-          // Attach to default Gjirafa Tech employer
-          await supabase.from("profiles").update({ employer_company_id: "11111111-1111-1111-1111-111111111111", full_name: fullName }).eq("id", userId);
-          await supabase.from("user_roles").insert({ user_id: userId, role: "employee", company_id: "11111111-1111-1111-1111-111111111111" });
-        } else if (role === "employer_admin") {
-          const { data: c, error: cErr } = await supabase.from("companies").insert({ name: companyName || `${fullName}'s company`, kind: "employer", country: "AL", currency: "ALL", city: "Tirana" }).select().single();
-          if (cErr) throw cErr;
-          await supabase.from("user_roles").insert({ user_id: userId, role: "employer_admin", company_id: c.id });
-        } else {
-          const { data: c, error: cErr } = await supabase.from("companies").insert({ name: companyName || `${fullName}'s shop`, kind: "provider", country: "AL", currency: "ALL", city: "Tirana" }).select().single();
-          if (cErr) throw cErr;
-          await supabase.from("user_roles").insert({ user_id: userId, role: "provider_admin", company_id: c.id });
-        }
+        // Controlled signup: one server-side function handles company + role assignment
+        const { error: setupErr } = await supabase.rpc("signup_setup_account", {
+          p_role: role,
+          p_company_name: companyName || undefined,
+          p_full_name: fullName || undefined,
+        });
+        if (setupErr) throw setupErr;
         toast.success("Account created");
         navigate({ to: role === "employer_admin" ? "/employer" : role === "provider_admin" ? "/provider" : "/app" });
       }
