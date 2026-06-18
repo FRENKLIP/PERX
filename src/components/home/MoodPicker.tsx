@@ -1,15 +1,16 @@
 import { Zap, Coffee, Users, BookOpen, Gift } from "lucide-react";
 
-export const MOODS = [
-  { id: "all", label: "All", icon: Gift, cats: [] as string[] },
+type Mood = { id: string; label: string; icon: typeof Gift; cats: string[] };
+export const MOODS: Mood[] = [
+  { id: "all", label: "All", icon: Gift, cats: [] },
   { id: "energized", label: "Energized", icon: Zap, cats: ["wellness", "fitness"] },
   { id: "cozy", label: "Cozy", icon: Coffee, cats: ["food", "wellness", "lifestyle"] },
   { id: "social", label: "Social", icon: Users, cats: ["food", "family"] },
   { id: "curious", label: "Curious", icon: BookOpen, cats: ["learning", "tech"] },
   { id: "treat", label: "Treat", icon: Gift, cats: ["travel", "lifestyle"] },
-] as const;
+];
 
-export type MoodId = (typeof MOODS)[number]["id"];
+export type MoodId = string;
 
 export function moodMatch(mood: MoodId, category?: string | null) {
   if (mood === "all" || !category) return true;
