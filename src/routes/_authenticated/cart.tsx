@@ -8,6 +8,10 @@ import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/cart")({
   head: () => ({ meta: [{ title: "Cart — Perka" }] }),
+  beforeLoad: async () => {
+    const { requireRole } = await import("@/lib/roles");
+    await requireRole("employee");
+  },
   component: Cart,
 });
 
