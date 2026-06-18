@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
@@ -114,15 +114,17 @@ function Marketplace() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((o: any) => (
                 <article key={o.id} className="group fade-up">
-                  <div className="aspect-[4/5] rounded-2xl overflow-hidden hairline mb-3">
-                    {o.image_url && <img src={o.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />}
-                  </div>
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-red">{o.category_slug} · {o.companies?.neighborhood ?? o.location}</div>
-                  <h3 className="font-serif text-xl leading-tight mt-1">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
-                  <div className="text-xs text-ink-soft mt-1">{o.companies?.name}</div>
+                  <Link to="/offer/$offerId" params={{ offerId: o.id }} className="block">
+                    <div className="aspect-[4/5] rounded-2xl overflow-hidden hairline mb-3">
+                      {o.image_url && <img src={o.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />}
+                    </div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-red">{o.category_slug} · {o.companies?.neighborhood ?? o.location}</div>
+                    <h3 className="font-serif text-xl leading-tight mt-1 group-hover:text-accent-red transition-colors">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
+                    <div className="text-xs text-ink-soft mt-1">{o.companies?.name}</div>
+                  </Link>
                   <div className="flex items-center justify-between mt-3">
                     <span className="font-semibold">{formatAll(o.price_all)}</span>
-                    <button onClick={() => add(o.id)} className="size-9 rounded-full hairline grid place-items-center hover:bg-ink hover:text-cream hover:border-ink transition-colors">
+                    <button onClick={() => add(o.id)} aria-label="Add to cart" className="size-9 rounded-full hairline grid place-items-center hover:bg-ink hover:text-cream hover:border-ink transition-colors">
                       <Plus className="size-4" />
                     </button>
                   </div>
