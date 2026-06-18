@@ -1,60 +1,65 @@
-# Cinematic, scrollable landing page
+## Goal
 
-Turn the single-fold landing into a long-scroll editorial site with a real 3D moment, keeping the existing editorial cream/ink/serif identity (no generic SaaS palette — that's what makes it feel cheap).
+Turn the employee home (`/app`) from a stacked feed into a playful, interactive cockpit. Tone dial = 4: bold, tactile, a little loud — but still on the existing cream/ink/red palette so it stays coherent with the rest of PERX.
 
-## New sections (top → bottom)
+## Layout (top → bottom)
 
-1. **Sticky nav** — slim glass nav (PERX · For employees · For employers · For providers · Sign in). Logo wordmark scales down once you scroll past the hero.
-2. **Hero** — kept editorial headline, but the right column becomes a live **3D scene** (see below) instead of the auth card. Subtle scroll-cue chevron at the bottom.
-3. **Marquee** — slow horizontal ticker of provider names ("Iron Gym · Komiteti · Mullixhiu · Coolab · Destil · Kayo Yoga · …") to signal real Tirana ecosystem.
-4. **"How it works" triptych** — three big numbered cards (01 Browse, 02 Approve, 03 Get paid) that pin while a thin progress line draws between them on scroll.
-5. **Bento grid of value props** — 6 unequal tiles: tax-free by design, AI concierge, real local providers, employer dashboard with live spend, instant redemption codes, multi-language (sq/en). Mixed sizes for editorial rhythm.
-6. **Parallax editorial spread** — full-bleed Tirana golden-hour photo with a serif pull-quote sliding in at a slower scroll speed.
-7. **Numbers strip** — four oversized counters that animate from 0 on scroll (providers, neighborhoods, ALL paid to date, languages).
-8. **For each audience** — three stacked dark/light alternating panels (Employees / Employers / Providers) with a real product screenshot mock + 3-bullet pitch each.
-9. **FAQ accordion** — five questions (tax treatment, payments, onboarding, languages, security).
-10. **Sign-in / sign-up section** — the existing auth card, kept fully functional, lives in its own section near the bottom (anchor `#enter`). Nav "Sign in" smooth-scrolls here.
-11. **Footer** — bigger, two columns (brand + sitemap), unchanged copy + © line.
+```
+┌───────────────────────────────────────────────────────────────┐
+│ 1 · 3D PARALLAX HERO                                          │
+│   greeting + wallet ring + floating perk objects (r3f)        │
+│   mouse tilts the scene; scroll parallaxes the cards          │
+├───────────────────────────────────────────────────────────────┤
+│ 2 · MOOD PICKER                                               │
+│   5 chips (Energized · Cozy · Social · Curious · Treat)       │
+│   selecting one re-sorts the rails below with a smooth        │
+│   FLIP-style animation                                        │
+├───────────────────────────────────────────────────────────────┤
+│ 3 · LIVE WALLET SIMULATOR                                     │
+│   left: animated wallet ring + "what if" basket               │
+│   right: draggable offer chips → drop into basket;            │
+│   ring depletes in real time, shows "you'd have X left"       │
+│   one-click "send for approval" turns sim into real cart      │
+├───────────────────────────────────────────────────────────────┤
+│ 4 · TIRANA MAP                                                │
+│   interactive SVG/Leaflet map of Tirana neighborhoods         │
+│   provider pins; hover = mini card; click = offer drawer      │
+│   neighborhood filter chips above                             │
+├───────────────────────────────────────────────────────────────┤
+│ 5 · WEEKLY DROP (kept, restyled as marquee strip)             │
+├───────────────────────────────────────────────────────────────┤
+│ 6 · EDITOR'S PICKS (kept, re-skinned as bento, not grid)      │
+└───────────────────────────────────────────────────────────────┘
+```
 
-## 3D animation
+## Sections in detail
 
-A real WebGL hero piece using **@react-three/fiber** + **@react-three/drei** (industry-standard, lightweight, plays well with React 19):
-- A floating soft-shaded **wallet object** (rounded-cube card stack) slowly orbiting, with three small "perk pills" (a tiny dumbbell, a coffee cup, a luggage tag — built from primitives) gently floating around it.
-- Soft studio lighting, contact shadow, subtle drift on mouse position.
-- `Suspense` fallback shows a static SVG of the same composition so first paint is instant and SSR doesn't break.
-- Wrapped in a client-only mount (no SSR) — keeps build fast and avoids `window` issues.
-- Plus a second lightweight 3D moment further down: a **parallax tilt card** of an offer detail UI inside the "For employees" panel — pure CSS 3D transforms reacting to scroll/mouse, no extra library.
+**1 · 3D parallax hero** — `Hero3DEmployee.tsx` using `@react-three/fiber` (already installed). Floating coffee cup, dumbbell, luggage tag, theatre mask orbit a central WalletRing rendered as a 3D torus. Mouse moves the camera 5°, scroll moves objects on the z-axis. Mobile + reduced-motion fallback = static SVG composition. Greeting + CTAs sit in front of the canvas. Stat ribbon below: "Refreshes in N days · X ALL untouched · N offers near you".
 
-## "Expensive web" craft
+**2 · Mood picker** — `MoodPicker.tsx`. Five pill chips, each tagged with category slugs (Energized→fitness, Cozy→food/wellness, Social→dining/events, Curious→learning/culture, Treat→travel/beauty). Selection sets a `mood` state shared with sections 3 & 6; cards reorder via `layout` prop simulation (CSS transitions on translate).
 
-- **Generous vertical rhythm** — sections breathe; min 120px gaps on desktop.
-- **Scroll-triggered fades** — every section uses `IntersectionObserver` to fade-up on entry (no jank, no extra deps).
-- **Cursor** — custom subtle ring that grows on hover over links/buttons (cream blend mode over photos).
-- **Micro details** — hairline rules with Issue 01 / 02 / 03 labels between sections (editorial framing), tabular numbers for stats, italic serif emphasis on accent words.
-- **Soft grain overlay** — barely-there noise texture over hero and editorial spreads for printed-magazine feel.
-- All within the existing tokens: cream / ink / ink-soft / accent-red / sage / accent-orange. No purple gradients, no glassmorphism cliches.
+**3 · Live wallet simulator** — `WalletSim.tsx`. Native HTML5 drag-and-drop (no extra deps): offer chips on the right are draggable, basket on the left is a drop zone. Each drop pushes to local `sim` state, the WalletRing animates the new "after" value with a ghosted arc showing the delta. "Clear", "Send to cart" buttons. "Send to cart" loops upserts into `cart_items` (existing table) — no schema changes.
 
-## Dependencies
+**4 · Tirana map** — `TiranaMap.tsx` already exists in the project; extend it. Pull `companies` rows (kind=provider, lat/lng or neighborhood centroid fallback). Hover pin → floating card with name + offer count + cheapest price; click → opens an offer drawer (shadcn Sheet) listing that provider's offers with add-to-cart.
 
-- `three`, `@react-three/fiber`, `@react-three/drei` (only client-side import on landing).
-- No motion library needed — IntersectionObserver + CSS transitions handle entrance animations, and r3f handles the 3D drift.
+**5 · Weekly drop** — same `/api/weekly-drop` data, restyled as a horizontal marquee of 3 cards inside an ink panel with the AI label.
+
+**6 · Editor's picks bento** — same offers, rendered as an asymmetric bento (1 tall hero + 4 small) instead of a uniform 3-col grid; respects current mood filter.
 
 ## Files
 
-- `src/routes/index.tsx` — restructured into the long-scroll composition above; auth logic kept intact (form, demo accounts, redirect).
-- `src/components/landing/Hero3D.tsx` *(new, client-only)* — r3f wallet + floating perks scene with SVG fallback.
-- `src/components/landing/Marquee.tsx` *(new)* — provider ticker.
-- `src/components/landing/HowItWorks.tsx` *(new)* — pinned triptych with progress line.
-- `src/components/landing/BentoGrid.tsx` *(new)* — 6-tile value-prop grid.
-- `src/components/landing/CountersStrip.tsx` *(new)* — animated number counters.
-- `src/components/landing/AudiencePanels.tsx` *(new)* — three alternating panels with tilt card.
-- `src/components/landing/FAQ.tsx` *(new)* — accordion.
-- `src/components/landing/CursorRing.tsx` *(new)* — custom cursor (desktop only).
-- `src/components/landing/useReveal.ts` *(new)* — shared IntersectionObserver hook.
+- create `src/components/home/Hero3DEmployee.tsx` (r3f scene + SVG fallback)
+- create `src/components/home/MoodPicker.tsx`
+- create `src/components/home/WalletSim.tsx`
+- create `src/components/home/ProviderMapPanel.tsx` (wraps existing `TiranaMap`, adds drawer + filters)
+- create `src/components/home/WeeklyMarquee.tsx`
+- create `src/components/home/EditorBento.tsx`
+- rewrite `src/routes/_authenticated/app.tsx` to compose them; keep existing query + addToCart logic
+- add a tiny `useMood` context (single file, no new dep) for sections 2/3/6
 
-## Notes
+## Constraints & non-goals
 
-- The 3D scene is the single hero animation — one well-timed moment beats scattered effects.
-- Mobile: the 3D scene is replaced with the SVG fallback (no GPU cost on phones); marquee and counters still play.
-- The whole page stays on the cream background; only the audience panels alternate to ink for contrast.
-- Existing routes, auth, and brand tokens stay untouched.
+- No schema changes, no new packages — `three`, `@react-three/fiber`, `@react-three/drei` are already installed for the landing page; reuse them. `sonner`, `lucide-react`, shadcn `Sheet` already present.
+- Keep cream / ink / accent-red tokens — no new colors.
+- Reduced motion + mobile both fall back to a static hero and disable drag (tap-to-add instead).
+- Employer and provider dashboards untouched.
