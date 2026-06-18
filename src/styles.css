@@ -1,30 +1,45 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-cream: #fefaf3;
-  --color-ink: #1a1a1a;
-  --color-accent-red: #e63946;
-  --color-accent-orange: #f4a261;
-  --color-border-soft: #1a1a1a15;
+  --color-cream: #faf7f2;
+  --color-paper: #f3efe7;
+  --color-ink: #171717;
+  --color-ink-soft: #5a5754;
+  --color-accent-red: #c5503a;
+  --color-accent-orange: #d98b5f;
+  --color-sage: #7a8b6f;
+  --color-border-soft: #17171712;
   --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
   --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes entrance {
-  from { opacity: 0; transform: translateY(10px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
-.bento-item { animation: entrance 0.6s var(--ease-out-expo) both; }
-.animate-marquee { animation: marquee 30s linear infinite; }
+.fade-up { animation: entrance 0.7s var(--ease-out-expo) both; }
+.hairline { border: 1px solid var(--color-border-soft); }
+.font-serif { font-family: var(--font-serif); }
+.skeleton { background: linear-gradient(90deg, #00000008 0%, #00000014 50%, #00000008 100%); background-size: 200% 100%; animation: shimmer 1.6s linear infinite; }
+
+/* Leaflet polish */
+.leaflet-container { font-family: var(--font-body); background: var(--color-paper); }
+.leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.leaflet-popup-tip { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.perx-pin { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: var(--color-ink); color: var(--color-cream); font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); border: 2px solid var(--color-cream); }
 
 /*
  * Design system definition.
