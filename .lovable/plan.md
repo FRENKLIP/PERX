@@ -1,50 +1,52 @@
-## Problem
+## Rebrand: Perka → PERX
 
-Right now every signed-in user — employee, employer, or provider — sees the full nav (Home, Marketplace, Concierge, Cart, Requests) and can open any page. Employer and provider tabs are conditionally rendered, but the employee-only pages are not gated. A provider or employer can still browse `/marketplace`, add to cart, and submit requests.
+### Scope
+Replace every user-facing occurrence of "Perka" with "PERX" across the app. This is a pure branding change — no DB schema or route structure changes.
 
-## Goal
+### Files to update
 
-Each role gets its own surface:
+1. **Landing page** — `src/routes/index.tsx`
+   - Meta title / description / og tags
+   - Logo text: `Perka.` → `PERX.`
+   - Body copy references
 
-- **Employee** → `/app`, `/marketplace`, `/concierge`, `/cart`, `/requests`
-- **Employer admin** → `/employer` only
-- **Provider admin** → `/provider` only
+2. **Auth page** — `src/routes/auth.tsx`
+   - Meta title
+   - Logo text
+   - Copy: "Sign in to your Perka wallet", "Choose how you'll use Perka"
+   - Demo email domains: `@perka.demo` → `@perx.demo`
 
-Users with multiple roles (e.g. an employer who also has an employee seat) see the union of their allowed tabs.
+3. **Root layout** — `src/routes/__root.tsx`
+   - Default meta title / description / og / twitter tags
 
-## Changes
+4. **App shell** — `src/components/AppShell.tsx`
+   - Logo text in nav
 
-### 1. Centralize role detection
-Add a small `useRoles()` helper (or inline in `AppShell`) that returns `{ isEmployee, isEmployer, isProvider }`. A user is treated as an employee when they have no role row OR an explicit `employee` role (current behavior — employees today have no `user_roles` entry, just a wallet/profile).
+5. **i18n dictionary** — `src/lib/i18n.ts`
+   - String keys and values: `ask_perka` → `ask_perx`, `Pyet Perkën` → `Pyet PERX`
+   - localStorage key: `perka_locale` → `perx_locale`
 
-### 2. Gate the nav in `AppShell`
-- Employee tabs (Home, Marketplace, Concierge, Cart, Requests) render only when `isEmployee`.
-- Employer tab renders only when `isEmployer`.
-- Provider tab renders only when `isProvider`.
-- Wallet budget pill renders only for employees (employers/providers have no personal wallet).
-- Brand logo links to the user's primary landing route (`/employer` for employer, `/provider` for provider, otherwise `/app`).
+6. **AI concierge** — `src/routes/api/chat.ts`
+   - System prompt: "You are Perka" → "You are PERX"
+   - Tool description: "Search the Perka marketplace" → "Search the PERX marketplace"
 
-### 3. Gate the routes
-In each `_authenticated/*.tsx`, add a `beforeLoad` that:
-- reads `user_roles` for the current user,
-- if the role is not allowed for that page, `throw redirect({ to: <their landing> })`.
+7. **Seed demo endpoint** — `src/routes/api/public/seed-demo.ts`
+   - Any seeded demo data referencing the brand name
 
-Mapping:
-- `app.tsx`, `marketplace.tsx`, `concierge.tsx`, `cart.tsx`, `requests.tsx` → employees only
-- `employer.tsx` → employer_admin only
-- `provider.tsx` → provider_admin only
+8. **Authenticated routes**
+   - `src/routes/_authenticated/app.tsx`
+   - `src/routes/_authenticated/marketplace.tsx`
+   - `src/routes/_authenticated/concierge.tsx`
+   - `src/routes/_authenticated/cart.tsx`
+   - `src/routes/_authenticated/requests.tsx`
+   - `src/routes/_authenticated/employer.tsx`
+   - `src/routes/_authenticated/provider.tsx`
+   - Update page titles, headings, and any hard-coded copy.
 
-### 4. Post-login landing
-Update `/auth` success redirect (and the `_authenticated` root if needed) to route to:
-- `/employer` if employer_admin,
-- `/provider` if provider_admin,
-- `/app` otherwise.
+### Out of scope
+- No DB migration or table renames.
+- No URL or route changes.
+- No new assets or logo images.
 
-### 5. Build error
-The pasted rolldown stack trace is the transient build failure we already reproduced — a clean rerun of `build:dev` succeeded. No code change for that; the next build after these edits will reverify.
-
-## Out of scope
-
-- No DB/schema changes. Roles already live in `user_roles` with `has_role()`.
-- No new pages — just visibility + redirects.
-- Multi-role UX stays simple: each allowed tab shows; no role switcher.
+### Verification
+Build check after edits to confirm no broken references.
