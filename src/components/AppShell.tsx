@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocale, setLocale } from "@/lib/i18n";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Languages, Home, Store, Sparkles, ShoppingBag, Inbox, BarChart3, Wrench } from "lucide-react";
+import { LogOut, Languages, Home, Store, Sparkles, ShoppingBag, Inbox, BarChart3, Wrench, Heart } from "lucide-react";
 
 type Role = "employee" | "employer_admin" | "provider_admin";
 
@@ -63,6 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {isEmployee && <NavTab to="/app" label={t("home")} />}
             {isEmployee && <NavTab to="/marketplace" label={t("marketplace")} />}
             {isEmployee && <NavTab to="/concierge" label={t("concierge")} />}
+            {isEmployee && <NavTab to="/saved" label="Saved" />}
             {isEmployee && <NavTab to="/cart" label={`${t("cart")}${ctx?.cartCount ? ` · ${ctx.cartCount}` : ""}`} />}
             {isEmployee && <NavTab to="/requests" label={t("requests")} />}
             {isEmployer && <NavTab to="/employer" label={t("employer_dashboard")} />}
@@ -90,7 +91,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-ink text-cream rounded-full px-2 py-2 flex items-center gap-1 shadow-xl">
           <BottomTab to="/app" icon={Home} />
           <BottomTab to="/marketplace" icon={Store} />
-          <BottomTab to="/concierge" icon={Sparkles} />
+          <BottomTab to="/saved" icon={Heart} />
           <BottomTab to="/cart" icon={ShoppingBag} badge={ctx?.cartCount ?? 0} />
           <BottomTab to="/requests" icon={Inbox} />
         </div>

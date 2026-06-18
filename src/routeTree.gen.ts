@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiWeeklyDropRouteImport } from './routes/api/weekly-drop'
 import { Route as ApiInsightsRouteImport } from './routes/api/insights'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedSavedRouteImport } from './routes/_authenticated/saved'
 import { Route as AuthenticatedRequestsRouteImport } from './routes/_authenticated/requests'
 import { Route as AuthenticatedProviderRouteImport } from './routes/_authenticated/provider'
 import { Route as AuthenticatedMarketplaceRouteImport } from './routes/_authenticated/marketplace'
@@ -47,6 +48,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSavedRoute = AuthenticatedSavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedRequestsRoute = AuthenticatedRequestsRouteImport.update({
   id: '/requests',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof AuthenticatedMarketplaceRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/requests': typeof AuthenticatedRequestsRoute
+  '/saved': typeof AuthenticatedSavedRoute
   '/api/chat': typeof ApiChatRoute
   '/api/insights': typeof ApiInsightsRoute
   '/api/weekly-drop': typeof ApiWeeklyDropRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/marketplace': typeof AuthenticatedMarketplaceRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/requests': typeof AuthenticatedRequestsRoute
+  '/saved': typeof AuthenticatedSavedRoute
   '/api/chat': typeof ApiChatRoute
   '/api/insights': typeof ApiInsightsRoute
   '/api/weekly-drop': typeof ApiWeeklyDropRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/_authenticated/marketplace': typeof AuthenticatedMarketplaceRoute
   '/_authenticated/provider': typeof AuthenticatedProviderRoute
   '/_authenticated/requests': typeof AuthenticatedRequestsRoute
+  '/_authenticated/saved': typeof AuthenticatedSavedRoute
   '/api/chat': typeof ApiChatRoute
   '/api/insights': typeof ApiInsightsRoute
   '/api/weekly-drop': typeof ApiWeeklyDropRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/provider'
     | '/requests'
+    | '/saved'
     | '/api/chat'
     | '/api/insights'
     | '/api/weekly-drop'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/provider'
     | '/requests'
+    | '/saved'
     | '/api/chat'
     | '/api/insights'
     | '/api/weekly-drop'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/_authenticated/marketplace'
     | '/_authenticated/provider'
     | '/_authenticated/requests'
+    | '/_authenticated/saved'
     | '/api/chat'
     | '/api/insights'
     | '/api/weekly-drop'
@@ -237,6 +249,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/saved': {
+      id: '/_authenticated/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof AuthenticatedSavedRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/requests': {
       id: '/_authenticated/requests'
@@ -312,6 +331,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMarketplaceRoute: typeof AuthenticatedMarketplaceRoute
   AuthenticatedProviderRoute: typeof AuthenticatedProviderRoute
   AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
+  AuthenticatedSavedRoute: typeof AuthenticatedSavedRoute
   AuthenticatedOfferOfferIdRoute: typeof AuthenticatedOfferOfferIdRoute
 }
 
@@ -323,6 +343,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMarketplaceRoute: AuthenticatedMarketplaceRoute,
   AuthenticatedProviderRoute: AuthenticatedProviderRoute,
   AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
+  AuthenticatedSavedRoute: AuthenticatedSavedRoute,
   AuthenticatedOfferOfferIdRoute: AuthenticatedOfferOfferIdRoute,
 }
 
