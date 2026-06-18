@@ -5,7 +5,7 @@ import { formatAll } from "@/lib/i18n";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/requests")({
-  head: () => ({ meta: [{ title: "Requests — Perka" }] }),
+  head: () => ({ meta: [{ title: "Requests — PERX" }] }),
   beforeLoad: async () => {
     const { requireRole } = await import("@/lib/roles");
     await requireRole("employee");

@@ -11,9 +11,9 @@ export const Route = createFileRoute("/api/public/seed-demo")({
         const ironGymId = "22222222-0000-0000-0000-000000000001";
 
         const accounts = [
-          { email: "era@perka.demo", password: "PerkaDemo!2026", full_name: "Era Bardha", role: "employee" as const, company_id: employerCoId },
-          { email: "boss@perka.demo", password: "PerkaDemo!2026", full_name: "Arta Hoxha", role: "employer_admin" as const, company_id: employerCoId },
-          { email: "gym@perka.demo", password: "PerkaDemo!2026", full_name: "Iron Gym Manager", role: "provider_admin" as const, company_id: ironGymId },
+          { email: "era@perx.demo", password: "PerxDemo!2026", full_name: "Era Bardha", role: "employee" as const, company_id: employerCoId },
+          { email: "boss@perx.demo", password: "PerxDemo!2026", full_name: "Arta Hoxha", role: "employer_admin" as const, company_id: employerCoId },
+          { email: "gym@perx.demo", password: "PerxDemo!2026", full_name: "Iron Gym Manager", role: "provider_admin" as const, company_id: ironGymId },
         ];
 
         const results: any[] = [];

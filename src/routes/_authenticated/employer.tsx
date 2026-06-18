@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Sparkles, CheckCircle2, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/employer")({
-  head: () => ({ meta: [{ title: "Employer — Perka" }] }),
+  head: () => ({ meta: [{ title: "Employer — PERX" }] }),
   beforeLoad: async () => {
     const { requireRole } = await import("@/lib/roles");
     await requireRole(["employer_admin"]);
@@ -94,7 +94,7 @@ function EmployerDashboard() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="font-display text-xl flex items-center gap-2"><Sparkles className="size-5 text-accent-orange" /> AI team insights</h3>
-            <p className="text-sm opacity-60 mt-1">A summary of what your team values, written by Perka AI.</p>
+            <p className="text-sm opacity-60 mt-1">A summary of what your team values, written by PERX AI.</p>
           </div>
           <button onClick={generateInsight} disabled={loadingInsight} className="bg-accent-orange text-ink px-5 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50">
             {loadingInsight ? "Thinking..." : insight ? "Regenerate" : "Generate"}

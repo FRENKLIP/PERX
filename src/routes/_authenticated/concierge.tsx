@@ -9,7 +9,7 @@ import { formatAll } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/concierge")({
-  head: () => ({ meta: [{ title: "Concierge — Perka" }] }),
+  head: () => ({ meta: [{ title: "Concierge — PERX" }] }),
   beforeLoad: async () => {
     const { requireRole } = await import("@/lib/roles");
     await requireRole("employee");
@@ -47,7 +47,7 @@ function Concierge() {
     <div className="max-w-3xl mx-auto px-6 pt-8 pb-8 flex flex-col" style={{ minHeight: "calc(100vh - 80px)" }}>
       <div className="mb-4">
         <h1 className="font-display text-3xl tracking-tight flex items-center gap-2">
-          <Sparkles className="size-6 text-accent-red" /> Perka concierge
+          <Sparkles className="size-6 text-accent-red" /> PERX concierge
         </h1>
         <p className="text-sm text-foreground/60">Tell me what you'd love — a relaxing weekend, a healthy lunch routine, a course you've meant to take. I'll find it in your wallet.</p>
       </div>
@@ -116,7 +116,7 @@ function Concierge() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
-          placeholder="Ask Perka..."
+          placeholder="Ask PERX..."
           className="flex-1 resize-none px-3 py-2.5 outline-none text-sm bg-transparent max-h-32"
           rows={1}
         />

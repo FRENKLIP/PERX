@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <nav className="sticky top-0 z-50 bg-cream/85 backdrop-blur-md border-b border-border-soft px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to={homeTo as any} className="font-display text-xl font-extrabold tracking-tighter uppercase">
-            Perka<span className="text-accent-red">.</span>
+            PERX<span className="text-accent-red">.</span>
           </Link>
           <div className="hidden md:flex items-center gap-1 text-xs font-semibold">
             {isEmployee && <NavTab to="/app" label={t("home")} />}
