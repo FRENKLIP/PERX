@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getMyRoles, landingFor } from "@/lib/roles";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — Perka" }] }),
@@ -21,8 +22,11 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/app" });
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (data.user) {
+        const roles = await getMyRoles();
+        navigate({ to: landingFor(roles) });
+      }
     });
   }, [navigate]);
 
@@ -34,7 +38,8 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back");
-        navigate({ to: "/app" });
+        const roles = await getMyRoles();
+        navigate({ to: landingFor(roles) });
       } else {
         const { data, error } = await supabase.auth.signUp({
           email, password,
