@@ -8,6 +8,10 @@ import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/provider")({
   head: () => ({ meta: [{ title: "Provider — Perka" }] }),
+  beforeLoad: async () => {
+    const { requireRole } = await import("@/lib/roles");
+    await requireRole(["provider_admin"]);
+  },
   component: ProviderDashboard,
 });
 

@@ -8,6 +8,10 @@ import { Sparkles, CheckCircle2, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/employer")({
   head: () => ({ meta: [{ title: "Employer — Perka" }] }),
+  beforeLoad: async () => {
+    const { requireRole } = await import("@/lib/roles");
+    await requireRole(["employer_admin"]);
+  },
   component: EmployerDashboard,
 });
 
