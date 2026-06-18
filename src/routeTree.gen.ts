@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiWeeklyDropRouteImport } from './routes/api/weekly-drop'
 import { Route as ApiInsightsRouteImport } from './routes/api/insights'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedRequestsRouteImport } from './routes/_authenticated/requests'
@@ -35,6 +36,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWeeklyDropRoute = ApiWeeklyDropRouteImport.update({
+  id: '/api/weekly-drop',
+  path: '/api/weekly-drop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiInsightsRoute = ApiInsightsRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/requests': typeof AuthenticatedRequestsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/insights': typeof ApiInsightsRoute
+  '/api/weekly-drop': typeof ApiWeeklyDropRoute
   '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRoutesByTo {
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/requests': typeof AuthenticatedRequestsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/insights': typeof ApiInsightsRoute
+  '/api/weekly-drop': typeof ApiWeeklyDropRoute
   '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRoutesById {
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/_authenticated/requests': typeof AuthenticatedRequestsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/insights': typeof ApiInsightsRoute
+  '/api/weekly-drop': typeof ApiWeeklyDropRoute
   '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRouteTypes {
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/api/chat'
     | '/api/insights'
+    | '/api/weekly-drop'
     | '/api/public/seed-demo'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/api/chat'
     | '/api/insights'
+    | '/api/weekly-drop'
     | '/api/public/seed-demo'
   id:
     | '__root__'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/_authenticated/requests'
     | '/api/chat'
     | '/api/insights'
+    | '/api/weekly-drop'
     | '/api/public/seed-demo'
   fileRoutesById: FileRoutesById
 }
@@ -185,6 +197,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiInsightsRoute: typeof ApiInsightsRoute
+  ApiWeeklyDropRoute: typeof ApiWeeklyDropRoute
   ApiPublicSeedDemoRoute: typeof ApiPublicSeedDemoRoute
 }
 
@@ -209,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/weekly-drop': {
+      id: '/api/weekly-drop'
+      path: '/api/weekly-drop'
+      fullPath: '/api/weekly-drop'
+      preLoaderRoute: typeof ApiWeeklyDropRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/insights': {
@@ -313,6 +333,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
   ApiInsightsRoute: ApiInsightsRoute,
+  ApiWeeklyDropRoute: ApiWeeklyDropRoute,
   ApiPublicSeedDemoRoute: ApiPublicSeedDemoRoute,
 }
 export const routeTree = rootRouteImport

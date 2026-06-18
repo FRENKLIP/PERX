@@ -72,6 +72,7 @@ export type Database = {
       }
       companies: {
         Row: {
+          address: string | null
           city: string | null
           country: string
           created_at: string
@@ -80,10 +81,14 @@ export type Database = {
           hero_image_url: string | null
           id: string
           kind: Database["public"]["Enums"]["company_kind"]
+          lat: number | null
+          lng: number | null
           logo_url: string | null
           name: string
+          neighborhood: string | null
         }
         Insert: {
+          address?: string | null
           city?: string | null
           country?: string
           created_at?: string
@@ -92,10 +97,14 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           kind: Database["public"]["Enums"]["company_kind"]
+          lat?: number | null
+          lng?: number | null
           logo_url?: string | null
           name: string
+          neighborhood?: string | null
         }
         Update: {
+          address?: string | null
           city?: string | null
           country?: string
           created_at?: string
@@ -104,8 +113,11 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["company_kind"]
+          lat?: number | null
+          lng?: number | null
           logo_url?: string | null
           name?: string
+          neighborhood?: string | null
         }
         Relationships: []
       }

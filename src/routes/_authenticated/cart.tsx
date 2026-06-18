@@ -1,10 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { WalletRing } from "@/components/WalletRing";
 
 export const Route = createFileRoute("/_authenticated/cart")({
   head: () => ({ meta: [{ title: "Cart — PERX" }] }),
@@ -29,7 +30,7 @@ function Cart() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
       const [{ data: items }, { data: profile }] = await Promise.all([
-        supabase.from("cart_items").select("id, qty, offers(id,title,title_sq,price_all,category_slug,provider_company_id,companies:provider_company_id(name))").eq("user_id", u.user.id),
+        supabase.from("cart_items").select("id, qty, offers(id,title,title_sq,price_all,category_slug,provider_company_id,image_url,companies:provider_company_id(name))").eq("user_id", u.user.id),
         supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle(),
       ]);
       return { items: items ?? [], profile, userId: u.user.id };
@@ -81,50 +82,62 @@ function Cart() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 pt-10">
-      <h1 className="font-display text-4xl tracking-tight mb-2">Your selection</h1>
-      <p className="text-foreground/60 text-sm mb-8">Submit when ready — your employer approves and payment is routed directly to providers.</p>
+    <div className="max-w-6xl mx-auto px-6 pt-10">
+      <div className="fade-up mb-10">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Your selection</div>
+        <h1 className="font-serif text-5xl tracking-tight">Ready when you are.</h1>
+      </div>
 
-      {(data?.items ?? []).length === 0 ? (
-        <div className="bg-white border border-border-soft rounded-3xl p-12 text-center">
-          <p className="text-foreground/60">Your cart is empty. Browse the marketplace or ask the concierge.</p>
-        </div>
-      ) : (
-        <div className="space-y-3 mb-6">
-          {(data?.items ?? []).map((it: any) => (
-            <div key={it.id} className="flex items-center bg-white border border-border-soft rounded-2xl p-4 gap-4">
-              <div className="size-14 rounded-xl bg-gradient-to-br from-accent-orange/30 to-accent-red/20 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-accent-red uppercase tracking-widest">{it.offers?.category_slug}</div>
-                <div className="font-display text-base truncate">{locale === "sq" && it.offers?.title_sq ? it.offers.title_sq : it.offers?.title}</div>
-                <div className="text-xs text-foreground/50">{it.offers?.companies?.name}</div>
-              </div>
-              <div className="font-display font-extrabold">{formatAll(it.offers?.price_all ?? 0)}</div>
-              <button onClick={() => remove(it.id)} className="size-8 rounded-full hover:bg-ink/5 grid place-items-center text-foreground/40 hover:text-accent-red">
-                <Trash2 className="size-4" />
-              </button>
+      <div className="grid md:grid-cols-12 gap-10">
+        <div className="md:col-span-7 space-y-3">
+          {(data?.items ?? []).length === 0 ? (
+            <div className="hairline rounded-3xl p-16 text-center">
+              <p className="font-serif text-2xl mb-3">Empty cart, empty plans.</p>
+              <p className="text-ink-soft text-sm mb-6">Browse the marketplace or let the concierge help.</p>
+              <Link to="/marketplace" className="inline-block bg-ink text-cream rounded-full px-6 py-3 text-sm font-semibold hover:bg-accent-red">Browse marketplace</Link>
             </div>
-          ))}
+          ) : (
+            (data?.items ?? []).map((it: any) => (
+              <div key={it.id} className="flex items-center hairline bg-white rounded-2xl p-3 gap-4 fade-up">
+                <div className="size-16 rounded-xl overflow-hidden shrink-0 bg-paper">
+                  {it.offers?.image_url && <img src={it.offers.image_url} alt="" className="w-full h-full object-cover" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-semibold text-accent-red uppercase tracking-[0.18em]">{it.offers?.category_slug}</div>
+                  <div className="font-serif text-lg leading-tight truncate">{locale === "sq" && it.offers?.title_sq ? it.offers.title_sq : it.offers?.title}</div>
+                  <div className="text-xs text-ink-soft">{it.offers?.companies?.name}</div>
+                </div>
+                <div className="font-semibold">{formatAll(it.offers?.price_all ?? 0)}</div>
+                <button onClick={() => remove(it.id)} className="size-9 rounded-full hover:bg-paper grid place-items-center text-ink-soft hover:text-accent-red">
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
+            ))
+          )}
         </div>
-      )}
 
-      {(data?.items ?? []).length > 0 && (
-        <div className="bg-ink text-cream rounded-3xl p-8">
-          <div className="flex justify-between items-baseline mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest opacity-60">Total request</span>
-            <span className="font-display text-3xl font-extrabold">{formatAll(total)}</span>
+        <aside className="md:col-span-5">
+          <div className="md:sticky md:top-24 hairline bg-white rounded-3xl p-8 fade-up">
+            <div className="flex justify-center mb-6">
+              <WalletRing spent={total} budget={budget} size={180} />
+            </div>
+            <div className="text-center mb-6">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft">This request</div>
+              <div className="font-serif text-4xl mt-1">{formatAll(total)}</div>
+            </div>
+            {(data?.items ?? []).length > 0 && (
+              <>
+                <input value={packageName} onChange={(e) => setPackageName(e.target.value)} placeholder="Name this package (optional)" className="w-full bg-paper rounded-xl px-4 py-3 text-sm mb-3 outline-none placeholder:text-ink-soft/60" />
+                <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note to your employer (optional)" className="w-full bg-paper rounded-xl px-4 py-3 text-sm mb-4 outline-none placeholder:text-ink-soft/60" rows={2} />
+                <button onClick={submit} disabled={submitting || total > budget} className="w-full bg-ink text-cream rounded-full py-4 font-semibold disabled:opacity-50 hover:bg-accent-red transition-colors">
+                  {submitting ? "Sending…" : total > budget ? "Over budget" : t("submit_for_approval")}
+                </button>
+                <p className="text-xs text-ink-soft text-center mt-4">Your employer approves and payment routes directly to providers.</p>
+              </>
+            )}
           </div>
-          <div className="h-2 bg-white/15 rounded-full overflow-hidden mb-2">
-            <div className="h-full bg-accent-orange" style={{ width: `${Math.min(100, (total / budget) * 100)}%` }} />
-          </div>
-          <p className="text-xs opacity-60 mb-6">{formatAll(total)} of {formatAll(budget)} monthly wallet</p>
-          <input value={packageName} onChange={(e) => setPackageName(e.target.value)} placeholder="Optional: name this package (e.g. 'Spring wellness')" className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm mb-3 outline-none placeholder:text-cream/40" />
-          <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional note to your employer..." className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm mb-4 outline-none placeholder:text-cream/40" rows={2} />
-          <button onClick={submit} disabled={submitting || total > budget} className="w-full bg-accent-red text-white rounded-2xl py-4 font-bold disabled:opacity-50 hover:bg-accent-orange transition-colors">
-            {submitting ? "Sending..." : total > budget ? "Over budget" : t("submit_for_approval")}
-          </button>
-        </div>
-      )}
+        </aside>
+      </div>
     </div>
   );
 }

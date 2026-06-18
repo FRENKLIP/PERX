@@ -1,9 +1,9 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useLocale, formatAll, setLocale } from "@/lib/i18n";
+import { useLocale, setLocale } from "@/lib/i18n";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Languages } from "lucide-react";
+import { LogOut, Languages, Home, Store, Sparkles, ShoppingBag, Inbox, BarChart3, Wrench } from "lucide-react";
 
 type Role = "employee" | "employer_admin" | "provider_admin";
 
@@ -37,8 +37,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   });
 
   const profile = ctx?.profile;
-  const budget = profile?.monthly_budget_all ?? 25000;
-  const remaining = Math.max(0, budget - (ctx?.pendingSpend ?? 0));
   const roles = ctx?.roles ?? [];
   const isEmployer = roles.some((r) => r.role === "employer_admin");
   const isProvider = roles.some((r) => r.role === "provider_admin");
@@ -56,40 +54,53 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-cream text-ink font-body">
-      <nav className="sticky top-0 z-50 bg-cream/85 backdrop-blur-md border-b border-border-soft px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link to={homeTo as any} className="font-display text-xl font-extrabold tracking-tighter uppercase">
+      <nav className="sticky top-0 z-50 bg-cream/85 backdrop-blur-md border-b border-border-soft">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
+          <Link to={homeTo as any} className="font-serif text-2xl tracking-tight">
             PERX<span className="text-accent-red">.</span>
           </Link>
-          <div className="hidden md:flex items-center gap-1 text-xs font-semibold">
+          <div className="hidden md:flex items-center gap-1 text-sm">
             {isEmployee && <NavTab to="/app" label={t("home")} />}
             {isEmployee && <NavTab to="/marketplace" label={t("marketplace")} />}
             {isEmployee && <NavTab to="/concierge" label={t("concierge")} />}
-            {isEmployee && <NavTab to="/cart" label={`${t("cart")}${ctx?.cartCount ? ` (${ctx.cartCount})` : ""}`} />}
+            {isEmployee && <NavTab to="/cart" label={`${t("cart")}${ctx?.cartCount ? ` · ${ctx.cartCount}` : ""}`} />}
             {isEmployee && <NavTab to="/requests" label={t("requests")} />}
             {isEmployer && <NavTab to="/employer" label={t("employer_dashboard")} />}
             {isProvider && <NavTab to="/provider" label={t("provider_dashboard")} />}
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          {isEmployee && <div className="hidden sm:flex items-center gap-2 bg-accent-orange/10 border border-accent-orange/20 px-3 py-1.5 rounded-full">
-            <div className="size-2 bg-accent-orange rounded-full animate-pulse" />
-            <span className="text-xs font-bold">{formatAll(remaining)} <span className="opacity-60 font-medium">{t("of")} {formatAll(budget)}</span></span>
-          </div>}
-          <button
-            onClick={() => { setLocale(locale === "en" ? "sq" : "en"); force((n) => n + 1); }}
-            className="size-9 rounded-full bg-white border border-border-soft hover:bg-cream grid place-items-center text-xs font-bold"
-            title="Toggle language"
-          >
-            <Languages className="size-4" />
-          </button>
-          <div className="size-10 rounded-full bg-ink text-cream grid place-items-center font-bold text-xs">{initials}</div>
-          <button onClick={signOut} className="size-9 rounded-full hover:bg-ink/5 grid place-items-center" title={t("sign_out")}>
-            <LogOut className="size-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setLocale(locale === "en" ? "sq" : "en"); force((n) => n + 1); }}
+              className="size-9 rounded-full hairline hover:bg-paper grid place-items-center"
+              title="Toggle language"
+            >
+              <Languages className="size-4" />
+            </button>
+            <div className="size-9 rounded-full bg-ink text-cream grid place-items-center font-bold text-[11px]">{initials}</div>
+            <button onClick={signOut} className="size-9 rounded-full hover:bg-paper grid place-items-center" title={t("sign_out")}>
+              <LogOut className="size-4" />
+            </button>
+          </div>
         </div>
       </nav>
-      <main className="pb-20">{children}</main>
+      <main className="pb-28 md:pb-12">{children}</main>
+
+      {/* Mobile bottom tab bar — employees */}
+      {isEmployee && (
+        <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-ink text-cream rounded-full px-2 py-2 flex items-center gap-1 shadow-xl">
+          <BottomTab to="/app" icon={Home} />
+          <BottomTab to="/marketplace" icon={Store} />
+          <BottomTab to="/concierge" icon={Sparkles} />
+          <BottomTab to="/cart" icon={ShoppingBag} badge={ctx?.cartCount ?? 0} />
+          <BottomTab to="/requests" icon={Inbox} />
+        </div>
+      )}
+      {(isEmployer || isProvider) && (
+        <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-ink text-cream rounded-full px-2 py-2 flex items-center gap-1 shadow-xl">
+          {isEmployer && <BottomTab to="/employer" icon={BarChart3} />}
+          {isProvider && <BottomTab to="/provider" icon={Wrench} />}
+        </div>
+      )}
     </div>
   );
 }
@@ -98,10 +109,19 @@ function NavTab({ to, label }: { to: string; label: string }) {
   return (
     <Link
       to={to as any}
-      className="px-3 py-1.5 rounded-full text-foreground/60 hover:bg-ink/5 transition-colors"
-      activeProps={{ className: "px-3 py-1.5 rounded-full bg-white shadow-sm text-ink" }}
+      className="px-3 py-1.5 rounded-full text-ink-soft hover:text-ink transition-colors"
+      activeProps={{ className: "px-3 py-1.5 rounded-full text-ink underline underline-offset-8 decoration-accent-red decoration-2" }}
     >
       {label}
+    </Link>
+  );
+}
+
+function BottomTab({ to, icon: Icon, badge }: { to: string; icon: any; badge?: number }) {
+  return (
+    <Link to={to as any} className="relative size-11 rounded-full grid place-items-center text-cream/60 hover:text-cream" activeProps={{ className: "relative size-11 rounded-full grid place-items-center bg-cream text-ink" }}>
+      <Icon className="size-4" />
+      {badge && badge > 0 ? <span className="absolute -top-0.5 -right-0.5 size-4 rounded-full bg-accent-red text-[9px] font-bold grid place-items-center">{badge}</span> : null}
     </Link>
   );
 }

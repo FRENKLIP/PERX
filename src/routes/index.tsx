@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Sparkles, ShoppingBag, Briefcase, Store } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,41 +16,52 @@ export const Route = createFileRoute("/")({
 function Landing() {
   return (
     <div className="min-h-screen bg-cream text-ink font-body">
-      <nav className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
-        <span className="font-display text-xl font-extrabold tracking-tighter uppercase">PERX<span className="text-accent-red">.</span></span>
-        <Link to="/auth" className="text-sm font-semibold px-5 py-2 rounded-full border border-ink/10 hover:bg-ink/5">Sign in</Link>
+      <nav className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+        <span className="font-serif text-2xl tracking-tight">PERX<span className="text-accent-red">.</span></span>
+        <Link to="/auth" className="text-sm font-semibold hover:text-accent-red transition-colors">Sign in →</Link>
       </nav>
 
-      <section className="max-w-5xl mx-auto px-6 pt-16 pb-12 text-center">
-        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-red bg-accent-red/10 px-3 py-1.5 rounded-full mb-6">
-          <Sparkles className="size-3" /> Built for Tirana, ready for everywhere
-        </span>
-        <h1 className="font-display text-5xl md:text-7xl tracking-tight leading-[1.05] text-balance mb-6">
-          The benefits your team<br/><span className="text-accent-red italic">actually opens.</span>
-        </h1>
-        <p className="text-foreground/60 max-w-xl mx-auto text-lg text-pretty mb-10">
-          Tax-efficient gyms, meals, travel, and learning — funded by employers, paid directly to providers, picked by employees through a marketplace they want to return to.
-        </p>
-        <Link to="/auth" className="inline-flex items-center gap-2 bg-ink text-cream px-7 py-4 rounded-2xl font-bold hover:bg-accent-red transition-colors">
-          Start exploring <ArrowRight className="size-4" />
-        </Link>
+      <section className="max-w-6xl mx-auto px-6 pt-16 md:pt-24 pb-16 grid md:grid-cols-12 gap-10 items-end fade-up">
+        <div className="md:col-span-7">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-6">Issue 01 · Tirana, 2026</div>
+          <h1 className="font-serif text-6xl md:text-8xl leading-[0.95] tracking-tight text-balance">
+            Benefits that <em className="text-accent-red">feel</em> like a Friday in Blloku.
+          </h1>
+          <p className="text-ink-soft text-lg max-w-md mt-8 text-pretty">
+            Tax-efficient gyms, meals, weekends and courses — picked by your team, paid straight to local providers.
+          </p>
+          <Link to="/auth" className="inline-flex items-center gap-2 mt-10 bg-ink text-cream px-7 py-4 rounded-full font-semibold hover:bg-accent-red transition-colors">
+            Start exploring <ArrowRight className="size-4" />
+          </Link>
+        </div>
+        <div className="md:col-span-5 relative aspect-[4/5] rounded-3xl overflow-hidden hairline">
+          <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1200" alt="A Tirana cafe at golden hour" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-ink/70 to-transparent">
+            <div className="text-cream/70 text-[10px] uppercase tracking-[0.18em] font-semibold mb-1">Featured</div>
+            <div className="text-cream font-serif text-2xl leading-tight">Komiteti, Pazari i Ri</div>
+          </div>
+        </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-4 pb-20">
-        <RoleCard icon={ShoppingBag} title="For employees" body="Browse, build smart packages with an AI concierge, redeem instantly. Pay nothing — your employer funds it." accent="bg-accent-orange text-white" />
-        <RoleCard icon={Briefcase} title="For employers" body="Set monthly budgets, approve in one click, see what your people actually value. Tax-efficient by design." />
-        <RoleCard icon={Store} title="For providers" body="List gyms, restaurants, escapes, courses. Get matched to motivated employees and paid directly." />
+      <section className="max-w-6xl mx-auto px-6 pb-24 grid md:grid-cols-3 gap-px bg-border-soft hairline rounded-3xl overflow-hidden">
+        <Row title="For employees" body="Browse real Tirana providers. Build packages with an AI concierge. Spend nothing — your employer funds it." />
+        <Row title="For employers" body="Set monthly budgets, approve in a click, see what your team actually values. Tax-efficient by design." />
+        <Row title="For providers" body="List your space. Reach motivated locals. Get paid directly when employers approve." />
       </section>
+
+      <footer className="max-w-6xl mx-auto px-6 py-10 text-xs text-ink-soft flex justify-between hairline border-t">
+        <span>PERX · Made in Tirana</span>
+        <span>© 2026</span>
+      </footer>
     </div>
   );
 }
 
-function RoleCard({ icon: Icon, title, body, accent }: { icon: any; title: string; body: string; accent?: string }) {
+function Row({ title, body }: { title: string; body: string }) {
   return (
-    <div className={`rounded-[28px] p-7 border border-border-soft ${accent ?? "bg-white"}`}>
-      <Icon className="size-7 mb-5" />
-      <h3 className="font-display text-2xl mb-2">{title}</h3>
-      <p className="text-sm opacity-80 text-pretty">{body}</p>
+    <div className="bg-cream p-8">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-red mb-3">{title}</div>
+      <p className="font-serif text-xl leading-snug text-pretty">{body}</p>
     </div>
   );
 }

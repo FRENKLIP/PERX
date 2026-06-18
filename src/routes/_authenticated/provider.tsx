@@ -63,66 +63,71 @@ function ProviderDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 pt-10">
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex justify-between items-end mb-10 fade-up gap-4">
         <div>
-          <h1 className="font-display text-4xl tracking-tight">Provider studio</h1>
-          <p className="text-foreground/60 mt-1">Your offers, incoming orders, and revenue.</p>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Provider studio</div>
+          <h1 className="font-serif text-5xl tracking-tight">Your offers, your orders.</h1>
         </div>
-        <button onClick={() => setShowNew((v) => !v)} className="bg-ink text-cream px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2"><Plus className="size-4" /> New offer</button>
+        <button onClick={() => setShowNew((v) => !v)} className="bg-ink text-cream px-5 py-3 rounded-full font-semibold text-sm flex items-center gap-2 hover:bg-accent-red transition-colors shrink-0">
+          <Plus className="size-4" /> New offer
+        </button>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4 mb-8">
+      <div className="grid md:grid-cols-3 gap-px bg-border-soft hairline rounded-3xl overflow-hidden mb-10">
         <Stat label="Live offers" value={data?.offers.length.toString() ?? "0"} />
         <Stat label="Paid orders" value={paid.length.toString()} />
         <Stat label="Revenue" value={formatAll(revenue)} />
       </div>
 
       {showNew && (
-        <form onSubmit={createOffer} className="bg-white border border-border-soft rounded-3xl p-6 mb-8 grid sm:grid-cols-2 gap-4">
+        <form onSubmit={createOffer} className="hairline bg-white rounded-3xl p-6 mb-10 grid sm:grid-cols-2 gap-4 fade-up">
           <Field label="Title" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
           <Field label="Price (ALL)" value={form.price} onChange={(v) => setForm({ ...form, price: v })} type="number" />
           <Field label="Location" value={form.location} onChange={(v) => setForm({ ...form, location: v })} />
           <label className="block">
-            <span className="text-xs font-bold uppercase tracking-widest text-foreground/50 mb-2 block">Category</span>
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full bg-cream border border-border-soft rounded-2xl px-4 py-3 outline-none">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Category</span>
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none">
               {(data?.cats ?? []).map((c) => <option key={c.slug} value={c.slug}>{c.name_en}</option>)}
             </select>
           </label>
           <label className="block sm:col-span-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-foreground/50 mb-2 block">Description</span>
-            <textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full bg-cream border border-border-soft rounded-2xl px-4 py-3 outline-none" rows={3} />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Description</span>
+            <textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none" rows={3} />
           </label>
-          <button type="submit" className="sm:col-span-2 bg-accent-red text-white py-3 rounded-xl font-bold">Publish</button>
+          <button type="submit" className="sm:col-span-2 bg-ink text-cream py-3 rounded-full font-semibold hover:bg-accent-red transition-colors">Publish</button>
         </form>
       )}
 
-      <h2 className="font-display text-2xl mb-4">Incoming orders</h2>
+      <h2 className="font-serif text-3xl mb-4">Incoming orders</h2>
       <div className="space-y-2 mb-10">
         {(data?.items ?? []).slice(0, 10).map((it: any) => (
-          <div key={it.id} className="bg-white border border-border-soft rounded-2xl p-4 flex items-center gap-4">
-            <div className="flex-1">
-              <div className="font-semibold text-sm">{it.offer_title}</div>
-              <div className="text-xs text-foreground/50">{it.requests?.status} · {new Date(it.requests?.created_at).toLocaleDateString()}</div>
+          <div key={it.id} className="hairline bg-white rounded-2xl p-4 flex items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-sm truncate">{it.offer_title}</div>
+              <div className="text-xs text-ink-soft">{it.requests?.status} · {new Date(it.requests?.created_at).toLocaleDateString()}</div>
             </div>
-            {it.redemption_code && <span className="text-xs font-mono bg-cream px-2 py-1 rounded">{it.redemption_code}</span>}
-            <span className={`text-xs font-bold px-3 py-1 rounded-full ${it.payment_status === "simulated_paid" ? "bg-emerald-100 text-emerald-700" : "bg-accent-orange/15 text-accent-orange"}`}>
+            {it.redemption_code && <span className="text-xs font-mono bg-paper px-2 py-1 rounded">{it.redemption_code}</span>}
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${it.payment_status === "simulated_paid" ? "bg-sage/15 text-sage" : "bg-accent-orange/15 text-accent-orange"}`}>
               {it.payment_status === "simulated_paid" ? "Paid" : "Pending"}
             </span>
-            <span className="font-bold">{formatAll(it.price_all)}</span>
+            <span className="font-semibold">{formatAll(it.price_all)}</span>
           </div>
         ))}
-        {(data?.items ?? []).length === 0 && <div className="bg-white border border-border-soft rounded-3xl p-12 text-center text-foreground/60">No orders yet.</div>}
+        {(data?.items ?? []).length === 0 && <div className="hairline rounded-3xl p-12 text-center text-ink-soft">No orders yet.</div>}
       </div>
 
-      <h2 className="font-display text-2xl mb-4">Your offers</h2>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {(data?.offers ?? []).map((o) => (
-          <div key={o.id} className="bg-white border border-border-soft rounded-3xl p-5">
-            <div className="text-xs font-bold text-accent-red uppercase mb-2">{o.category_slug}</div>
-            <h3 className="font-display text-lg mb-1">{o.title}</h3>
-            <p className="text-xs text-foreground/50 mb-3 line-clamp-2">{o.description}</p>
-            <div className="flex justify-between items-center"><span className="font-display font-extrabold">{formatAll(o.price_all)}</span><span className="text-xs text-foreground/50">{o.location}</span></div>
-          </div>
+      <h2 className="font-serif text-3xl mb-4">Your offers</h2>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {(data?.offers ?? []).map((o: any) => (
+          <article key={o.id} className="hairline bg-white rounded-3xl overflow-hidden">
+            {o.image_url && <div className="aspect-[4/3] overflow-hidden"><img src={o.image_url} alt="" className="w-full h-full object-cover" loading="lazy" /></div>}
+            <div className="p-5">
+              <div className="text-[10px] font-semibold text-accent-red uppercase tracking-[0.18em] mb-1">{o.category_slug}</div>
+              <h3 className="font-serif text-xl leading-tight mb-1">{o.title}</h3>
+              <p className="text-xs text-ink-soft mb-3 line-clamp-2">{o.description}</p>
+              <div className="flex justify-between items-center"><span className="font-semibold">{formatAll(o.price_all)}</span><span className="text-xs text-ink-soft">{o.location}</span></div>
+            </div>
+          </article>
         ))}
       </div>
     </div>
@@ -131,9 +136,9 @@ function ProviderDashboard() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white border border-border-soft rounded-3xl p-6">
-      <div className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">{label}</div>
-      <div className="font-display text-3xl font-extrabold">{value}</div>
+    <div className="bg-white p-6">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">{label}</div>
+      <div className="font-serif text-4xl">{value}</div>
     </div>
   );
 }
@@ -141,8 +146,8 @@ function Stat({ label, value }: { label: string; value: string }) {
 function Field({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   return (
     <label className="block">
-      <span className="text-xs font-bold uppercase tracking-widest text-foreground/50 mb-2 block">{label}</span>
-      <input required type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-cream border border-border-soft rounded-2xl px-4 py-3 outline-none" />
+      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">{label}</span>
+      <input required type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none" />
     </label>
   );
 }
