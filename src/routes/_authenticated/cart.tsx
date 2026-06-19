@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
@@ -6,6 +7,7 @@ import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { WalletRing } from "@/components/WalletRing";
+import { submitCartRequest } from "@/lib/cart.functions";
 
 export const Route = createFileRoute("/_authenticated/cart")({
   head: () => ({ meta: [{ title: "Cart — PERX" }] }),
@@ -23,6 +25,7 @@ function Cart() {
   const [note, setNote] = useState("");
   const [packageName, setPackageName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const submitFn = useServerFn(submitCartRequest);
 
   const { data } = useQuery({
     queryKey: ["cart"],
@@ -33,7 +36,16 @@ function Cart() {
         supabase.from("cart_items").select("id, qty, chosen_provider_id, chosen:chosen_provider_id(name), offers(id,title,title_sq,price_all,category_slug,provider_company_id,image_url,companies:provider_company_id(name))").eq("user_id", u.user.id),
         supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle(),
       ]);
-      return { items: items ?? [], profile, userId: u.user.id };
+      let policy: any = null;
+      if (profile?.employer_company_id) {
+        const { data: co } = await supabase
+          .from("companies")
+          .select("policy_max_request_all, policy_allowed_categories, policy_auto_approve_below_all")
+          .eq("id", profile.employer_company_id)
+          .maybeSingle();
+        policy = co;
+      }
+      return { items: items ?? [], profile, userId: u.user.id, policy };
     },
   });
 
