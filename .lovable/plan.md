@@ -1,78 +1,40 @@
-## Goal
-Turn an **approved request** into a tangible, real-world redemption experience: a beautiful screen with a QR code, redemption instructions, provider map, and a shareable calendar invite — so PERX feels complete the moment the user walks into the café/gym/spa.
+## What's actually happening
 
-## UX
+Those toasts aren't decorations — they're real errors from the database:
+**`infinite recursion detected in policy for relation "requests"`**.
 
-New route: `/_authenticated/redeem/$requestId`
+The recursion was introduced last turn when I added a SELECT policy on `requests` that does `EXISTS (SELECT … FROM request_items …)`, while `request_items`'s own SELECT policy already does `EXISTS (SELECT … FROM requests …)`. Postgres re-enters RLS evaluation on each side and aborts. Every cart / requests / redeem query is currently failing.
 
-Layout (single full-height "ticket" feel, matches existing serif + cream/sage palette):
+So this plan does two things: **fix the recursion** (so the toasts stop happening), and **restyle the Toaster** (so when toasts *do* show, they live bottom-left in the PERX cream/ink/red palette).
 
-```text
-┌──────────────────────────────────────────────────┐
-│  APPROVED · #A4F2  ·  Hani Hane café             │  ← header strip
-│  Macchiato + croissant                            │
-│                                                   │
-│   ┌─────────────────┐    Show this at the counter│
-│   │                 │                              │
-│   │   ░░ QR CODE ░░ │    Redemption code         │
-│   │                 │    PERX-A4F2-9KQ           │
-│   └─────────────────┘                              │
-│                                                   │
-│   Status: ● Ready to redeem                       │
-│   [ Mark as redeemed ]   [ Add to calendar ]      │
-│                                                   │
-│   ── Provider instructions ──                     │
-│   "Show this screen to staff. Valid Mon–Sat."     │
-│                                                   │
-│   ── Getting there ──                             │
-│   📍 Rr. Myslym Shyri 22, Tiranë                  │
-│   [ small map preview with pin ]                  │
-│   [ Open in Google Maps ↗ ]                       │
-│                                                   │
-│   ── Items ──                                     │
-│   • Macchiato        500 ALL                      │
-│   • Croissant        300 ALL                      │
-└──────────────────────────────────────────────────┘
-```
+## 1. Fix the RLS recursion
 
-Entry points:
-- On **Requests** page (`/requests`), each approved request row gets a "Redeem" button → opens this screen.
-- The post-approval toast / approval email (future) can link straight here.
+Migration:
+- `DROP POLICY "Provider sees requests with their items" ON public.requests`.
+- Add a `SECURITY DEFINER` helper `public.user_is_request_provider(_user uuid, _request uuid) RETURNS boolean` that does the `EXISTS … request_items … has_company_role …` lookup with RLS bypassed (same pattern as `has_role`).
+- Recreate the policy using only that function — no direct subquery on `request_items` from a `requests` policy, so no recursion.
 
-## Data
+Result: providers can still load `/redeem/$id` for requests that include their items; the cart / requests pages stop erroring.
 
-Add a few columns to `public.requests` (one migration):
-- `redemption_code text unique` — short human-friendly code, e.g. `PERX-A4F2-9KQ`, generated on approval.
-- `redeemed_at timestamptz` — set when the user (or provider) marks redeemed.
-- `redeemed_by uuid` — who marked it.
+## 2. Move and theme the Toaster
 
-Backfill: generate `redemption_code` for existing approved rows in the same migration.
+Edit `src/routes/__root.tsx` (the one place `<Toaster>` is mounted):
 
-A trigger on `requests` fills `redemption_code` automatically when `status` flips to `approved` and the column is null. Keeps the employer-approval flow untouched.
-
-New SECURITY DEFINER function `public.mark_request_redeemed(p_request_id uuid)`:
-- Caller must be either the request's `employee_id` or a `provider_admin` of one of the request's `request_items.provider_company_id`s.
-- Sets `redeemed_at = now()`, `redeemed_by = auth.uid()`. Idempotent (no-op if already set).
-
-No new tables. RLS: existing `requests` policies already let the employee read their own request and provider admins read items routed to them — extend the existing SELECT policy on `requests` to also allow provider admins of any line item to read the parent row (needed so a provider can scan the QR and load the screen).
+- `position="bottom-left"` instead of `top-center`.
+- Drop `richColors` (it forces sonner's default red/green palette).
+- Pass `toastOptions` so toasts use the PERX palette:
+  - background: `cream` (`#faf7f2`-ish, via CSS var `--cream`)
+  - text: `ink`
+  - border: hairline 1px `border-soft`
+  - rounded-2xl, serif title, small caps label strip for the type (`Error` / `Done`)
+  - Error variant: left accent bar in `accent-red`; success: `sage`.
+- Keep the same `<Toaster>` API — no per-call changes needed at the 14 `toast(...)` sites.
 
 ## Files
-
-- `supabase/migrations/<ts>_redemption.sql` — columns, generator function, trigger, backfill, `mark_request_redeemed`, policy tweak.
-- `src/routes/_authenticated/redeem.$requestId.tsx` — the redemption screen (loader-fetched via `useQuery`).
-- `src/components/redeem/RedemptionCard.tsx` — QR + code + status + actions (renders QR with the existing-or-newly-added `qrcode` lib; we'll add `qrcode` via `bun add qrcode`).
-- `src/components/redeem/ProviderMapMini.tsx` — reuses `TiranaMap` styling, single pin from `companies.lat/lng` (already in schema based on `TiranaMap`); falls back to address-only card if no coords.
-- `src/lib/ics.ts` — tiny helper that builds an `.ics` calendar invite (title = offer title, location = provider address, 1-hour default block starting "today 7pm" or user-picked time) and triggers a download.
-- `src/routes/_authenticated/requests.tsx` — add **Redeem** link on approved rows.
+- `supabase/migrations/<ts>_fix_requests_recursion.sql`
+- `src/routes/__root.tsx` — Toaster props + className
+- (optionally `src/components/ui/sonner.tsx` if we want the theming centralized there instead of on the root mount — I'll put it on the root mount to keep the change small)
 
 ## Out of scope
-- Provider-side scanner UI (provider can still open the same `/redeem/$id` URL and tap "Mark redeemed"; a camera scanner is a separate feature).
-- Push/email reminders.
-- Multi-visit punch cards or partial redemptions — redemption is all-or-nothing per request for now.
-- Wallet pass (Apple/Google Wallet) export — the `.ics` invite covers calendar; wallet pass is a follow-up.
-
-## Technical notes
-- QR payload = absolute URL `https://<host>/redeem/<requestId>?c=<redemption_code>` so a provider scanning with any phone camera lands on the same screen and can mark it redeemed (after login as a provider admin of that offer).
-- `qrcode` runs client-side only; no server dependency.
-- `.ics` is generated on the client as a `Blob` and downloaded — no server route needed.
-- `mark_request_redeemed` is called via `supabase.rpc(...)`; invalidates `["request", id]` and `["requests"]`.
+- No changes to the `mark_request_redeemed` function or to `request_items` policies.
+- No new toast call sites; existing `toast.success/error(...)` calls just inherit the new look.
