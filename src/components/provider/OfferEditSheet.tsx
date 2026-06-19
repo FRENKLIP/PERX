@@ -100,7 +100,14 @@ export function OfferEditSheet({
       image_url = null;
     }
 
-    const patch: Record<string, any> = {
+    const patch: {
+      title: string;
+      description: string;
+      price_all: number;
+      category_slug: string;
+      location: string;
+      image_url?: string | null;
+    } = {
       title: form.title,
       description: form.description,
       price_all: parseInt(form.price, 10),
