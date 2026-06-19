@@ -107,19 +107,19 @@ function AppHome() {
         </div>
 
         {/* Near you tile */}
-        <div className="tile col-span-12 lg:col-span-4 p-7 md:p-8 flex flex-col justify-between min-h-[260px]">
+        <div className="tile-dark col-span-12 lg:col-span-4 p-7 md:p-8 flex flex-col justify-between min-h-[260px]">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft">Near you</div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cream/60">Near you</div>
               <div className="font-serif text-6xl md:text-7xl leading-none tracking-tight mt-3">{offersWithLatLng.length}</div>
-              <div className="text-sm text-ink-soft mt-2">offers in Tirana right now</div>
+              <div className="text-sm text-cream/60 mt-2">offers in Tirana right now</div>
             </div>
-            <div className="grid place-items-center size-10 rounded-full bg-sage-soft hairline">
-              <MapPin className="size-4 text-sage-deep" />
+            <div className="grid place-items-center size-10 rounded-full bg-cream/10 border border-cream/10">
+              <MapPin className="size-4 text-cream" />
             </div>
           </div>
-          <div className="mt-6 flex items-center justify-end">
-            <WalletRing daysLeft={daysLeft} />
+          <div className="mt-6 flex items-center justify-center">
+            <WalletRing daysLeft={daysLeft} dark />
           </div>
         </div>
 
