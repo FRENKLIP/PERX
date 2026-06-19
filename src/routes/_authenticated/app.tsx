@@ -69,6 +69,13 @@ function AppHome() {
 
   const offers = data?.offers ?? [];
   const offersWithLatLng = offers.filter((o: any) => o.companies?.lat != null && o.companies?.lng != null);
+  const remaining = Math.max(0, (data?.budget ?? 25000) - (data?.spent ?? 0));
+  const suggestion = (() => {
+    const affordable = offers.filter((o: any) => (o.price_all ?? 0) > 0 && (o.price_all ?? 0) <= remaining);
+    if (!affordable.length) return null;
+    const idx = new Date().getDate() % affordable.length;
+    return affordable[idx];
+  })();
   const daysLeft = (() => {
     const now = new Date();
     const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -83,6 +90,8 @@ function AppHome() {
           <Hero3DEmployee
             spent={data?.spent ?? 0}
             budget={data?.budget ?? 25000}
+            suggestion={suggestion}
+            onAdd={addToCart}
           />
         </div>
 
