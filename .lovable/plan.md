@@ -1,49 +1,41 @@
-# Talent Edge Insight
+## Goal
 
-Replace the existing "PERX AI · Team insights" card on the Employer dashboard with a sharper, structured "Talent Edge" insight that reads like the example: a single plain-English narrative sentence followed by concrete category-based recommendations.
+Replace the standalone Passport tab with a Profile panel that opens when the user taps their avatar (PFP) in the top nav / bottom bar. The panel shows the user's profile details and the full Benefit Passport content inline.
 
-## What changes
+## Changes
 
-### 1. API: `src/routes/api/insights.ts`
-- Switch from free-form `generateText` to structured output (`generateText` + `Output.object`) so the model returns:
-  - `headline` (string, 1 sentence) — the "Your team is not asking for X, they are choosing Y." style narrative.
-  - `recommendations` (array of 2-3 objects, each `{ category, action, rationale }`) — e.g. `{ category: "wellness", action: "Add two more wellness providers next month", rationale: "Recovery makes up 38% of approvals." }`.
-- Server pre-aggregates the request data into per-category totals and counts before prompting the model, so the model sees clean numbers, not raw row dumps. Aggregation buckets reuse the same regex map used in `employer.tsx` (`wellness | travel | learning | food`), with an `other` bucket for the rest.
-- System prompt is rewritten for "Talent Edge" voice: concise, comparative ("not X, they are choosing Y"), Tirana/ALL context, no hedging, no bullet-list prose. Model is instructed to ground every recommendation in an observed category share.
-- Falls back to a deterministic message if there are fewer than 3 approved requests in the period ("Not enough signal yet — approve a few requests to unlock Talent Edge.").
+### 1. New component `src/components/ProfileDrawer.tsx`
+Right-side slide-over (Sheet-style, built with a plain fixed overlay to match the current minimalist style — no new deps). Sections, top to bottom:
 
-### 2. Employer page: `src/routes/_authenticated/employer.tsx`
-- Replace the existing insight card (the `md:col-span-3 bg-ink text-cream` block around line 352) with a new `TalentEdgeCard` component.
-- Change state shape from `insight: string | null` to `insight: { headline, recommendations } | null` plus `period` (passed into the prompt so insights match the selected 7/30/90 day window).
-- Auto-fetch once when the overview tab mounts and there is enough data; show a soft skeleton while loading. Keep a "Refresh" button.
-- Re-fetch automatically when `period` changes.
-- Send the pre-aggregated category mix (the existing `byCategory` and a small derived `recentTitles` sample) in the POST body, not the raw request rows.
+- **Identity header** — large avatar (initials), full name, email, language, role badge (Employee / Employer / Provider), company name if available, sign-out button.
+- **This month** — same recap strip currently on the Passport page (Approved, Spent, Top category, Unlocked).
+- **Benefit Passport** — the four `StampCard`s in a 2-col grid, plus the "+ N other benefits" line and empty state. All logic moved out of the route file into this component (same query, same `summarize`).
+- Footer link "Browse the marketplace" closes the drawer.
 
-### 3. New component: `src/components/employer/TalentEdgeCard.tsx`
-- Visual: dark `bg-ink text-cream` card matching the current aesthetic.
-- Header strip: small caps "Talent Edge · powered by PERX AI", sparkles icon, period chip ("Last 30 days"), Refresh button.
-- Body:
-  - Large serif pull-quote rendering `headline` with a leading red quote mark (uses existing `accent-red`).
-  - Below, a 2-3 item recommendation list. Each item is a hairline `bg-cream/5` chip: category icon + label on the left, `action` as the main text, `rationale` as muted small text.
-- Empty state and loading state handled inside the component.
+Closes on: backdrop click, Esc, route change, or sign-out.
 
-## Technical details
+### 2. `src/components/AppShell.tsx`
+- Convert the avatar `div` into a `button` that toggles the drawer open. Add a subtle ring on hover. Keep initials styling.
+- Remove the `/passport` `NavTab` (desktop) and the `Stamp` `BottomTab` (mobile).
+- Render `<ProfileDrawer open={...} onClose={...} ctx={ctx} />` at the shell root so it works on every page.
+- Keep the language toggle and sign-out icons where they are (drawer also has sign-out, both are fine).
 
-- Structured output uses the AI SDK pattern: `generateText({ model, output: Output.object({ schema: z.object({...}) }) })`. `zod` is already a project dep (used elsewhere).
-- Category mix is computed server-side in the API handler from the request payload so the same regex bucketing lives in one place — extract a tiny shared helper `src/lib/categorize.ts` and import from both the API route and `employer.tsx` (replaces the inline `categoryNames` regex map currently duplicated in `employer.tsx`).
-- Auto-fetch uses a `useEffect` keyed on `[tab, period, data?.requests.length]`, guarded by a request-count threshold and an in-flight ref to prevent thrash.
-- No DB schema changes. No new tables. No new env vars (reuses `LOVABLE_API_KEY`).
+### 3. `src/routes/_authenticated/passport.tsx`
+- Keep the route file but make it a thin redirect to `/app` (so any existing `/passport` link or the success-page deep link still lands somewhere sensible). Alternative: delete the file and update the "View in your Passport →" link on `redeem.$requestId.tsx` to open the drawer instead. **Chosen:** delete the route and replace the success-page link with a normal link to `/app` plus copy "Open your profile to see your Passport" — the drawer is the only entry point, matching the user's intent.
 
-## Files
+### 4. `src/routes/_authenticated/redeem.$requestId.tsx`
+Update the "View in your Passport →" link to point to `/app` with the new copy above. (No drawer auto-open wiring — keeps scope tight.)
 
-- `src/routes/api/insights.ts` — rewrite to structured output + server-side aggregation.
-- `src/lib/categorize.ts` — new, shared category bucketer.
-- `src/components/employer/TalentEdgeCard.tsx` — new card.
-- `src/routes/_authenticated/employer.tsx` — wire new state, auto-fetch, mount new card, drop inline regex map.
+### 5. Files unchanged
+`src/lib/passport.ts` and `src/components/passport/StampCard.tsx` are reused as-is by the drawer.
 
 ## Out of scope
+- Editing profile fields (name, avatar upload) — display only.
+- Animations beyond a simple fade/slide.
+- Persisting drawer open state across reloads.
+- Auto-opening the drawer from the redeem success page.
 
-- Provider-specific suggestions (we only have category-level signal in the current data model).
-- Persisting insights to the database / historical Talent Edge log.
-- Localization to Albanian — keeps current English-only copy.
-- Changes to the Approvals or Employees tabs.
+## Technical notes
+- Drawer is a controlled component in `AppShell` using `useState`. No router state, no URL change.
+- Query key stays `["passport", monthStart]` so the data is shared if both the drawer and any other consumer mount.
+- Role detection reuses the existing `ctx.roles` already fetched in `AppShell`.
