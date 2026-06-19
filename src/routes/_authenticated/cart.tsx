@@ -52,6 +52,16 @@ function Cart() {
   const total = (data?.items ?? []).reduce((s: number, it: any) => s + (it.offers?.price_all ?? 0) * (it.qty ?? 1), 0);
   const budget = data?.profile?.monthly_budget_all ?? 25000;
   const employerId = data?.profile?.employer_company_id;
+  const policy = data?.policy;
+  const maxAmt: number | null = policy?.policy_max_request_all ?? null;
+  const allowed: string[] | null = policy?.policy_allowed_categories ?? null;
+  const autoBelow: number | null = policy?.policy_auto_approve_below_all ?? null;
+  const overCap = !!(maxAmt && total > maxAmt);
+  const disallowedItems = allowed && allowed.length > 0
+    ? (data?.items ?? []).filter((it: any) => it.offers && !allowed.includes(it.offers.category_slug))
+    : [];
+  const willAutoApprove = !!(autoBelow && autoBelow > 0 && total > 0 && total <= autoBelow);
+  const blocked = overCap || disallowedItems.length > 0;
 
   async function remove(id: string) {
     await supabase.from("cart_items").delete().eq("id", id);
