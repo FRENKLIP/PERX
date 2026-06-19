@@ -71,6 +71,8 @@ function EmployerDashboard() {
 
   async function generateInsight() {
     if (!data) return;
+    if (insightInFlight.current) return;
+    insightInFlight.current = true;
     setLoadingInsight(true);
     try {
       const cutoffMs = Date.now() - period * 24 * 60 * 60 * 1000;
@@ -97,8 +99,24 @@ function EmployerDashboard() {
       toast.error(e.message);
     } finally {
       setLoadingInsight(false);
+      insightInFlight.current = false;
     }
   }
+
+  // Auto-load Talent Edge when overview is visible and inputs change.
+  useEffect(() => {
+    if (tab !== "overview" || !data) return;
+    const cutoffMs = Date.now() - period * 24 * 60 * 60 * 1000;
+    const approvedCount = (data.requests ?? []).filter(
+      (r) => r.status === "approved" && new Date(r.decided_at ?? r.created_at).getTime() >= cutoffMs,
+    ).length;
+    const key = `${period}:${approvedCount}`;
+    if (insightKey.current === key) return;
+    if (approvedCount < 3) return;
+    insightKey.current = key;
+    void generateInsight();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, period, data?.requests.length]);
 
   const pending = (data?.requests ?? []).filter((r) => r.status === "pending");
   const approved = (data?.requests ?? []).filter((r) => r.status === "approved");
