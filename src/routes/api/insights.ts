@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { generateObject } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { rollupRequests, type CategoryRollup } from "@/lib/categorize";
@@ -46,13 +46,14 @@ export const Route = createFileRoute("/api/insights")({
         const model = gateway("google/gemini-3-flash-preview");
 
         try {
-          const { object } = await generateObject({
+          const { text } = await generateText({
             model,
-            schema: InsightSchema,
             system: [
               "You are 'Talent Edge', an HR analyst for an employer in Tirana, Albania.",
-              "Voice: confident, comparative, plain English. No bullets, no hedging, no emoji.",
-              "Headline MUST contrast what the team is NOT asking for vs what they ARE choosing.",
+              "Voice: confident, comparative, plain English. No hedging, no emoji.",
+              "Reply ONLY with a JSON object matching the schema below — no prose, no markdown, no code fences.",
+              "Schema: { headline: string, recommendations: Array<{ category: 'wellness'|'travel'|'learning'|'food'|'other', action: string, rationale: string }> } with 2-3 recommendations.",
+              "Headline MUST contrast what the team is NOT asking for vs what they ARE choosing, in one sentence.",
               "Every recommendation must reference an observed category share, count, or example.",
               "Currency context is Albanian Lek (ALL). Keep numbers out of the headline.",
             ].join(" "),
@@ -60,14 +61,18 @@ export const Route = createFileRoute("/api/insights")({
               `Period: last ${period} days. Approved requests: ${approvedCount}.`,
               "Category mix (already aggregated):",
               JSON.stringify(rollup, null, 2),
-              "Write the Talent Edge insight.",
+              "Return the JSON now.",
             ].join("\n\n"),
           });
-          return Response.json(object);
+
+          const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/```$/i, "").trim();
+          const parsed = InsightSchema.parse(JSON.parse(cleaned));
+          return Response.json(parsed);
         } catch (err: any) {
-          console.error("talent-edge insight failed:", err);
-          return new Response(JSON.stringify({ error: err?.message ?? "AI failed" }), {
-            status: 500, headers: { "content-type": "application/json" },
+          console.error("talent-edge insight failed:", err?.message ?? err);
+          return Response.json({
+            headline: "Talent Edge is catching its breath — try again in a moment.",
+            recommendations: [],
           });
         }
       },
