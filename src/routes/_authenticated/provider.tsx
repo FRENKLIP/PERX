@@ -360,6 +360,41 @@ function ProviderDashboard() {
       )}
 
       <h2 className="font-serif text-3xl mb-4">Incoming orders</h2>
+      {/* Pending co-provider invitations */}
+      {(() => {
+        const pendingInvites = (data?.coRows ?? []).filter((r: any) => !r.is_owner && !r.accepted_at);
+        if (pendingInvites.length === 0) return null;
+        return (
+          <div className="mb-8">
+            <h3 className="font-serif text-2xl mb-3 flex items-center gap-2">
+              <Users className="size-5" /> Co-listing invitations
+            </h3>
+            <div className="space-y-2">
+              {pendingInvites.map((r: any) => (
+                <div key={r.id} className="hairline bg-white rounded-2xl p-4 flex items-center gap-4 fade-up">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm truncate">{r.offers?.title ?? "Offer"}</div>
+                    <div className="text-xs text-ink-soft">
+                      Share offered: <strong className="text-ink">{r.share_pct}%</strong> · {formatAll(Math.round((r.offers?.price_all ?? 0) * r.share_pct / 100))} per redemption
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => respondInvite(r.id, false)}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full hairline hover:bg-paper text-ink-soft"
+                  >Decline</button>
+                  <button
+                    onClick={() => respondInvite(r.id, true)}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full bg-ink text-cream hover:bg-accent-red transition-colors inline-flex items-center gap-1.5"
+                  >
+                    <Check className="size-3.5" /> Accept
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="space-y-2 mb-10">
         {(data?.items ?? []).slice(0, 10).map((it: any) => (
           <div key={it.id} className="hairline bg-white rounded-2xl p-4 flex items-center gap-4">
@@ -379,7 +414,12 @@ function ProviderDashboard() {
 
       <h2 className="font-serif text-3xl mb-4">Your offers</h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {(data?.offers ?? []).map((o: any) => (
+        {(data?.offers ?? []).map((o: any) => {
+          const providersForOffer = (data?.allProviders ?? []).filter((p: any) => p.offer_id === o.id);
+          const isOwner = (data?.companyIds ?? []).includes(o.provider_company_id);
+          const myRow = providersForOffer.find((p: any) => (data?.companyIds ?? []).includes(p.provider_company_id));
+          const isCoListed = providersForOffer.length > 1;
+          return (
           <article key={o.id} className={`hairline bg-white rounded-3xl overflow-hidden ${o.is_active === false ? "opacity-60" : ""}`}>
             {o.image_url && (
               <div className="relative aspect-[4/3] overflow-hidden">
@@ -387,14 +427,26 @@ function ProviderDashboard() {
                 <span className={`absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${o.is_active === false ? "bg-ink/80 text-cream" : "bg-sage/90 text-cream"}`}>
                   {o.is_active === false ? "Paused" : "Live"}
                 </span>
+                {isCoListed && (
+                  <span className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-ink/85 text-cream inline-flex items-center gap-1">
+                    <Users className="size-3" /> Co-listed · {providersForOffer.length}
+                  </span>
+                )}
               </div>
             )}
             <div className="p-5">
               <div className="text-[10px] font-semibold text-accent-red uppercase tracking-[0.18em] mb-1">{o.category_slug}</div>
               <h3 className="font-serif text-xl leading-tight mb-1">{o.title}</h3>
               <p className="text-xs text-ink-soft mb-3 line-clamp-2">{o.description}</p>
+              {isCoListed && (
+                <div className="mb-3 text-[11px] text-ink-soft">
+                  Your share: <strong className="text-ink">{myRow?.share_pct ?? 0}%</strong>
+                  {!isOwner && !myRow?.accepted_at && <span className="ml-2 text-accent-orange font-semibold">Pending your acceptance</span>}
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="font-semibold">{formatAll(o.price_all)}</span>
+                {isOwner ? (
                 <button
                   onClick={() => toggleActive(o.id, o.is_active !== false)}
                   className="text-[11px] font-semibold flex items-center gap-1.5 text-ink-soft hover:text-ink"
@@ -402,10 +454,13 @@ function ProviderDashboard() {
                 >
                   {o.is_active === false ? <><Power className="size-3.5" /> Activate</> : <><PowerOff className="size-3.5" /> Pause</>}
                 </button>
+                ) : (
+                  <span className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Co-listed</span>
+                )}
               </div>
             </div>
           </article>
-        ))}
+        );})}
       </div>
     </div>
   );
