@@ -388,59 +388,9 @@ function EmployerDashboard() {
         </div>
       </div>
 
-      <h2 className="font-serif text-3xl mb-4">Pending approvals</h2>
-      {pending.length === 0 ? (
-        <div className="hairline rounded-3xl p-12 text-center text-ink-soft mb-10">Nothing waiting.</div>
-      ) : (
-        <div className="space-y-3 mb-10">
-          {pending.map((r) => (
-            <div key={r.id} className="hairline bg-white rounded-3xl p-6 fade-up">
-              <div className="flex justify-between items-start mb-3 gap-4">
-                <div className="min-w-0">
-                  <div className="font-serif text-xl">{r.ai_package_name || `Request · ${r.id.slice(0,8)}`}</div>
-                  <div className="text-xs text-ink-soft mt-0.5">{new Date(r.created_at).toLocaleString()}</div>
-                  {r.note && <p className="text-sm mt-2 italic text-ink-soft">"{r.note}"</p>}
-                </div>
-                <div className="font-serif text-2xl shrink-0">{formatAll(r.total_all)}</div>
-              </div>
-              <div className="space-y-1 mb-4">
-                {(r as any).request_items?.map((it: any) => (
-                  <div key={it.id} className="flex justify-between text-sm py-1.5 border-t border-border-soft">
-                    <span>{it.offer_title}</span><span className="font-semibold">{formatAll(it.price_all)}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => decide(r.id, "approved")} className="flex-1 bg-sage text-cream py-3 rounded-full font-semibold text-sm hover:bg-ink transition-colors flex items-center justify-center gap-2">
-                  <CheckCircle2 className="size-4" /> Approve & pay providers
-                </button>
-                <button onClick={() => decide(r.id, "rejected")} className="px-5 hairline text-ink-soft py-3 rounded-full font-semibold text-sm hover:bg-accent-red hover:text-cream flex items-center gap-2">
-                  <XCircle className="size-4" /> Reject
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {approved.length > 0 && (
-        <>
-          <h2 className="font-serif text-3xl mb-4">Recent approvals</h2>
-          <div className="space-y-2">
-            {approved.slice(0, 6).map((r) => (
-              <div key={r.id} className="hairline bg-white rounded-2xl p-4 flex justify-between items-center">
-                <div>
-                  <div className="font-medium text-sm">{r.ai_package_name || r.id.slice(0,8)}</div>
-                  <div className="text-xs text-ink-soft">{new Date(r.decided_at ?? r.created_at).toLocaleDateString()}</div>
-                </div>
-                <div className="font-semibold">{formatAll(r.total_all)}</div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
       </>
       )}
+      </div>
     </div>
   );
 }
