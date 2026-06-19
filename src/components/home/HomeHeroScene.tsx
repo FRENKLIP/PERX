@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { ContactShadows, Environment, Text } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, type ReactElement } from "react";
 import type { Group } from "three";
 
 const NOTE_W = 2.2;
@@ -56,7 +56,7 @@ function Stack({
     g.current.rotation.x = 0.18 + pointer.y * 0.05;
   });
 
-  const notes: JSX.Element[] = [];
+  const notes: ReactElement[] = [];
   const visible = Math.ceil(lerped.current);
   for (let i = 0; i < visible; i++) {
     const frac = Math.min(1, lerped.current - i);
@@ -85,7 +85,7 @@ function Stack({
 
   // Spent slab (lying to the right)
   const spentVisible = Math.ceil(spentLerped.current);
-  const spentNotes: JSX.Element[] = [];
+  const spentNotes: ReactElement[] = [];
   for (let i = 0; i < spentVisible; i++) {
     const frac = Math.min(1, spentLerped.current - i);
     if (frac <= 0.01) continue;
