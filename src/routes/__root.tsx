@@ -140,7 +140,28 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <Toaster position="top-center" richColors />
+      <Toaster
+        position="bottom-left"
+        offset={24}
+        toastOptions={{
+          unstyled: true,
+          classNames: {
+            toast:
+              "group w-full flex items-start gap-3 bg-cream text-ink hairline rounded-2xl px-4 py-3 pr-4 shadow-[0_8px_30px_rgba(20,20,20,0.08)] border-l-4 border-l-ink",
+            title: "font-serif text-[15px] leading-snug",
+            description: "text-xs text-ink-soft mt-0.5",
+            success: "!border-l-sage",
+            error: "!border-l-accent-red",
+            warning: "!border-l-accent-red",
+            info: "!border-l-ink",
+            actionButton:
+              "ml-auto bg-ink text-cream rounded-full px-3 py-1.5 text-xs font-semibold hover:bg-accent-red",
+            cancelButton:
+              "text-xs font-semibold text-ink-soft hover:text-ink px-2 py-1.5",
+            icon: "mt-0.5 shrink-0",
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

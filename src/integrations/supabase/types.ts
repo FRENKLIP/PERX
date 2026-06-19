@@ -568,6 +568,10 @@ export type Database = {
         Args: { p_amount: number; p_note?: string; p_recipient: string }
         Returns: string
       }
+      user_is_request_provider: {
+        Args: { _request: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "employee" | "employer_admin" | "provider_admin"
