@@ -41,6 +41,9 @@ export function Hero3DEmployee({
           <div className="text-sm text-ink-soft mt-3">
             of {budget.toLocaleString()} ALL · {spent.toLocaleString()} pending{simTotal ? ` · ${simTotal.toLocaleString()} simulated` : ""}
           </div>
+          <div className="mt-5">
+            <TransferFundsButton remaining={remaining} />
+          </div>
         </div>
       </div>
     </div>
