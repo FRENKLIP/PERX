@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
-import { CheckCircle2, Clock, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, QrCode, XCircle } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/requests")({
@@ -78,6 +78,17 @@ function Requests() {
                   <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft">Total</span>
                   <span className="font-serif text-2xl">{formatAll(r.total_all)}</span>
                 </div>
+                {r.status === "approved" && (
+                  <div className="mt-4 flex justify-end">
+                    <Link
+                      to="/redeem/$requestId"
+                      params={{ requestId: r.id }}
+                      className="inline-flex items-center gap-2 bg-ink text-cream rounded-full px-5 py-2.5 text-sm font-semibold hover:bg-accent-red transition-colors"
+                    >
+                      <QrCode className="size-4" /> {r.redeemed_at ? "View pass" : "Redeem"}
+                    </Link>
+                  </div>
+                )}
               </article>
             </li>
           ))}
