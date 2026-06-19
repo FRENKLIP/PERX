@@ -1,41 +1,70 @@
 ## Goal
 
-Replace the standalone Passport tab with a Profile panel that opens when the user taps their avatar (PFP) in the top nav / bottom bar. The panel shows the user's profile details and the full Benefit Passport content inline.
+Ship two independent features:
+1. **Saved Offer Collections** — let employees group saved offers into named collections (Weekend, Healthy week, Date night, Next month, custom).
+2. **Provider Offer Editing** — give providers a full edit flow for an existing offer matching the "New offer" form (title, price, category, image, description, co-providers, location).
 
-## Changes
+---
 
-### 1. New component `src/components/ProfileDrawer.tsx`
-Right-side slide-over (Sheet-style, built with a plain fixed overlay to match the current minimalist style — no new deps). Sections, top to bottom:
+## 1. Saved Offer Collections
 
-- **Identity header** — large avatar (initials), full name, email, language, role badge (Employee / Employer / Provider), company name if available, sign-out button.
-- **This month** — same recap strip currently on the Passport page (Approved, Spent, Top category, Unlocked).
-- **Benefit Passport** — the four `StampCard`s in a 2-col grid, plus the "+ N other benefits" line and empty state. All logic moved out of the route file into this component (same query, same `summarize`).
-- Footer link "Browse the marketplace" closes the drawer.
+### Data model (migration)
+- New table `public.saved_collections` with: `user_id` (FK auth.users), `name` (text), `emoji` (text, optional), `sort_order` (int).
+- Add `collection_id uuid null` column to existing `public.favorites` (null = "All saved" / uncategorized). On collection delete → set null.
+- RLS: owner-only (`auth.uid() = user_id`) on `saved_collections`; existing favorites policies already scope to user.
+- GRANT block + service_role per project rules.
+- Seed nothing — collections are user-created. We'll suggest 4 starter chips in the UI ("Weekend", "Healthy week", "Date night", "Next month") that create on first click.
 
-Closes on: backdrop click, Esc, route change, or sign-out.
+### UI — `src/routes/_authenticated/saved.tsx`
+- Header gets a horizontal collection switcher (pill row): **All · [collections…] · + New**.
+  - "+ New" opens a small inline input → creates collection.
+  - Active pill filters the grid by `collection_id`.
+  - Long-press / kebab on a pill → rename / delete (confirm).
+- Empty state for a specific collection: "Nothing in [name] yet. Save offers and tag them here."
+- Each saved card gets a small "Move to…" menu (folder icon next to the heart) that lists collections + "+ New collection". Updates `favorites.collection_id`.
+- Suggested starter chips: if user has zero collections, show 4 ghost chips that create-on-click.
 
-### 2. `src/components/AppShell.tsx`
-- Convert the avatar `div` into a `button` that toggles the drawer open. Add a subtle ring on hover. Keep initials styling.
-- Remove the `/passport` `NavTab` (desktop) and the `Stamp` `BottomTab` (mobile).
-- Render `<ProfileDrawer open={...} onClose={...} ctx={ctx} />` at the shell root so it works on every page.
-- Keep the language toggle and sign-out icons where they are (drawer also has sign-out, both are fine).
+### UI — `FavoriteButton.tsx`
+- Unchanged behavior on tap (save to "All / no collection").
+- Long-press / right-click optional follow-up — **out of scope** for v1 to keep the interaction simple. Moving happens on the Saved page.
 
-### 3. `src/routes/_authenticated/passport.tsx`
-- Keep the route file but make it a thin redirect to `/app` (so any existing `/passport` link or the success-page deep link still lands somewhere sensible). Alternative: delete the file and update the "View in your Passport →" link on `redeem.$requestId.tsx` to open the drawer instead. **Chosen:** delete the route and replace the success-page link with a normal link to `/app` plus copy "Open your profile to see your Passport" — the drawer is the only entry point, matching the user's intent.
+### Query keys
+- `["saved-offers", collectionId | "all"]` — invalidate on move/create/delete.
+- `["saved-collections"]` — fetch list once for switcher + move menu.
 
-### 4. `src/routes/_authenticated/redeem.$requestId.tsx`
-Update the "View in your Passport →" link to point to `/app` with the new copy above. (No drawer auto-open wiring — keeps scope tight.)
+---
 
-### 5. Files unchanged
-`src/lib/passport.ts` and `src/components/passport/StampCard.tsx` are reused as-is by the drawer.
+## 2. Provider Offer Editing
+
+### New component `src/components/provider/OfferEditSheet.tsx`
+- Right-side slide-over (same minimal style as `ProfileDrawer`).
+- Reuses the exact field set from the existing inline "New offer" form in `provider.tsx`: Title, Price (ALL), Location, Category, Description, Cover image (with current image preview + replace/remove), `CoProviderEditor` (pre-populated from `offer_providers`).
+- Save button: updates `public.offers` row; diff-applies co-providers (insert new, delete removed, update share_pct).
+- Delete button (destructive, with confirm) — soft option: just toggle `is_active=false`. We'll include both: "Pause" (existing) and "Delete" (hard delete, only if no `request_items` exist; otherwise toast "Pause instead — this offer has orders").
+- Image: if user picks a new file, upload to `offer-images` bucket and update `image_url`; old image left in bucket (cleanup is out of scope).
+
+### Wiring — `src/routes/_authenticated/provider.tsx`
+- In the offers list (below "Incoming orders"), each owned offer row gets an **Edit** button next to existing Activate/Pause.
+- Edit only shown when current company is the owner (`is_owner=true` in `offer_providers`, or `provider_company_id` matches). Co-listed providers see no Edit.
+- Opens `<OfferEditSheet offer={…} onClose={…} />`; on save → `qc.invalidateQueries({ queryKey: ["provider-data"] })`.
+
+### Refactor
+- Extract the current "New offer" form body into a shared `<OfferForm mode="create" | "edit" …/>` used by both the inline create panel and the edit sheet. Keeps validation/image-upload/co-provider logic in one place.
+
+---
 
 ## Out of scope
-- Editing profile fields (name, avatar upload) — display only.
-- Animations beyond a simple fade/slide.
-- Persisting drawer open state across reloads.
-- Auto-opening the drawer from the redeem success page.
+- Sharing collections between users.
+- Reordering offers within a collection.
+- Bulk move / multi-select on Saved.
+- Image cleanup in storage on edit/delete.
+- Versioning / audit log of offer edits.
+- Localized (`title_sq`, `description_sq`) editing — current form doesn't expose these; keeping parity.
+
+---
 
 ## Technical notes
-- Drawer is a controlled component in `AppShell` using `useState`. No router state, no URL change.
-- Query key stays `["passport", monthStart]` so the data is shared if both the drawer and any other consumer mount.
-- Role detection reuses the existing `ctx.roles` already fetched in `AppShell`.
+- Migration includes GRANTs and RLS per project standards.
+- `favorites.collection_id` is nullable so existing rows keep working without backfill.
+- Edit sheet imports `CoProviderEditor` as-is; the diff logic lives in the sheet's submit handler.
+- Both features are independent — can be built and shipped in either order.
