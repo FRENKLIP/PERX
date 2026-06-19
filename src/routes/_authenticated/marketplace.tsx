@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
-import { Plus, Map as MapIcon, LayoutGrid } from "lucide-react";
+import { Plus, Map as MapIcon, LayoutGrid, Users } from "lucide-react";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -35,7 +35,14 @@ function Marketplace() {
       ]);
       let offers = q.data ?? [];
       if (cat) offers = offers.filter((o) => o.category_slug === cat);
-      return { cats: cats ?? [], offers };
+      // Provider counts per offer (only accepted)
+      const offerIds = offers.map((o) => o.id);
+      const { data: ops } = offerIds.length
+        ? await supabase.from("offer_providers").select("offer_id").in("offer_id", offerIds).not("accepted_at", "is", null)
+        : { data: [] as any[] };
+      const counts: Record<string, number> = {};
+      (ops ?? []).forEach((r: any) => { counts[r.offer_id] = (counts[r.offer_id] ?? 0) + 1; });
+      return { cats: cats ?? [], offers, providerCounts: counts };
     },
   });
 
@@ -121,6 +128,11 @@ function Marketplace() {
                       <div className="absolute top-3 right-3">
                         <FavoriteButton offerId={o.id} />
                       </div>
+                      {(data?.providerCounts?.[o.id] ?? 0) > 1 && (
+                        <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.18em] bg-ink/85 text-cream px-2.5 py-1 rounded-full">
+                          <Users className="size-3" /> +{(data!.providerCounts![o.id] - 1)} venues
+                        </span>
+                      )}
                     </div>
                     <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-red">{o.category_slug} · {o.companies?.neighborhood ?? o.location}</div>
                     <h3 className="font-serif text-xl leading-tight mt-1 group-hover:text-accent-red transition-colors">{locale === "sq" && o.title_sq ? o.title_sq : o.title}</h3>
