@@ -107,7 +107,7 @@ function Cart() {
             </div>
           ) : (
             (data?.items ?? []).map((it: any) => (
-              <div key={it.id} className="flex items-center hairline bg-white rounded-2xl p-3 gap-4 fade-up">
+              <div key={it.id} className={`flex items-center hairline bg-white rounded-2xl p-3 gap-4 fade-up ${allowed && allowed.length > 0 && !allowed.includes(it.offers?.category_slug) ? "ring-1 ring-accent-red/40" : ""}`}>
                 <div className="size-16 rounded-xl overflow-hidden shrink-0 bg-paper">
                   {it.offers?.image_url && <img src={it.offers.image_url} alt="" className="w-full h-full object-cover" />}
                 </div>
@@ -118,6 +118,9 @@ function Cart() {
                     {it.chosen?.name ?? it.offers?.companies?.name}
                     {it.chosen && it.chosen.name !== it.offers?.companies?.name && <span className="ml-1 text-accent-red font-semibold">· redeem here</span>}
                   </div>
+                  {allowed && allowed.length > 0 && !allowed.includes(it.offers?.category_slug) && (
+                    <div className="text-[10px] mt-1 inline-block bg-accent-red/10 text-accent-red px-2 py-0.5 rounded-full font-semibold">Not allowed by your employer</div>
+                  )}
                 </div>
                 <div className="font-semibold">{formatAll(it.offers?.price_all ?? 0)}</div>
                 <button onClick={() => remove(it.id)} className="size-9 rounded-full hover:bg-paper grid place-items-center text-ink-soft hover:text-accent-red">
