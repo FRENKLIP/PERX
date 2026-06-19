@@ -1,6 +1,20 @@
-Restructure the hero section of `src/routes/index.tsx`:
+Make the ProviderMapPanel widget fully green with black text, leaving the map itself unchanged.
 
-1. Remove the `Hero3D` import and the right column (`<Hero3D />`).
-2. Replace the two-column grid with a centered single-column layout: full viewport-tall section (`min-h-screen`), content centered both horizontally and vertically, headline/sub/CTAs aligned center, `max-w-5xl` container.
-3. Add a background photo (Tirana / Blloku editorial Unsplash shot) as `<img>` absolutely positioned `inset-0`, `object-cover`, `opacity-15`, behind content. Add a subtle cream gradient overlay so text stays readable.
-4. Keep nav, all downstream sections, and rest of page unchanged.
+## What to change
+
+**File: `src/components/home/ProviderMapPanel.tsx`**
+
+1. **Green the whole widget background**
+   - Change the outer `<section>` class from `bg-cream` to `bg-sage`
+   - Remove the explicit `bg-sage` from the left panel div (now inherited from the section)
+
+2. **Flip all text from cream (light) to ink (dark/black)**
+   - Label "TIRANA, ON THE MAP": `text-cream/70` → `text-ink/70`
+   - Heading "Find perks by neighborhood.": `text-cream` → `text-ink`
+   - Description paragraph: `text-cream/70` → `text-ink/70`
+   - Inactive filter buttons: `text-cream border-cream/30` → `text-ink border-ink/30`
+   - Active filter button stays `bg-cream text-ink border-cream` (cream pill on green bg)
+   - Pin count: `text-cream/70` → `text-ink/70`
+
+3. **Leave the map untouched**
+   - The right-column map div and `<TiranaMap />` component remain exactly as-is. The Leaflet tiles and paper background cover that area, so the green section background only shows on the left panel and any widget edges/corners.
