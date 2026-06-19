@@ -3,11 +3,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
 import { toast } from "sonner";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, CheckCircle2, XCircle, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { StatTile } from "@/components/StatTile";
 import { TrendArea, CategoryDonut, TopBars, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
 import { EmployeesTab } from "@/components/employer/EmployeesTab";
+import { TalentEdgeCard, type TalentEdge } from "@/components/employer/TalentEdgeCard";
+import { categorizeTitle } from "@/lib/categorize";
 
 export const Route = createFileRoute("/_authenticated/employer")({
   head: () => ({ meta: [{ title: "Employer — PERX" }] }),
@@ -20,9 +22,11 @@ export const Route = createFileRoute("/_authenticated/employer")({
 
 function EmployerDashboard() {
   const qc = useQueryClient();
-  const [insight, setInsight] = useState<string | null>(null);
+  const [insight, setInsight] = useState<TalentEdge | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
   const [tab, setTab] = useState<"overview" | "approvals" | "employees">("overview");
+  const insightInFlight = useRef(false);
+  const insightKey = useRef<string | null>(null);
 
   const { data } = useQuery({
     queryKey: ["employer-data"],
@@ -67,25 +71,52 @@ function EmployerDashboard() {
 
   async function generateInsight() {
     if (!data) return;
+    if (insightInFlight.current) return;
+    insightInFlight.current = true;
     setLoadingInsight(true);
     try {
-      const summary = (data.requests ?? []).map((r) => ({
-        status: r.status,
-        total: r.total_all,
-        items: (r as any).request_items?.map((i: any) => ({ title: i.offer_title, price: i.price_all })),
-      }));
+      const cutoffMs = Date.now() - period * 24 * 60 * 60 * 1000;
+      const approvedInWindow = (data.requests ?? []).filter(
+        (r) => r.status === "approved" && new Date(r.decided_at ?? r.created_at).getTime() >= cutoffMs,
+      );
+      const items = approvedInWindow.flatMap((r) =>
+        ((r as any).request_items ?? []).map((i: any) => ({
+          offer_title: i.offer_title ?? "",
+          price_all: i.price_all ?? 0,
+        })),
+      );
       const res = await fetch("/api/insights", {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ requests: summary }),
+        body: JSON.stringify({
+          items,
+          period_days: period,
+          approved_count: approvedInWindow.length,
+        }),
       });
-      const json = await res.json();
-      setInsight(json.text ?? "Could not generate insights.");
+      const json = (await res.json()) as TalentEdge;
+      setInsight(json);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
       setLoadingInsight(false);
+      insightInFlight.current = false;
     }
   }
+
+  // Auto-load Talent Edge when overview is visible and inputs change.
+  useEffect(() => {
+    if (tab !== "overview" || !data) return;
+    const cutoffMs = Date.now() - period * 24 * 60 * 60 * 1000;
+    const approvedCount = (data.requests ?? []).filter(
+      (r) => r.status === "approved" && new Date(r.decided_at ?? r.created_at).getTime() >= cutoffMs,
+    ).length;
+    const key = `${period}:${approvedCount}`;
+    if (insightKey.current === key) return;
+    if (approvedCount < 3) return;
+    insightKey.current = key;
+    void generateInsight();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, period, data?.requests.length]);
 
   const pending = (data?.requests ?? []).filter((r) => r.status === "pending");
   const approved = (data?.requests ?? []).filter((r) => r.status === "approved");
@@ -105,19 +136,11 @@ function EmployerDashboard() {
     period,
   ), [approved, period]);
 
-  const categoryNames: Record<string, RegExp> = {
-    wellness: /(gym|yoga|spa|pool|sauna|pilates|massage|fitness)/i,
-    travel: /(ksamil|theth|dajti|dhërmi|llogara|trip|hotel|getaway|weekend)/i,
-    learning: /(coding|language|coolab|destil|course|class|workshop)/i,
-    food: /./,
-  };
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
     approvedInPeriod.forEach((r) => {
       (r as any).request_items?.forEach((it: any) => {
-        const title = it.offer_title ?? "";
-        let key = "food";
-        for (const [k, re] of Object.entries(categoryNames)) { if (re.test(title)) { key = k; break; } }
+        const key = categorizeTitle(it.offer_title ?? "");
         map.set(key, (map.get(key) ?? 0) + (it.price_all ?? 0));
       });
     });
@@ -349,22 +372,12 @@ function EmployerDashboard() {
       </div>
 
       <div className="grid md:grid-cols-5 gap-6 mb-10">
-        <div className="md:col-span-3 bg-ink text-cream rounded-3xl p-8 fade-up">
-          <div className="flex items-start justify-between mb-4 gap-4">
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream/60 mb-2 flex items-center gap-2"><Sparkles className="size-3 text-accent-red" /> PERX AI · Team insights</div>
-              <h3 className="font-serif text-2xl">What your people actually value.</h3>
-            </div>
-            <button onClick={generateInsight} disabled={loadingInsight} className="bg-cream text-ink px-5 py-2.5 rounded-full font-semibold text-sm disabled:opacity-50 shrink-0">
-              {loadingInsight ? "Thinking…" : insight ? "Regenerate" : "Generate"}
-            </button>
-          </div>
-          {insight ? (
-            <p className="text-sm leading-relaxed opacity-90 whitespace-pre-wrap font-serif text-lg">{insight}</p>
-          ) : (
-            <p className="text-sm text-cream/60">Click Generate to read this period in plain English.</p>
-          )}
-        </div>
+        <TalentEdgeCard
+          insight={insight}
+          loading={loadingInsight}
+          periodDays={period}
+          onRefresh={generateInsight}
+        />
         <div className="md:col-span-2 hairline rounded-3xl p-6 fade-up bg-paper/50 flex flex-col justify-between">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Approval rate</div>
