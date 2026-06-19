@@ -144,10 +144,6 @@ function AppHome() {
           <WeeklyMarquee theme={weekly?.theme} picks={(weekly?.picks ?? []) as any} />
         </div>
 
-        {/* Editor bento */}
-        <div className="tile col-span-12 p-6 md:p-8">
-          <EditorBento offers={offers as any} onAdd={addToCart} mood={mood} />
-        </div>
       </div>
     </div>
   );
