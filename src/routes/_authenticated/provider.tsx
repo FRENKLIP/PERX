@@ -8,6 +8,7 @@ import { Plus, Power, PowerOff, Copy, Upload, X, Loader2, Users, Check } from "l
 import { StatTile } from "@/components/StatTile";
 import { TrendArea, TopBars, CategoryDonut, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
 import { CoProviderEditor, type CoProviderDraft } from "@/components/CoProviderEditor";
+import { OfferEditSheet } from "@/components/provider/OfferEditSheet";
 
 export const Route = createFileRoute("/_authenticated/provider")({
   head: () => ({ meta: [{ title: "Provider — PERX" }] }),
@@ -27,6 +28,7 @@ function ProviderDashboard() {
   const [uploading, setUploading] = useState(false);
   const [coProviders, setCoProviders] = useState<CoProviderDraft[]>([]);
   const [period, setPeriod] = useState<7 | 30 | 90>(30);
+  const [editingOffer, setEditingOffer] = useState<any | null>(null);
 
   const { data } = useQuery({
     queryKey: ["provider-data"],
