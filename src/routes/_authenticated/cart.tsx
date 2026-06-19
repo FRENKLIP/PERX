@@ -30,7 +30,7 @@ function Cart() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
       const [{ data: items }, { data: profile }] = await Promise.all([
-        supabase.from("cart_items").select("id, qty, offers(id,title,title_sq,price_all,category_slug,provider_company_id,image_url,companies:provider_company_id(name))").eq("user_id", u.user.id),
+        supabase.from("cart_items").select("id, qty, chosen_provider_id, chosen:chosen_provider_id(name), offers(id,title,title_sq,price_all,category_slug,provider_company_id,image_url,companies:provider_company_id(name))").eq("user_id", u.user.id),
         supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle(),
       ]);
       return { items: items ?? [], profile, userId: u.user.id };
@@ -60,14 +60,26 @@ function Cart() {
         ai_package_name: packageName || null,
       }).select().single();
       if (error) throw error;
-      const rows = (data.items as any[]).map((it) => ({
-        request_id: req.id,
-        offer_id: it.offers.id,
-        provider_company_id: it.offers.provider_company_id,
-        offer_title: it.offers.title,
-        price_all: it.offers.price_all,
-        qty: it.qty,
-      }));
+      // Resolve share % per line from offer_providers
+      const offerIds = (data.items as any[]).map((it) => it.offers.id);
+      const { data: opRows } = offerIds.length
+        ? await supabase.from("offer_providers").select("offer_id, provider_company_id, share_pct, is_owner, accepted_at").in("offer_id", offerIds)
+        : { data: [] as any[] };
+      const rows = (data.items as any[]).map((it) => {
+        const all = (opRows ?? []).filter((r) => r.offer_id === it.offers.id);
+        const fulfillingId = it.chosen_provider_id ?? it.offers.provider_company_id;
+        const row = all.find((r) => r.provider_company_id === fulfillingId);
+        const share = row?.share_pct ?? 100;
+        return {
+          request_id: req.id,
+          offer_id: it.offers.id,
+          provider_company_id: fulfillingId,
+          offer_title: it.offers.title,
+          price_all: it.offers.price_all,
+          qty: it.qty,
+          share_pct_snapshot: share,
+        };
+      });
       const { error: e2 } = await supabase.from("request_items").insert(rows);
       if (e2) throw e2;
       await supabase.from("cart_items").delete().eq("user_id", data.userId);
@@ -105,7 +117,10 @@ function Cart() {
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-semibold text-accent-red uppercase tracking-[0.18em]">{it.offers?.category_slug}</div>
                   <div className="font-serif text-lg leading-tight truncate">{locale === "sq" && it.offers?.title_sq ? it.offers.title_sq : it.offers?.title}</div>
-                  <div className="text-xs text-ink-soft">{it.offers?.companies?.name}</div>
+                  <div className="text-xs text-ink-soft">
+                    {it.chosen?.name ?? it.offers?.companies?.name}
+                    {it.chosen && it.chosen.name !== it.offers?.companies?.name && <span className="ml-1 text-accent-red font-semibold">· redeem here</span>}
+                  </div>
                 </div>
                 <div className="font-semibold">{formatAll(it.offers?.price_all ?? 0)}</div>
                 <button onClick={() => remove(it.id)} className="size-9 rounded-full hover:bg-paper grid place-items-center text-ink-soft hover:text-accent-red">
