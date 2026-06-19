@@ -1,46 +1,53 @@
-# Employee home (`/app`) redesign — bento + 3D
+# Remove 3D + remove WalletSim + lean into sage green
 
-Scope is **only** `/app` (employee logged-in home). No changes to employer, provider, marketplace, or landing.
+## 1. Remove the Wallet Simulator
+- Drop the `<WalletSim>` tile from `src/routes/_authenticated/app.tsx`.
+- The `ProviderMapPanel` takes its spot and expands to **full width** (`col-span-12`) where Wallet+Map used to sit.
+- Remove `WalletSim` import and `picks` / `setPicks` / `simTotal` state — no longer needed on this page.
+- The `Hero3DEmployee` `simTotal` prop already defaults to `0`; remove the prop from the call site too.
+- `src/components/home/WalletSim.tsx` stays on disk (not deleted) but is no longer referenced.
 
-## What changes
-Recompose `src/routes/_authenticated/app.tsx` from a vertical stack of sections into a true 12-col bento using the `.tile` / `.bento` utilities already added. The cash-stack 3D scene becomes the visual anchor; everything else slots around it as right-sized tiles.
+## 2. Remove all 3D from the site
+Replace every `<Canvas>`-backed scene with the existing static SVG / CSS fallback. No `@react-three/fiber` rendering anywhere.
 
-## Layout (desktop)
-```text
-┌──────────────────────────────┬─────────────────┐
-│  HERO TILE (cash stack 3D)   │  GREETING +     │
-│  spans 8 col × 2 row         │  BUDGET RING    │
-│  - live banknote stack       │  4 col × 1 row  │
-│  - remaining ALL big number  ├─────────────────┤
-│  - "spent / budget" caption  │  NEAR YOU       │
-│                              │  4 col × 1 row  │
-│                              │  (offer count + │
-│                              │   mini map)     │
-├──────────────────────────────┴─────────────────┤
-│  MOOD STRIP (12 col, hairline, sticky)         │
-├────────────┬───────────────────────────────────┤
-│  WALLET    │  PROVIDER MAP PANEL               │
-│  SIM       │  7 col × 1 row                    │
-│  5 col     │                                   │
-├────────────┴───────────────────────────────────┤
-│  WEEKLY MARQUEE (12 col, dark tile)            │
-├────────────────────────────────────────────────┤
-│  EDITOR BENTO (12 col, existing inner grid)    │
-└────────────────────────────────────────────────┘
-```
-Mobile collapses to a single column; cash-stack tile keeps the 3D canvas, others stack in the order shown.
+- `src/components/landing/Hero3D.tsx` — keep the component shell, render only `HeroFallback` (the SVG cash-stack already there); delete the dynamic import of `Hero3DScene`.
+- `src/components/landing/Hero3DScene.tsx` — delete file.
+- `src/components/home/Hero3DEmployee.tsx` — strip the lazy-loaded `<Scene>`; the tile renders a flat cream/paper background with the existing "Remaining ALL" overlay only.
+- `src/components/home/HomeHeroScene.tsx` — delete file.
+- No other Canvas usages exist.
 
-## Concrete edits
-- `src/routes/_authenticated/app.tsx`: wrap the page in `<div className="bento">`, give each existing component a tile wrapper with explicit `col-span` / `row-span`. Move greeting + budget summary out of `Hero3DEmployee` into a dedicated small tile so the hero tile is pure 3D + remaining number.
-- `src/components/home/Hero3DEmployee.tsx`: strip the inline greeting/header so it becomes a pure scene tile (full-bleed Canvas with the remaining ALL overlay). Keep all existing 3D logic and props.
-- New tiny tile components inside `app.tsx` (no new files): `GreetingTile`, `NearYouTile` — both use `.tile` with hairline borders and Sora numerics.
-- `WalletSim`, `ProviderMapPanel`, `WeeklyMarquee`, `EditorBento` rendered inside `.tile` / `.tile-dark` wrappers with consistent padding (`p-6 md:p-8`). No changes to their internal logic.
-- Sticky `MoodPicker` strip restyled as a hairline pill bar inside a 12-col tile.
+R3F packages stay installed (cheap, no runtime cost since nothing imports them). No code references remain.
+
+## 3. Lean into sage green
+Raise sage from a single accent dot to a recurring secondary accent across the marketing site and the employee app. Red stays the primary warm accent; sage becomes the supporting cool accent.
+
+Specific moves:
+- `src/styles.css`: add `--color-sage-soft: #e7ece2` (tint for backgrounds) and `--color-sage-deep: #5e6e54` (for text on cream). Add a `.tile-sage` utility (sage background, cream text) mirroring `.tile-accent`.
+- Landing (`src/routes/index.tsx`):
+  - Section labels' eyebrow dot → sage.
+  - "How it works" step numbers backgrounds → sage-soft.
+  - Second CTA ("See how it works") underline hover → sage.
+  - Footer hover state on links → sage instead of red.
+- `BentoGrid.tsx`: keep the existing `bg-sage` tile, also tint the "Live dashboard" tile background with `bg-sage-soft` so green appears on the light side too.
+- `AudiencePanels.tsx`: make the Employer panel sage-accented (currently red); keep Employee red, Provider stays ink.
+- `/app` (`app.tsx`):
+  - Greeting tile: swap the red accent name color for sage (the firstName line goes sage, not red).
+  - "Near you" tile's MapPin icon: sage.
+  - WalletRing accent color (in `WalletRing.tsx`): the progress arc switches from red to sage; over-budget state stays red.
+- `Hero3DEmployee.tsx` (now flat): "Remaining" label dot + a thin sage underline beneath the big number for visual weight.
+- `MoodPicker.tsx`: active chip's outline tint → sage.
+
+## Files touched
+Edit: `src/styles.css`, `src/routes/_authenticated/app.tsx`, `src/components/home/Hero3DEmployee.tsx`, `src/components/landing/Hero3D.tsx`, `src/routes/index.tsx`, `src/components/landing/BentoGrid.tsx`, `src/components/landing/AudiencePanels.tsx`, `src/components/landing/HowItWorks.tsx`, `src/components/WalletRing.tsx`, `src/components/home/MoodPicker.tsx`.
+Delete: `src/components/landing/Hero3DScene.tsx`, `src/components/home/HomeHeroScene.tsx`.
 
 ## Out of scope
-- No backend / data changes.
-- No edits to employer, provider, marketplace, landing, or shared shell.
-- No new 3D scenes — only the existing cash stack is reused.
+- No layout changes beyond removing Wallet sim and expanding the map.
+- No backend changes.
+- No employer / provider / marketplace edits this pass.
 
 ## Verification
-- Visit `/app` in preview at 1786px and 390px; confirm bento layout renders, 3D hero is the visual anchor, no orange anywhere, all existing interactions (mood, wallet sim, map, add-to-cart) still work.
+- `rg "@react-three|Canvas" src/` returns no matches in app code.
+- `/app` shows hero tile (flat) + greeting tile + near-you tile + mood strip + full-width map + weekly marquee + editor bento — no wallet simulator.
+- Landing hero shows the static SVG cash-stack, no WebGL.
+- Sage appears in at least 4 distinct locations across landing and `/app`.
