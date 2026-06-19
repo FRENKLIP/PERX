@@ -10,7 +10,6 @@ import { Hero3DEmployee } from "@/components/home/Hero3DEmployee";
 import { MoodPicker, type MoodId } from "@/components/home/MoodPicker";
 import { ProviderMapPanel } from "@/components/home/ProviderMapPanel";
 import { WeeklyMarquee } from "@/components/home/WeeklyMarquee";
-import { EditorBento } from "@/components/home/EditorBento";
 import { WalletRing } from "@/components/WalletRing";
 
 export const Route = createFileRoute("/_authenticated/app")({
