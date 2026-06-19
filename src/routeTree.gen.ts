@@ -23,6 +23,7 @@ import { Route as AuthenticatedConciergeRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiPublicSeedDemoRouteImport } from './routes/api/public/seed-demo'
+import { Route as AuthenticatedRedeemRequestIdRouteImport } from './routes/_authenticated/redeem.$requestId'
 import { Route as AuthenticatedOfferOfferIdRouteImport } from './routes/_authenticated/offer.$offerId'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -95,6 +96,12 @@ const ApiPublicSeedDemoRoute = ApiPublicSeedDemoRouteImport.update({
   path: '/api/public/seed-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRedeemRequestIdRoute =
+  AuthenticatedRedeemRequestIdRouteImport.update({
+    id: '/redeem/$requestId',
+    path: '/redeem/$requestId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedOfferOfferIdRoute =
   AuthenticatedOfferOfferIdRouteImport.update({
     id: '/offer/$offerId',
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/api/insights': typeof ApiInsightsRoute
   '/api/weekly-drop': typeof ApiWeeklyDropRoute
   '/offer/$offerId': typeof AuthenticatedOfferOfferIdRoute
+  '/redeem/$requestId': typeof AuthenticatedRedeemRequestIdRoute
   '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRoutesByTo {
@@ -132,6 +140,7 @@ export interface FileRoutesByTo {
   '/api/insights': typeof ApiInsightsRoute
   '/api/weekly-drop': typeof ApiWeeklyDropRoute
   '/offer/$offerId': typeof AuthenticatedOfferOfferIdRoute
+  '/redeem/$requestId': typeof AuthenticatedRedeemRequestIdRoute
   '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRoutesById {
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/api/insights': typeof ApiInsightsRoute
   '/api/weekly-drop': typeof ApiWeeklyDropRoute
   '/_authenticated/offer/$offerId': typeof AuthenticatedOfferOfferIdRoute
+  '/_authenticated/redeem/$requestId': typeof AuthenticatedRedeemRequestIdRoute
   '/api/public/seed-demo': typeof ApiPublicSeedDemoRoute
 }
 export interface FileRouteTypes {
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/api/insights'
     | '/api/weekly-drop'
     | '/offer/$offerId'
+    | '/redeem/$requestId'
     | '/api/public/seed-demo'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/api/insights'
     | '/api/weekly-drop'
     | '/offer/$offerId'
+    | '/redeem/$requestId'
     | '/api/public/seed-demo'
   id:
     | '__root__'
@@ -201,6 +213,7 @@ export interface FileRouteTypes {
     | '/api/insights'
     | '/api/weekly-drop'
     | '/_authenticated/offer/$offerId'
+    | '/_authenticated/redeem/$requestId'
     | '/api/public/seed-demo'
   fileRoutesById: FileRoutesById
 }
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSeedDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/redeem/$requestId': {
+      id: '/_authenticated/redeem/$requestId'
+      path: '/redeem/$requestId'
+      fullPath: '/redeem/$requestId'
+      preLoaderRoute: typeof AuthenticatedRedeemRequestIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/offer/$offerId': {
       id: '/_authenticated/offer/$offerId'
       path: '/offer/$offerId'
@@ -333,6 +353,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
   AuthenticatedSavedRoute: typeof AuthenticatedSavedRoute
   AuthenticatedOfferOfferIdRoute: typeof AuthenticatedOfferOfferIdRoute
+  AuthenticatedRedeemRequestIdRoute: typeof AuthenticatedRedeemRequestIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -345,6 +366,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
   AuthenticatedSavedRoute: AuthenticatedSavedRoute,
   AuthenticatedOfferOfferIdRoute: AuthenticatedOfferOfferIdRoute,
+  AuthenticatedRedeemRequestIdRoute: AuthenticatedRedeemRequestIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

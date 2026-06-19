@@ -74,6 +74,7 @@ function RedeemPage() {
   }
 
   function addToCalendar() {
+    if (!data) return;
     const start = new Date();
     start.setHours(start.getHours() + 1, 0, 0, 0);
     downloadIcs({
