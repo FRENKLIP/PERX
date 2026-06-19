@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { generateText, Output } from "ai";
+import { generateObject } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { rollupRequests, type CategoryRollup } from "@/lib/categorize";
@@ -45,25 +45,31 @@ export const Route = createFileRoute("/api/insights")({
         const gateway = createLovableAiGatewayProvider(key);
         const model = gateway("google/gemini-3-flash-preview");
 
-        const { experimental_output } = await generateText({
-          model,
-          system: [
-            "You are 'Talent Edge', an HR analyst for an employer in Tirana, Albania.",
-            "Voice: confident, comparative, plain English. No bullets, no hedging, no emoji.",
-            "Headline MUST contrast what the team is NOT asking for vs what they ARE choosing.",
-            "Every recommendation must reference an observed category share, count, or example.",
-            "Currency context is Albanian Lek (ALL). Keep numbers out of the headline.",
-          ].join(" "),
-          prompt: [
-            `Period: last ${period} days. Approved requests: ${approvedCount}.`,
-            "Category mix (already aggregated):",
-            JSON.stringify(rollup, null, 2),
-            "Write the Talent Edge insight.",
-          ].join("\n\n"),
-          experimental_output: Output.object({ schema: InsightSchema }),
-        });
-
-        return Response.json(experimental_output);
+        try {
+          const { object } = await generateObject({
+            model,
+            schema: InsightSchema,
+            system: [
+              "You are 'Talent Edge', an HR analyst for an employer in Tirana, Albania.",
+              "Voice: confident, comparative, plain English. No bullets, no hedging, no emoji.",
+              "Headline MUST contrast what the team is NOT asking for vs what they ARE choosing.",
+              "Every recommendation must reference an observed category share, count, or example.",
+              "Currency context is Albanian Lek (ALL). Keep numbers out of the headline.",
+            ].join(" "),
+            prompt: [
+              `Period: last ${period} days. Approved requests: ${approvedCount}.`,
+              "Category mix (already aggregated):",
+              JSON.stringify(rollup, null, 2),
+              "Write the Talent Edge insight.",
+            ].join("\n\n"),
+          });
+          return Response.json(object);
+        } catch (err: any) {
+          console.error("talent-edge insight failed:", err);
+          return new Response(JSON.stringify({ error: err?.message ?? "AI failed" }), {
+            status: 500, headers: { "content-type": "application/json" },
+          });
+        }
       },
     },
   },
