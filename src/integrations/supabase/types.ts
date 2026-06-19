@@ -573,6 +573,44 @@ export type Database = {
           },
         ]
       }
+      wallet_transfers: {
+        Row: {
+          amount_all: number
+          company_id: string
+          created_at: string
+          id: string
+          note: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          amount_all: number
+          company_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          amount_all?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transfers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -599,6 +637,10 @@ export type Database = {
           p_full_name?: string
           p_role: Database["public"]["Enums"]["app_role"]
         }
+        Returns: string
+      }
+      transfer_funds: {
+        Args: { p_amount: number; p_note?: string; p_recipient: string }
         Returns: string
       }
     }
