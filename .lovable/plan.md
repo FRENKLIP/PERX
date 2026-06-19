@@ -1,56 +1,55 @@
+## Goal
+Add an **Employees** tab to the employer dashboard (`/employer`) where an employer admin can see every employee at their company and edit each one's profile and monthly budget.
 
-# Multi-provider (co-listed) offers
+## Tab layout
 
-Today every offer belongs to exactly one provider via `offers.provider_company_id`. We'll keep that column as the **creator/owner**, and add a join table for **co-providers** with revenue-share percentages. At checkout the employee picks one of the attached providers; that provider gets the redemption code and the order is stamped with their split for reporting.
+Add a top-of-page segmented switcher: **Overview | Employees**.
+- **Overview** = the existing dashboard (stats, charts, pending approvals) unchanged.
+- **Employees** = new view.
 
-## Data model changes
+## Employees view
 
-1. New table `public.offer_providers`
-   - `offer_id` (FK offers, cascade)
-   - `provider_company_id` (FK companies)
-   - `share_pct` int (0–100, default 0)
-   - `is_owner` bool (true for the creator row)
-   - `accepted_at` timestamptz null (null = invitation pending)
-   - `created_at` timestamptz
-   - Unique (`offer_id`, `provider_company_id`)
-   - Trigger: ensure total `share_pct` across accepted rows ≤ 100.
-   - RLS: any provider admin in the row can read; only the owner can insert/delete; an invited provider can update their own `accepted_at`.
-   - GRANTs to authenticated + service_role.
+Card/table list of every profile whose `employer_company_id` is one of the admin's companies. Each row shows:
+- Avatar + full name
+- Monthly budget (editable inline, ALL)
+- Spent this month (sum of approved request totals in the period)
+- Utilization bar
+- "Edit" button → opens a side sheet
 
-2. Backfill: insert one `offer_providers` row per existing offer with `is_owner=true`, `share_pct=100`, `accepted_at=now()`.
+### Edit sheet (per employee)
+Editable fields:
+- `full_name` (text)
+- `avatar_url` (upload to existing storage or paste URL)
+- `locale` (sq / en)
+- `monthly_budget_all` (integer, ALL, validated 0–10,000,000)
+- "Remove from company" button → clears `employer_company_id` (with confirm)
 
-3. `request_items` gets two new columns:
-   - `fulfilling_provider_id uuid` (which provider was chosen at checkout — already covered by existing `provider_company_id`, so we just repurpose it: keep it as the chosen one).
-   - `share_pct_snapshot int` so revenue reports reflect the split at purchase time.
+Header strip on the tab:
+- Search by name
+- Sort by budget / spent / utilization
+- Bulk action: "Set budget for all" (applies a single value to every employee in the list)
 
-## Provider dashboard (`/_authenticated/provider`)
+## Database changes
 
-- New-offer form: after entering details, an "Co-providers" section lets the owner search companies (kind = provider) by name, add them as rows, and set each share %. Owner's share auto-fills to `100 - sum(others)`. Submit creates the offer + N `offer_providers` rows in one call (server fn).
-- "Your offers" grid shows offers where the current company is in `offer_providers` (owner or co). A "Co-listed" pill appears when >1 provider; owners see "Manage co-providers"; invitees see "Accept / decline".
-- Incoming orders list filters to items where `fulfilling_provider_id = your company`. Revenue stats use `price_all * share_pct_snapshot / 100` for co-listed orders so each provider sees their cut.
+Currently `profiles` only has `UPDATE` allowed for `auth.uid() = id`. We need employer admins to update their employees' profiles.
 
-## Employee flow
-
-- Offer detail page (`offer.$offerId`): shows a "Available from" row with logos/names of all accepted providers. If >1, a small selector ("Redeem at: …") appears and is required before "Add to cart" / checkout.
-- Marketplace card: small "+N venues" badge when an offer has multiple providers.
-- Cart / checkout: persists the selected `provider_company_id` per line. The redemption code, on payment, is generated for that provider only.
-
-## Out of scope
-
-- No revenue payouts integration (we already simulate payment). Split is for reporting only.
-- No public discovery / opt-in marketplace for providers to find offers — strictly invite-by-name.
-- No editing of share % after the offer has paid orders (we just block it in the UI / server fn).
+Migration:
+- Add RLS policy on `public.profiles` for `UPDATE` allowing
+  `has_company_role(auth.uid(), employer_company_id, 'employer_admin')`
+  in both `USING` and `WITH CHECK`. The `WITH CHECK` also enforces that the new `employer_company_id` is either NULL (remove from company) or still a company the actor admins, so an admin can't reassign an employee to a company they don't control.
+- No schema additions — `full_name`, `avatar_url`, `locale`, `monthly_budget_all`, `employer_company_id` already exist on `profiles`.
 
 ## Files to touch
+- New migration for the `UPDATE` policy on `profiles`.
+- `src/routes/_authenticated/employer.tsx` — add tab switcher, lift existing JSX into an "Overview" panel, mount new component for "Employees".
+- New `src/components/employer/EmployeesTab.tsx` — list, filters, bulk-set-budget bar.
+- New `src/components/employer/EmployeeEditSheet.tsx` — side sheet form, avatar upload via existing `offer-images` bucket (or a new `avatars` bucket if you prefer — say the word).
+- Reuse `formatAll`, `StatTile` styles for consistency.
 
-- DB: one migration (new table, trigger, RLS, GRANTs, backfill, two new `request_items` columns).
-- `src/routes/_authenticated/provider.tsx` — new-offer form additions, manage / accept UI, dashboard filtering.
-- `src/routes/_authenticated/offer.$offerId.tsx` — provider list + selector.
-- `src/routes/_authenticated/cart.tsx` — pass selected provider into request_items, stamp share_pct.
-- `src/routes/_authenticated/marketplace.tsx`, `EditorBento.tsx`, `WalletSim.tsx` — "+N venues" badge.
-- New server fn `src/lib/offers.functions.ts` (`createOfferWithProviders`, `setShare`, `respondToInvite`).
+## Out of scope
+- Inviting new employees by email (auth admin flow) — not requested.
+- Per-employee category limits or weekly budgets.
+- Audit log of admin edits.
 
-## Open questions
-
-- Should an invited provider be able to **counter-propose** a share %, or only accept/decline? (Default plan: accept/decline only.)
-- For pending invites, should the offer still be live to employees? (Default plan: yes — only accepted providers appear in the "redeem at" list.)
+## Open question
+Avatar uploads: reuse the existing private `offer-images` bucket, or create a new public `avatars` bucket? I'll create a new public `avatars` bucket by default since avatars need to render in the UI without signed URLs — tell me if you'd rather keep one bucket.

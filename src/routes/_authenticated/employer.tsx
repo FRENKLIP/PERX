@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { Sparkles, CheckCircle2, XCircle, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { StatTile } from "@/components/StatTile";
 import { TrendArea, CategoryDonut, TopBars, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
+import { EmployeesTab } from "@/components/employer/EmployeesTab";
 
 export const Route = createFileRoute("/_authenticated/employer")({
   head: () => ({ meta: [{ title: "Employer — PERX" }] }),
@@ -21,6 +22,7 @@ function EmployerDashboard() {
   const qc = useQueryClient();
   const [insight, setInsight] = useState<string | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
+  const [tab, setTab] = useState<"overview" | "employees">("overview");
 
   const { data } = useQuery({
     queryKey: ["employer-data"],
@@ -170,9 +172,30 @@ function EmployerDashboard() {
           <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Employer console</div>
           <h1 className="font-serif text-5xl tracking-tight">How your team is spending their wellbeing.</h1>
         </div>
-        <PeriodSwitcher value={period} onChange={setPeriod} />
+        {tab === "overview" && <PeriodSwitcher value={period} onChange={setPeriod} />}
       </div>
 
+      <div className="inline-flex items-center gap-1 p-1 mb-8 hairline rounded-full bg-white">
+        {([
+          { id: "overview", label: "Overview" },
+          { id: "employees", label: `Employees · ${(data?.employees ?? []).length}` },
+        ] as const).map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
+              tab === t.id ? "bg-ink text-cream" : "text-ink-soft hover:text-ink"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "employees" ? (
+        <EmployeesTab companyIds={data?.companyIds ?? []} />
+      ) : (
+      <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-border-soft hairline rounded-3xl overflow-hidden mb-10 fade-up">
         <StatTile label="Pending" value={pending.length.toString()} hint={pending.length ? "awaiting review" : "all clear"} accent="orange" />
         <StatTile label={`Approved · ${period}d`} value={approvedInPeriod.length.toString()} hint={`${rejected.length} rejected total`} accent="sage" />
@@ -343,6 +366,8 @@ function EmployerDashboard() {
             ))}
           </div>
         </>
+      )}
+      </>
       )}
     </div>
   );
