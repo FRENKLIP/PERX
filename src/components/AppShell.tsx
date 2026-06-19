@@ -64,7 +64,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             {isEmployee && <NavTab to="/marketplace" label={t("marketplace")} />}
             {isEmployee && <NavTab to="/concierge" label={t("concierge")} />}
             {isEmployee && <NavTab to="/saved" label="Saved" />}
-            {isEmployee && <NavTab to="/pairs" label="Pairs" />}
             {isEmployee && <NavTab to="/cart" label={`${t("cart")}${ctx?.cartCount ? ` · ${ctx.cartCount}` : ""}`} />}
             {isEmployee && <NavTab to="/requests" label={t("requests")} />}
             {isEmployer && <NavTab to="/employer" label={t("employer_dashboard")} />}

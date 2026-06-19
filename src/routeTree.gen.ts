@@ -17,7 +17,6 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedSavedRouteImport } from './routes/_authenticated/saved'
 import { Route as AuthenticatedRequestsRouteImport } from './routes/_authenticated/requests'
 import { Route as AuthenticatedProviderRouteImport } from './routes/_authenticated/provider'
-import { Route as AuthenticatedPairsRouteImport } from './routes/_authenticated/pairs'
 import { Route as AuthenticatedMarketplaceRouteImport } from './routes/_authenticated/marketplace'
 import { Route as AuthenticatedEmployerRouteImport } from './routes/_authenticated/employer'
 import { Route as AuthenticatedConciergeRouteImport } from './routes/_authenticated/concierge'
@@ -65,11 +64,6 @@ const AuthenticatedProviderRoute = AuthenticatedProviderRouteImport.update({
   path: '/provider',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedPairsRoute = AuthenticatedPairsRouteImport.update({
-  id: '/pairs',
-  path: '/pairs',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedMarketplaceRoute =
   AuthenticatedMarketplaceRouteImport.update({
     id: '/marketplace',
@@ -115,7 +109,6 @@ export interface FileRoutesByFullPath {
   '/concierge': typeof AuthenticatedConciergeRoute
   '/employer': typeof AuthenticatedEmployerRoute
   '/marketplace': typeof AuthenticatedMarketplaceRoute
-  '/pairs': typeof AuthenticatedPairsRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/requests': typeof AuthenticatedRequestsRoute
   '/saved': typeof AuthenticatedSavedRoute
@@ -132,7 +125,6 @@ export interface FileRoutesByTo {
   '/concierge': typeof AuthenticatedConciergeRoute
   '/employer': typeof AuthenticatedEmployerRoute
   '/marketplace': typeof AuthenticatedMarketplaceRoute
-  '/pairs': typeof AuthenticatedPairsRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/requests': typeof AuthenticatedRequestsRoute
   '/saved': typeof AuthenticatedSavedRoute
@@ -151,7 +143,6 @@ export interface FileRoutesById {
   '/_authenticated/concierge': typeof AuthenticatedConciergeRoute
   '/_authenticated/employer': typeof AuthenticatedEmployerRoute
   '/_authenticated/marketplace': typeof AuthenticatedMarketplaceRoute
-  '/_authenticated/pairs': typeof AuthenticatedPairsRoute
   '/_authenticated/provider': typeof AuthenticatedProviderRoute
   '/_authenticated/requests': typeof AuthenticatedRequestsRoute
   '/_authenticated/saved': typeof AuthenticatedSavedRoute
@@ -170,7 +161,6 @@ export interface FileRouteTypes {
     | '/concierge'
     | '/employer'
     | '/marketplace'
-    | '/pairs'
     | '/provider'
     | '/requests'
     | '/saved'
@@ -187,7 +177,6 @@ export interface FileRouteTypes {
     | '/concierge'
     | '/employer'
     | '/marketplace'
-    | '/pairs'
     | '/provider'
     | '/requests'
     | '/saved'
@@ -205,7 +194,6 @@ export interface FileRouteTypes {
     | '/_authenticated/concierge'
     | '/_authenticated/employer'
     | '/_authenticated/marketplace'
-    | '/_authenticated/pairs'
     | '/_authenticated/provider'
     | '/_authenticated/requests'
     | '/_authenticated/saved'
@@ -283,13 +271,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProviderRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/pairs': {
-      id: '/_authenticated/pairs'
-      path: '/pairs'
-      fullPath: '/pairs'
-      preLoaderRoute: typeof AuthenticatedPairsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/marketplace': {
       id: '/_authenticated/marketplace'
       path: '/marketplace'
@@ -348,7 +329,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedConciergeRoute: typeof AuthenticatedConciergeRoute
   AuthenticatedEmployerRoute: typeof AuthenticatedEmployerRoute
   AuthenticatedMarketplaceRoute: typeof AuthenticatedMarketplaceRoute
-  AuthenticatedPairsRoute: typeof AuthenticatedPairsRoute
   AuthenticatedProviderRoute: typeof AuthenticatedProviderRoute
   AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
   AuthenticatedSavedRoute: typeof AuthenticatedSavedRoute
@@ -361,7 +341,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedConciergeRoute: AuthenticatedConciergeRoute,
   AuthenticatedEmployerRoute: AuthenticatedEmployerRoute,
   AuthenticatedMarketplaceRoute: AuthenticatedMarketplaceRoute,
-  AuthenticatedPairsRoute: AuthenticatedPairsRoute,
   AuthenticatedProviderRoute: AuthenticatedProviderRoute,
   AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
   AuthenticatedSavedRoute: AuthenticatedSavedRoute,
