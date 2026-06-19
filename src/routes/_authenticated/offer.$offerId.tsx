@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
-import { ArrowLeft, Plus, Sparkles, MapPin, Check } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, MapPin, Check, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton";
