@@ -1,11 +1,6 @@
-Change the left panel of the map widget to a green (sage) background with matching text and button styles.
+Restructure the hero section of `src/routes/index.tsx`:
 
-1. In `src/components/home/ProviderMapPanel.tsx`:
-   - Change the left panel container from `bg-cream` to `bg-sage text-cream`
-   - Update the label text color from `text-ink-soft` to `text-cream/70`
-   - Update the heading color to `text-cream`
-   - Update the paragraph color to `text-cream/70`
-   - Update the filter buttons:
-     - Active state: `bg-cream text-ink border-cream`
-     - Inactive state: `bg-sage-soft/30 text-cream border-cream/30 hover:border-cream/60`
-   - Update the pin count text color to `text-cream/70`
+1. Remove the `Hero3D` import and the right column (`<Hero3D />`).
+2. Replace the two-column grid with a centered single-column layout: full viewport-tall section (`min-h-screen`), content centered both horizontally and vertically, headline/sub/CTAs aligned center, `max-w-5xl` container.
+3. Add a background photo (Tirana / Blloku editorial Unsplash shot) as `<img>` absolutely positioned `inset-0`, `object-cover`, `opacity-15`, behind content. Add a subtle cream gradient overlay so text stays readable.
+4. Keep nav, all downstream sections, and rest of page unchanged.

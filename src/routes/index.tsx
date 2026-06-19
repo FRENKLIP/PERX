@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getMyRoles, landingFor } from "@/lib/roles";
-import Hero3D from "@/components/landing/Hero3D";
 import Marquee from "@/components/landing/Marquee";
 import HowItWorks, { SectionLabel } from "@/components/landing/HowItWorks";
 import BentoGrid from "@/components/landing/BentoGrid";
@@ -123,16 +122,23 @@ function Landing() {
       </nav>
 
       {/* HERO */}
-      <section id="top" className="max-w-7xl mx-auto px-6 pt-32 md:pt-40 pb-24 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center fade-up">
-        <div className="lg:col-span-7">
+      <section id="top" className="relative min-h-screen flex items-center justify-center overflow-hidden fade-up">
+        <img
+          src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=2000&q=80"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-cream via-cream/60 to-cream pointer-events-none" />
+        <div className="relative max-w-5xl mx-auto px-6 pt-32 pb-24 text-center">
           <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-6">Issue 01 · Tirana, 2026</div>
-          <h1 className="font-serif text-6xl md:text-8xl lg:text-[9rem] leading-[0.92] tracking-tight text-balance">
+          <h1 className="font-serif text-6xl md:text-8xl lg:text-[8.5rem] leading-[0.92] tracking-tight text-balance">
             Benefits that <em className="text-accent-red">feel</em> like a Friday in Blloku.
           </h1>
-          <p className="text-ink-soft text-lg max-w-md mt-8 text-pretty">
+          <p className="text-ink-soft text-lg max-w-xl mx-auto mt-8 text-pretty">
             Tax-efficient gyms, meals, weekends and courses — picked by your team, paid straight to local providers.
           </p>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <a href="#enter" className="bg-ink text-cream px-7 py-4 rounded-full font-bold text-sm hover:bg-accent-red transition-colors">
               Start free
             </a>
@@ -140,9 +146,6 @@ function Landing() {
               See how it works
             </a>
           </div>
-        </div>
-        <div className="lg:col-span-5">
-          <Hero3D />
         </div>
       </section>
 
