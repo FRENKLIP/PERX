@@ -12,12 +12,11 @@ function HeroFallback() {
         </radialGradient>
       </defs>
       <rect width="400" height="400" fill="url(#g)" />
-      <rect x="120" y="160" width="160" height="100" rx="14" fill="#171717" />
-      <rect x="130" y="150" width="160" height="100" rx="14" fill="#c5503a" opacity="0.9" />
-      <rect x="140" y="140" width="160" height="100" rx="14" fill="#faf7f2" stroke="#17171712" />
-      <circle cx="90" cy="100" r="22" fill="#7a8b6f" />
-      <circle cx="320" cy="120" r="18" fill="#c5503a" />
-      <circle cx="300" cy="300" r="20" fill="#c5503a" />
+      {Array.from({ length: 18 }).map((_, i) => (
+        <rect key={i} x={80 + (i % 3) * 2} y={300 - i * 8} width="240" height="14" rx="3" fill={i === 17 ? "#faf7f2" : i % 4 === 0 ? "#f3efe7" : "#faf7f2"} stroke="#17171712" />
+      ))}
+      <rect x="92" y="156" width="40" height="10" fill="#c5503a" />
+      <text x="200" y="166" textAnchor="middle" fontFamily="Sora, sans-serif" fontWeight="700" fontSize="14" fill="#171717">50 000 ALL</text>
     </svg>
   );
 }
