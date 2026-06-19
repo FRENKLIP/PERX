@@ -124,13 +124,13 @@ function AppHome() {
         </div>
 
         {/* Mood strip */}
-        <div className="tile-dark col-span-12 px-5 py-3">
+        <div className="tile-white col-span-12 px-5 py-3">
           <MoodPicker value={mood} onChange={setMood} />
         </div>
 
         {/* Map panel — full width */}
         {offersWithLatLng.length > 0 && (
-          <div className="tile-dark col-span-12 p-6 md:p-7">
+          <div className="tile-white col-span-12 p-6 md:p-7">
             <ProviderMapPanel
               offers={offersWithLatLng.filter((o: any) => moodMatch(mood, o.category_slug)) as any}
               onAdd={addToCart}

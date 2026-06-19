@@ -31,8 +31,8 @@ export function MoodPicker({ value, onChange }: { value: MoodId; onChange: (v: M
             onClick={() => onChange(m.id)}
             className={`shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border transition-all duration-300 ${
               active
-                ? "bg-sage text-ink border-sage scale-[1.02] shadow-[0_8px_22px_-12px_rgba(0,0,0,0.4)]"
-                : "bg-transparent border-cream/40 text-cream hover:bg-cream hover:text-ink hover:-translate-y-0.5"
+                ? "bg-sage text-cream border-sage scale-[1.02] shadow-[0_8px_22px_-12px_rgba(0,0,0,0.4)]"
+                : "bg-transparent border-sage/40 text-sage hover:bg-sage hover:text-cream hover:-translate-y-0.5"
             }`}
           >
             <Icon className="size-4" />
