@@ -147,6 +147,51 @@ export type Database = {
           },
         ]
       }
+      offer_providers: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          is_owner: boolean
+          offer_id: string
+          provider_company_id: string
+          share_pct: number
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          is_owner?: boolean
+          offer_id: string
+          provider_company_id: string
+          share_pct?: number
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          is_owner?: boolean
+          offer_id?: string
+          provider_company_id?: string
+          share_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_providers_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offer_providers_provider_company_id_fkey"
+            columns: ["provider_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offer_reviews: {
         Row: {
           body: string | null
@@ -300,6 +345,7 @@ export type Database = {
           qty: number
           redemption_code: string | null
           request_id: string
+          share_pct_snapshot: number
         }
         Insert: {
           id?: string
@@ -311,6 +357,7 @@ export type Database = {
           qty?: number
           redemption_code?: string | null
           request_id: string
+          share_pct_snapshot?: number
         }
         Update: {
           id?: string
@@ -322,6 +369,7 @@ export type Database = {
           qty?: number
           redemption_code?: string | null
           request_id?: string
+          share_pct_snapshot?: number
         }
         Relationships: [
           {
