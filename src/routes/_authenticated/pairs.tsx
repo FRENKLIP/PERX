@@ -17,12 +17,26 @@ function PairsPage() {
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return { incoming: [], outgoing: [] };
-      const select = "*, offer:offer_id(id,title,image_url,price_all), inviter:inviter_id(full_name,avatar_url), invitee:invitee_id(full_name,avatar_url), provider:provider_company_id(name,neighborhood)";
+      const select = "*, offer:offer_id(id,title,image_url,price_all), provider:provider_company_id(name,neighborhood)";
       const [{ data: incoming }, { data: outgoing }] = await Promise.all([
         supabase.from("pair_invitations").select(select).eq("invitee_id", u.user.id).order("created_at", { ascending: false }),
         supabase.from("pair_invitations").select(select).eq("inviter_id", u.user.id).order("created_at", { ascending: false }),
       ]);
-      return { incoming: incoming ?? [], outgoing: outgoing ?? [] };
+      const all = [...(incoming ?? []), ...(outgoing ?? [])];
+      const ids = Array.from(new Set(all.flatMap((p: any) => [p.inviter_id, p.invitee_id])));
+      const { data: profs } = ids.length
+        ? await supabase.from("profiles").select("id, full_name, avatar_url").in("id", ids)
+        : { data: [] as any[] };
+      const byId = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      const hydrate = (p: any) => ({
+        ...p,
+        inviter: byId.get(p.inviter_id) ?? null,
+        invitee: byId.get(p.invitee_id) ?? null,
+      });
+      return {
+        incoming: (incoming ?? []).map(hydrate),
+        outgoing: (outgoing ?? []).map(hydrate),
+      };
     },
   });
 
