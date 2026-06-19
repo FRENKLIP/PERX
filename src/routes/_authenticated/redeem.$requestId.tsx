@@ -123,6 +123,9 @@ function RedeemPage() {
               <button onClick={addToCalendar} className="inline-flex items-center gap-2 hairline rounded-full px-5 py-2.5 text-sm font-semibold hover:bg-paper">
                 <CalendarPlus className="size-4" /> Add to calendar
               </button>
+              <Link to="/passport" className="inline-flex items-center gap-2 text-xs font-semibold text-ink-soft hover:text-ink self-center">
+                View in your Passport →
+              </Link>
             </div>
           </div>
         </div>
