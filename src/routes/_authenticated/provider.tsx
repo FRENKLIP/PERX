@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Power, PowerOff, Copy } from "lucide-react";
+import { Plus, Power, PowerOff, Copy, Upload, X, Loader2 } from "lucide-react";
 import { StatTile } from "@/components/StatTile";
 import { TrendArea, TopBars, CategoryDonut, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
 
@@ -21,6 +21,9 @@ function ProviderDashboard() {
   const qc = useQueryClient();
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", price: "5000", category: "wellness", location: "Tirana" });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [period, setPeriod] = useState<7 | 30 | 90>(30);
 
   const { data } = useQuery({
@@ -103,6 +106,23 @@ function ProviderDashboard() {
   async function createOffer(e: React.FormEvent) {
     e.preventDefault();
     if (!data?.companyIds[0]) return;
+    setUploading(true);
+    let image_url: string | null = null;
+    if (imageFile) {
+      const ext = imageFile.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const path = `${data.companyIds[0]}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("offer-images").upload(path, imageFile, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: imageFile.type,
+      });
+      if (upErr) {
+        setUploading(false);
+        toast.error(upErr.message);
+        return;
+      }
+      image_url = supabase.storage.from("offer-images").getPublicUrl(path).data.publicUrl;
+    }
     const { error } = await supabase.from("offers").insert({
       provider_company_id: data.companyIds[0],
       title: form.title,
@@ -110,14 +130,28 @@ function ProviderDashboard() {
       price_all: parseInt(form.price, 10),
       category_slug: form.category,
       location: form.location,
+      image_url,
     });
+    setUploading(false);
     if (error) toast.error(error.message);
     else {
       toast.success("Offer published");
       setShowNew(false);
       setForm({ title: "", description: "", price: "5000", category: "wellness", location: "Tirana" });
+      setImageFile(null);
+      setImagePreview(null);
       qc.invalidateQueries({ queryKey: ["provider-data"] });
     }
+  }
+
+  function handleImagePick(file: File | null) {
+    if (!file) { setImageFile(null); setImagePreview(null); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Please pick an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
   }
 
   return (
@@ -221,7 +255,41 @@ function ProviderDashboard() {
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Description</span>
             <textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none" rows={3} />
           </label>
-          <button type="submit" className="sm:col-span-2 bg-ink text-cream py-3 rounded-full font-semibold hover:bg-accent-red transition-colors">Publish</button>
+          <div className="sm:col-span-2">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Cover image</span>
+            {imagePreview ? (
+              <div className="relative rounded-2xl overflow-hidden hairline group">
+                <img src={imagePreview} alt="" className="w-full aspect-[16/9] object-cover" />
+                <button
+                  type="button"
+                  onClick={() => handleImagePick(null)}
+                  className="absolute top-3 right-3 size-9 grid place-items-center rounded-full bg-ink/80 text-cream hover:bg-accent-red transition-colors"
+                  aria-label="Remove image"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center gap-2 aspect-[16/9] sm:aspect-[21/9] bg-paper hairline rounded-2xl cursor-pointer hover:bg-paper/70 transition-colors">
+                <Upload className="size-5 text-ink-soft" />
+                <span className="text-sm text-ink-soft">Drop or click to upload (max 5MB)</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleImagePick(e.target.files?.[0] ?? null)}
+                />
+              </label>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={uploading}
+            className="sm:col-span-2 bg-ink text-cream py-3 rounded-full font-semibold hover:bg-accent-red transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {uploading && <Loader2 className="size-4 animate-spin" />}
+            {uploading ? "Publishing…" : "Publish"}
+          </button>
         </form>
       )}
 
