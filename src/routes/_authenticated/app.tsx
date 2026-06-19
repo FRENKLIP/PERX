@@ -124,7 +124,7 @@ function AppHome() {
         </div>
 
         {/* Mood strip */}
-        <div className="tile-sage col-span-12 px-5 py-3">
+        <div className="tile-dark col-span-12 px-5 py-3">
           <MoodPicker value={mood} onChange={setMood} />
         </div>
 
