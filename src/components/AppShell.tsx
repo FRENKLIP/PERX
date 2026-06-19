@@ -5,6 +5,7 @@ import { useLocale, setLocale } from "@/lib/i18n";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Languages, Home, Store, ShoppingBag, Inbox, BarChart3, Wrench, Heart } from "lucide-react";
 import { ProfileDrawer } from "@/components/ProfileDrawer";
+import { avatarFor } from "@/lib/avatar";
 
 type Role = "employee" | "employer_admin" | "provider_admin";
 
@@ -45,7 +46,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isEmployee = roles.length === 0 || roles.some((r) => r.role === "employee");
   const homeTo = isEmployer ? "/employer" : isProvider ? "/provider" : "/app";
 
-  const initials = (profile?.full_name ?? ctx?.user?.email ?? "??").slice(0, 2).toUpperCase();
+  const avatarSeed = ctx?.user?.id || ctx?.user?.email || profile?.full_name || "anon";
+  const avatarUrl = avatarFor({ avatar_url: profile?.avatar_url, seed: avatarSeed }, 72);
 
   async function signOut() {
     await qc.cancelQueries();
@@ -81,11 +83,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
             <button
               onClick={() => setProfileOpen(true)}
-              className="size-9 rounded-full bg-ink text-cream grid place-items-center font-bold text-[11px] hover:ring-2 hover:ring-accent-red/40 transition"
+              className="size-9 rounded-full overflow-hidden bg-paper ring-1 ring-border-soft hover:ring-2 hover:ring-accent-red/40 transition"
               title="Profile"
               aria-label="Open profile"
             >
-              {initials}
+              <img src={avatarUrl} alt="Profile" className="size-full object-cover" />
             </button>
           </div>
         </div>
