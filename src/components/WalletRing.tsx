@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { formatAll } from "@/lib/i18n";
 
 type Props =
-  | { spent: number; budget: number; size?: number; daysLeft?: undefined; daysInMonth?: undefined }
-  | { daysLeft: number; daysInMonth?: number; size?: number; spent?: undefined; budget?: undefined };
+  | { spent: number; budget: number; size?: number; daysLeft?: undefined; daysInMonth?: undefined; dark?: boolean }
+  | { daysLeft: number; daysInMonth?: number; size?: number; spent?: undefined; budget?: undefined; dark?: boolean };
 
 export function WalletRing(props: Props) {
   const size = props.size ?? 220;
+  const dark = props.dark ?? false;
   const stroke = 10;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
@@ -38,7 +39,7 @@ export function WalletRing(props: Props) {
   return (
     <div className="relative inline-grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--color-border-soft)" strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke={dark ? "rgba(250,247,242,0.12)" : "var(--color-border-soft)"} strokeWidth={stroke} fill="none" />
         <circle
           cx={size / 2} cy={size / 2} r={r}
           stroke="var(--color-sage)" strokeWidth={stroke} fill="none" strokeLinecap="round"
