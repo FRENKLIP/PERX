@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { OfferReviews } from "@/components/OfferReviews";
+import { PairInviteButton } from "@/components/PairInviteButton";
 
 export const Route = createFileRoute("/_authenticated/offer/$offerId")({
   head: () => ({ meta: [{ title: "Offer — PERX" }] }),
@@ -184,6 +185,16 @@ function OfferDetail() {
               <button onClick={() => navigate({ to: "/concierge" })} className="mt-2 w-full hairline bg-cream rounded-2xl py-3.5 font-semibold text-sm hover:border-ink/30 transition-colors inline-flex items-center justify-center gap-2">
                 <Sparkles className="size-4" /> Ask the concierge
               </button>
+              {o.pair_enabled && (
+                <div className="mt-2">
+                  <PairInviteButton
+                    offerId={offerId}
+                    providerCompanyId={chosenProvider ?? o.provider_company_id}
+                    pairBonusPct={o.pair_bonus_pct ?? 15}
+                    pairBonusNote={o.pair_bonus_note}
+                  />
+                </div>
+              )}
               <p className="text-[11px] text-ink-soft mt-3 leading-relaxed">
                 Funded by your employer wallet. Pay nothing at checkout — your provider gets paid directly when the request is approved.
               </p>
