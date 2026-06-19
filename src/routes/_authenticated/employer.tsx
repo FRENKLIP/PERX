@@ -8,6 +8,7 @@ import { Sparkles, CheckCircle2, XCircle, Clock, ArrowUpRight, ArrowDownRight } 
 import { StatTile } from "@/components/StatTile";
 import { TrendArea, CategoryDonut, TopBars, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
 import { EmployeesTab } from "@/components/employer/EmployeesTab";
+import { PolicyTab } from "@/components/employer/PolicyTab";
 import { TalentEdgeCard, type TalentEdge } from "@/components/employer/TalentEdgeCard";
 import { categorizeTitle } from "@/lib/categorize";
 
