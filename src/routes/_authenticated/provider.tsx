@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Power, PowerOff, Copy, Upload, X, Loader2 } from "lucide-react";
+import { Plus, Power, PowerOff, Copy, Upload, X, Loader2, Users, Check } from "lucide-react";
 import { StatTile } from "@/components/StatTile";
 import { TrendArea, TopBars, CategoryDonut, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
+import { CoProviderEditor, type CoProviderDraft } from "@/components/CoProviderEditor";
 
 export const Route = createFileRoute("/_authenticated/provider")({
   head: () => ({ meta: [{ title: "Provider — PERX" }] }),
@@ -24,6 +25,7 @@ function ProviderDashboard() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [coProviders, setCoProviders] = useState<CoProviderDraft[]>([]);
   const [period, setPeriod] = useState<7 | 30 | 90>(30);
 
   const { data } = useQuery({
@@ -34,12 +36,34 @@ function ProviderDashboard() {
       const { data: roles } = await supabase.from("user_roles").select("company_id").eq("user_id", u.user.id).eq("role", "provider_admin");
       const companyIds = (roles ?? []).map((r) => r.company_id).filter(Boolean) as string[];
       if (companyIds.length === 0) return null;
-      const [{ data: offers }, { data: items }, { data: cats }] = await Promise.all([
+      const [{ data: ownedOffers }, { data: coRows }, { data: items }, { data: cats }, { data: companies }] = await Promise.all([
         supabase.from("offers").select("*").in("provider_company_id", companyIds).order("created_at", { ascending: false }),
+        supabase.from("offer_providers").select("*, offers(*)").in("provider_company_id", companyIds),
         supabase.from("request_items").select("*, requests(status, decided_at, created_at, employer_company_id)").in("provider_company_id", companyIds).order("id", { ascending: false }),
         supabase.from("categories").select("*"),
+        supabase.from("companies").select("id,name").in("id", companyIds),
       ]);
-      return { offers: offers ?? [], items: items ?? [], companyIds, cats: cats ?? [] };
+      // Merge owned + co-listed offers; dedupe by id
+      const map = new Map<string, any>();
+      (ownedOffers ?? []).forEach((o) => map.set(o.id, o));
+      (coRows ?? []).forEach((r: any) => { if (r.offers) map.set(r.offers.id, r.offers); });
+      const offers = Array.from(map.values()).sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+
+      // Per-offer provider counts (for "co-listed" pill)
+      const offerIds = offers.map((o) => o.id);
+      const { data: allProviders } = offerIds.length
+        ? await supabase.from("offer_providers").select("offer_id, provider_company_id, share_pct, is_owner, accepted_at, companies:provider_company_id(name)").in("offer_id", offerIds)
+        : { data: [] as any[] };
+
+      return {
+        offers,
+        items: items ?? [],
+        companyIds,
+        cats: cats ?? [],
+        companies: companies ?? [],
+        coRows: coRows ?? [],
+        allProviders: allProviders ?? [],
+      };
     },
   });
 
@@ -99,6 +123,18 @@ function ProviderDashboard() {
     else { toast.success(!current ? "Offer activated" : "Offer paused"); qc.invalidateQueries({ queryKey: ["provider-data"] }); }
   }
 
+  async function respondInvite(rowId: string, accept: boolean) {
+    if (accept) {
+      const { error } = await supabase.from("offer_providers").update({ accepted_at: new Date().toISOString() }).eq("id", rowId);
+      if (error) toast.error(error.message);
+      else { toast.success("Invitation accepted"); qc.invalidateQueries({ queryKey: ["provider-data"] }); }
+    } else {
+      const { error } = await supabase.from("offer_providers").delete().eq("id", rowId);
+      if (error) toast.error(error.message);
+      else { toast.success("Invitation declined"); qc.invalidateQueries({ queryKey: ["provider-data"] }); }
+    }
+  }
+
   function copyCode(code: string) {
     navigator.clipboard?.writeText(code).then(() => toast.success("Copied"));
   }
@@ -106,6 +142,8 @@ function ProviderDashboard() {
   async function createOffer(e: React.FormEvent) {
     e.preventDefault();
     if (!data?.companyIds[0]) return;
+    const othersTotal = coProviders.reduce((s, c) => s + (c.share_pct || 0), 0);
+    if (othersTotal > 100) { toast.error("Total co-provider share exceeds 100%"); return; }
     setUploading(true);
     let image_url: string | null = null;
     if (imageFile) {
@@ -123,7 +161,8 @@ function ProviderDashboard() {
       }
       image_url = supabase.storage.from("offer-images").getPublicUrl(path).data.publicUrl;
     }
-    const { error } = await supabase.from("offers").insert({
+    const ownerCompanyId = data.companyIds[0];
+    const { data: inserted, error } = await supabase.from("offers").insert({
       provider_company_id: data.companyIds[0],
       title: form.title,
       description: form.description,
@@ -131,15 +170,34 @@ function ProviderDashboard() {
       category_slug: form.category,
       location: form.location,
       image_url,
-    });
+    }).select("id").single();
+
+    if (!error && inserted) {
+      // Owner row at remaining share
+      const ownerShare = Math.max(0, 100 - othersTotal);
+      const rows = [
+        { offer_id: inserted.id, provider_company_id: ownerCompanyId, share_pct: ownerShare, is_owner: true, accepted_at: new Date().toISOString() },
+        ...coProviders.map((c) => ({
+          offer_id: inserted.id,
+          provider_company_id: c.company_id,
+          share_pct: c.share_pct,
+          is_owner: false,
+          accepted_at: null as string | null,
+        })),
+      ];
+      const { error: opErr } = await supabase.from("offer_providers").insert(rows);
+      if (opErr) toast.error(`Offer created, but co-providers failed: ${opErr.message}`);
+    }
+
     setUploading(false);
     if (error) toast.error(error.message);
     else {
-      toast.success("Offer published");
+      toast.success(coProviders.length > 0 ? `Offer published · ${coProviders.length} provider invite(s) sent` : "Offer published");
       setShowNew(false);
       setForm({ title: "", description: "", price: "5000", category: "wellness", location: "Tirana" });
       setImageFile(null);
       setImagePreview(null);
+      setCoProviders([]);
       qc.invalidateQueries({ queryKey: ["provider-data"] });
     }
   }
