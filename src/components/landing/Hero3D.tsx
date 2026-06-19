@@ -16,7 +16,7 @@ function HeroFallback() {
       <rect x="130" y="150" width="160" height="100" rx="14" fill="#c5503a" opacity="0.9" />
       <rect x="140" y="140" width="160" height="100" rx="14" fill="#faf7f2" stroke="#17171712" />
       <circle cx="90" cy="100" r="22" fill="#7a8b6f" />
-      <circle cx="320" cy="120" r="18" fill="#d98b5f" />
+      <circle cx="320" cy="120" r="18" fill="#c5503a" />
       <circle cx="300" cy="300" r="20" fill="#c5503a" />
     </svg>
   );

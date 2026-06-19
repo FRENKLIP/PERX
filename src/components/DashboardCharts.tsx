@@ -1,7 +1,7 @@
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
 import { formatAll } from "@/lib/i18n";
 
-const PALETTE = ["#171717", "#c5503a", "#7a8b6f", "#d98b5f", "#9c8fb8", "#5c8aa8"];
+const PALETTE = ["#171717", "#c5503a", "#7a8b6f", "#c5503a", "#9c8fb8", "#5c8aa8"];
 
 export function TrendArea({ data, color = "#171717", height = 220 }: { data: { date: string; value: number }[]; color?: string; height?: number }) {
   return (

@@ -69,12 +69,12 @@ function Panel({
       className={`rounded-[2rem] overflow-hidden p-10 md:p-16 grid md:grid-cols-2 gap-10 items-center transition-all duration-700 ${shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${dark ? "bg-ink text-cream" : "bg-paper text-ink"}`}
     >
       <div className={reverse ? "md:order-2" : ""}>
-        <div className={`text-[10px] font-bold uppercase tracking-[0.24em] mb-6 ${dark ? "text-accent-orange" : "text-accent-red"}`}>{tag}</div>
+        <div className={`text-[10px] font-bold uppercase tracking-[0.24em] mb-6 ${dark ? "text-accent-red" : "text-accent-red"}`}>{tag}</div>
         <h3 className="font-serif text-4xl md:text-6xl leading-[1.02] tracking-tight">{title}</h3>
         <ul className="mt-8 space-y-3">
           {bullets.map((b) => (
             <li key={b} className={`flex items-center gap-3 text-sm ${dark ? "text-cream/80" : "text-ink-soft"}`}>
-              <span className={`h-px w-6 ${dark ? "bg-accent-orange" : "bg-accent-red"}`} />
+              <span className={`h-px w-6 ${dark ? "bg-accent-red" : "bg-accent-red"}`} />
               {b}
             </li>
           ))}

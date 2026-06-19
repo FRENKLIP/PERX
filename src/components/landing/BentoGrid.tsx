@@ -30,7 +30,7 @@ export default function BentoGrid() {
           <Eyebrow>Live dashboard</Eyebrow>
           <p className="font-serif text-2xl leading-snug mt-3">Spend trend, approval rate, category mix — in real time.</p>
         </Tile>
-        <Tile className="md:col-span-3 bg-accent-orange text-cream">
+        <Tile className="md:col-span-3 bg-accent-red text-cream">
           <Eyebrow tone="cream">Instant codes</Eyebrow>
           <p className="font-serif text-2xl leading-snug mt-3">Redemption codes the moment an approval lands.</p>
         </Tile>

@@ -59,7 +59,7 @@ export default function Hero3DScene() {
       <directionalLight position={[3, 4, 3]} intensity={1.2} castShadow shadow-mapSize={[1024, 1024]} />
       <Wallet />
       <Pill position={[-1.7, 0.9, 0.2]} color="#7a8b6f" />
-      <Pill position={[1.8, 0.6, 0.1]} color="#d98b5f" />
+      <Pill position={[1.8, 0.6, 0.1]} color="#c5503a" />
       <Pill position={[1.5, -1.1, 0.3]} color="#c5503a" />
       <ContactShadows position={[0, -1.1, 0]} opacity={0.35} scale={6} blur={2.4} far={2} />
       <Environment preset="apartment" />

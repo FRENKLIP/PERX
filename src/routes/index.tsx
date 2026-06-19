@@ -161,7 +161,7 @@ function Landing() {
         <div className="relative max-w-5xl mx-auto px-6 h-full flex flex-col justify-end pb-20">
           <div className="text-cream/70 text-[10px] uppercase tracking-[0.24em] font-bold mb-4">Editor's note</div>
           <p className="font-serif text-4xl md:text-6xl text-cream leading-[1.05] max-w-3xl text-balance">
-            "A salary tells you what a company can afford. A perk tells you who they <em className="text-accent-orange">are</em>."
+            "A salary tells you what a company can afford. A perk tells you who they <em className="text-accent-red">are</em>."
           </p>
         </div>
       </section>
@@ -261,17 +261,17 @@ function Landing() {
             <div>
               <div className="text-cream/40 mb-3">Product</div>
               <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
-                <li><a href="#how" className="hover:text-accent-orange">How it works</a></li>
-                <li><a href="#what" className="hover:text-accent-orange">Features</a></li>
-                <li><a href="#faq" className="hover:text-accent-orange">FAQ</a></li>
+                <li><a href="#how" className="hover:text-accent-red">How it works</a></li>
+                <li><a href="#what" className="hover:text-accent-red">Features</a></li>
+                <li><a href="#faq" className="hover:text-accent-red">FAQ</a></li>
               </ul>
             </div>
             <div>
               <div className="text-cream/40 mb-3">For</div>
               <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
-                <li><a href="#who" className="hover:text-accent-orange">Employees</a></li>
-                <li><a href="#who" className="hover:text-accent-orange">Employers</a></li>
-                <li><a href="#who" className="hover:text-accent-orange">Providers</a></li>
+                <li><a href="#who" className="hover:text-accent-red">Employees</a></li>
+                <li><a href="#who" className="hover:text-accent-red">Employers</a></li>
+                <li><a href="#who" className="hover:text-accent-red">Providers</a></li>
               </ul>
             </div>
             <div>
