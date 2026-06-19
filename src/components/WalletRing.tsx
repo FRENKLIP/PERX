@@ -50,15 +50,15 @@ export function WalletRing(props: Props) {
       <div className="absolute inset-0 grid place-items-center text-center">
         {daysMode ? (
           <div className="px-6">
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft">Refreshes in</div>
+            <div className={`text-[10px] font-bold uppercase tracking-[0.18em] ${dark ? 'text-cream/60' : 'text-ink-soft'}`}>Refreshes in</div>
             <div className="font-serif text-3xl mt-1 leading-none">{props.daysLeft} days</div>
-            <div className="text-xs text-ink-soft mt-1">of {daysInMonth} days</div>
+            <div className={`text-xs mt-1 ${dark ? 'text-cream/60' : 'text-ink-soft'}`}>of {daysInMonth} days</div>
           </div>
         ) : (
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft">Remaining</div>
+            <div className={`text-[10px] font-bold uppercase tracking-[0.18em] ${dark ? 'text-cream/60' : 'text-ink-soft'}`}>Remaining</div>
             <div className="font-serif text-3xl mt-1">{formatAll(Math.max(0, (props.budget ?? 0) - (props.spent ?? 0)))}</div>
-            <div className="text-xs text-ink-soft mt-1">of {formatAll(props.budget ?? 0)}</div>
+            <div className={`text-xs mt-1 ${dark ? 'text-cream/60' : 'text-ink-soft'}`}>of {formatAll(props.budget ?? 0)}</div>
           </div>
         )}
       </div>
