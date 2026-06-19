@@ -118,12 +118,8 @@ function AppHome() {
               <MapPin className="size-4 text-sage-deep" />
             </div>
           </div>
-          <div className="mt-6 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft">Refreshes in</div>
-              <div className="font-serif text-2xl mt-1">{daysLeft} days</div>
-            </div>
-            <WalletRing spent={data?.spent ?? 0} budget={data?.budget ?? 25000} />
+          <div className="mt-6 flex items-center justify-end">
+            <WalletRing daysLeft={daysLeft} />
           </div>
         </div>
 
