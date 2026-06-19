@@ -457,6 +457,10 @@ function ProviderDashboard() {
                   >
                     {o.is_active === false ? <><Power className="size-3.5" /> Activate</> : <><PowerOff className="size-3.5" /> Pause</>}
                   </button>
+                  <button
+                    onClick={() => setEditingOffer(o)}
+                    className="text-[11px] font-semibold text-ink-soft hover:text-ink"
+                  >Edit</button>
                 </div>
                 ) : (
                   <span className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Co-listed</span>
@@ -466,6 +470,15 @@ function ProviderDashboard() {
           </article>
         );})}
       </div>
+      {editingOffer && data?.companyIds[0] && (
+        <OfferEditSheet
+          offer={editingOffer}
+          ownerCompanyId={data.companyIds[0]}
+          ownerName={data.companies?.find((c: any) => c.id === data.companyIds[0])?.name ?? "Your company"}
+          categories={data.cats ?? []}
+          onClose={() => setEditingOffer(null)}
+        />
+      )}
     </div>
   );
 }
