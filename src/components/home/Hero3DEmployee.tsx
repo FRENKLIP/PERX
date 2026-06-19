@@ -24,12 +24,9 @@ export function Hero3DEmployee({
         style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.85'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }} />
 
       <div className="relative h-full flex flex-col justify-between p-6 md:p-9">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft">
-            <span className="inline-block size-1.5 rounded-full bg-sage" />
-            Your wallet · this month
-          </div>
-          <TransferFundsButton remaining={remaining} />
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft">
+          <span className="inline-block size-1.5 rounded-full bg-sage" />
+          Your wallet · this month
         </div>
         <div className="max-w-md">
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft mb-2">
@@ -43,6 +40,9 @@ export function Hero3DEmployee({
           </div>
           <div className="text-sm text-ink-soft mt-3">
             of {budget.toLocaleString()} ALL · {spent.toLocaleString()} pending{simTotal ? ` · ${simTotal.toLocaleString()} simulated` : ""}
+          </div>
+          <div className="mt-5">
+            <TransferFundsButton remaining={remaining} />
           </div>
         </div>
       </div>
