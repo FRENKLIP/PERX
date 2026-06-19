@@ -41,6 +41,7 @@
 
 /* Bento / Tile system */
 .tile { background: var(--color-cream); border: 1px solid var(--color-border-soft); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
+.tile-white { background: #ffffff; border: 1px solid var(--color-border-soft); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
 .tile-dark { background: var(--color-ink); color: var(--color-cream); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
 .tile-accent { background: var(--color-accent-red); color: var(--color-cream); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
 .tile-sage { background: var(--color-sage); color: var(--color-cream); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
