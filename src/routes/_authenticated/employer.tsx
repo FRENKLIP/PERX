@@ -22,7 +22,7 @@ function EmployerDashboard() {
   const qc = useQueryClient();
   const [insight, setInsight] = useState<string | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
-  const [tab, setTab] = useState<"overview" | "employees">("overview");
+  const [tab, setTab] = useState<"overview" | "approvals" | "employees">("overview");
 
   const { data } = useQuery({
     queryKey: ["employer-data"],
@@ -166,36 +166,108 @@ function EmployerDashboard() {
   }, [data]);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 pt-10">
+    <div>
+      <div className="sticky top-[64px] z-30 bg-cream/85 backdrop-blur border-b border-border-soft">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-2 overflow-x-auto">
+          {([
+            { id: "overview", label: "Overview", badge: 0 },
+            { id: "approvals", label: "Approvals", badge: pending.length },
+            { id: "employees", label: "Employees", badge: (data?.employees ?? []).length },
+          ] as const).map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap ${
+                tab === t.id ? "bg-ink text-cream" : "text-ink-soft hover:text-ink hover:bg-paper"
+              }`}
+            >
+              {t.label}
+              {t.badge > 0 && (
+                <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                  tab === t.id
+                    ? "bg-cream/20 text-cream"
+                    : t.id === "approvals" ? "bg-accent-orange/20 text-accent-orange" : "bg-paper text-ink-soft"
+                }`}>{t.badge}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 pt-10">
+      {tab === "employees" ? (
+        <EmployeesTab companyIds={data?.companyIds ?? []} />
+      ) : tab === "approvals" ? (
+        <>
+          <div className="flex items-end justify-between gap-6 mb-8 fade-up">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Employer console</div>
+              <h1 className="font-serif text-5xl tracking-tight">Approvals{pending.length > 0 ? ` · ${pending.length} pending` : ""}.</h1>
+            </div>
+          </div>
+
+          <h2 className="font-serif text-3xl mb-4">Pending</h2>
+          {pending.length === 0 ? (
+            <div className="hairline rounded-3xl p-12 text-center text-ink-soft mb-10">Nothing waiting.</div>
+          ) : (
+            <div className="space-y-3 mb-10">
+              {pending.map((r) => (
+                <div key={r.id} className="hairline bg-white rounded-3xl p-6 fade-up">
+                  <div className="flex justify-between items-start mb-3 gap-4">
+                    <div className="min-w-0">
+                      <div className="font-serif text-xl">{r.ai_package_name || `Request · ${r.id.slice(0,8)}`}</div>
+                      <div className="text-xs text-ink-soft mt-0.5">{new Date(r.created_at).toLocaleString()}</div>
+                      {r.note && <p className="text-sm mt-2 italic text-ink-soft">"{r.note}"</p>}
+                    </div>
+                    <div className="font-serif text-2xl shrink-0">{formatAll(r.total_all)}</div>
+                  </div>
+                  <div className="space-y-1 mb-4">
+                    {(r as any).request_items?.map((it: any) => (
+                      <div key={it.id} className="flex justify-between text-sm py-1.5 border-t border-border-soft">
+                        <span>{it.offer_title}</span><span className="font-semibold">{formatAll(it.price_all)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => decide(r.id, "approved")} className="flex-1 bg-sage text-cream py-3 rounded-full font-semibold text-sm hover:bg-ink transition-colors flex items-center justify-center gap-2">
+                      <CheckCircle2 className="size-4" /> Approve & pay providers
+                    </button>
+                    <button onClick={() => decide(r.id, "rejected")} className="px-5 hairline text-ink-soft py-3 rounded-full font-semibold text-sm hover:bg-accent-red hover:text-cream flex items-center gap-2">
+                      <XCircle className="size-4" /> Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {approved.length > 0 && (
+            <>
+              <h2 className="font-serif text-3xl mb-4">Recent approvals</h2>
+              <div className="space-y-2 pb-10">
+                {approved.slice(0, 12).map((r) => (
+                  <div key={r.id} className="hairline bg-white rounded-2xl p-4 flex justify-between items-center">
+                    <div>
+                      <div className="font-medium text-sm">{r.ai_package_name || r.id.slice(0,8)}</div>
+                      <div className="text-xs text-ink-soft">{new Date(r.decided_at ?? r.created_at).toLocaleDateString()}</div>
+                    </div>
+                    <div className="font-semibold">{formatAll(r.total_all)}</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      ) : (
+      <>
       <div className="flex items-end justify-between gap-6 mb-10 fade-up">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Employer console</div>
           <h1 className="font-serif text-5xl tracking-tight">How your team is spending their wellbeing.</h1>
         </div>
-        {tab === "overview" && <PeriodSwitcher value={period} onChange={setPeriod} />}
+        <PeriodSwitcher value={period} onChange={setPeriod} />
       </div>
 
-      <div className="inline-flex items-center gap-1 p-1 mb-8 hairline rounded-full bg-white">
-        {([
-          { id: "overview", label: "Overview" },
-          { id: "employees", label: `Employees · ${(data?.employees ?? []).length}` },
-        ] as const).map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
-              tab === t.id ? "bg-ink text-cream" : "text-ink-soft hover:text-ink"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {tab === "employees" ? (
-        <EmployeesTab companyIds={data?.companyIds ?? []} />
-      ) : (
-      <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-border-soft hairline rounded-3xl overflow-hidden mb-10 fade-up">
         <StatTile label="Pending" value={pending.length.toString()} hint={pending.length ? "awaiting review" : "all clear"} accent="orange" />
         <StatTile label={`Approved · ${period}d`} value={approvedInPeriod.length.toString()} hint={`${rejected.length} rejected total`} accent="sage" />
