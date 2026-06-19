@@ -52,10 +52,10 @@
 .grain::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .05; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
 
 /* Leaflet polish */
-.leaflet-container { font-family: var(--font-body); background: var(--color-paper); }
+.leaflet-container { font-family: var(--font-body); background: var(--color-ink); }
 .leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 .leaflet-popup-tip { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-.perx-pin { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: var(--color-ink); color: var(--color-cream); font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); border: 2px solid var(--color-cream); }
+.perx-pin { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: var(--color-sage); color: var(--color-ink); font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.35); border: 2px solid var(--color-ink); }
 
 /*
  * Design system definition.

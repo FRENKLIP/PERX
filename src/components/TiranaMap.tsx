@@ -44,7 +44,7 @@ export function TiranaMap({ pins, onAdd }: { pins: Pin[]; onAdd: (id: string) =>
     <MapContainer center={[41.3275, 19.8189]} zoom={13} scrollWheelZoom className="w-full h-full rounded-2xl">
       <TileLayer
         attribution='&copy; OpenStreetMap'
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
       />
       {valid.map((p) => (
         <Marker key={p.id} position={[p.companies!.lat!, p.companies!.lng!]} icon={makeIcon(p.category_slug)}>

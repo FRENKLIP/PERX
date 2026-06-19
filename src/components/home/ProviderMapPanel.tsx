@@ -28,28 +28,28 @@ export function ProviderMapPanel({ offers, onAdd }: { offers: Offer[]; onAdd: (i
   );
 
   return (
-    <section className="rounded-[2rem] hairline overflow-hidden bg-sage">
+    <section className="rounded-[2rem] hairline overflow-hidden bg-ink">
       <div className="grid md:grid-cols-12">
-        <div className="md:col-span-4 p-6 md:p-8 bg-sage text-ink">
-          <div className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-ink mb-2">Tirana, on the map</div>
-          <h2 className="font-serif font-bold text-3xl md:text-4xl leading-tight text-ink">Find perks by neighborhood.</h2>
-          <p className="text-ink font-semibold text-sm mt-3">Click a pin to see the offer. Filter by area to plan a route.</p>
+        <div className="md:col-span-4 p-6 md:p-8 bg-ink text-cream">
+          <div className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-sage mb-2">Tirana, on the map</div>
+          <h2 className="font-serif font-bold text-3xl md:text-4xl leading-tight text-cream">Find perks by neighborhood.</h2>
+          <p className="text-cream/70 font-semibold text-sm mt-3">Click a pin to see the offer. Filter by area to plan a route.</p>
           <div className="flex flex-wrap gap-1.5 mt-5">
             {neighborhoods.map((n) => (
               <button
                 key={n}
                 onClick={() => setActive(n)}
                 className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-colors ${
-                  active === n ? "bg-ink text-cream border-ink" : "bg-transparent text-ink border-ink/40 hover:border-ink"
+                  active === n ? "bg-sage text-ink border-sage" : "bg-transparent text-cream border-cream/40 hover:border-cream"
                 }`}
               >
                 {n}
               </button>
             ))}
           </div>
-          <div className="text-[11px] font-bold text-ink mt-5">{filtered.length} pin{filtered.length === 1 ? "" : "s"}</div>
+          <div className="text-[11px] font-bold text-cream/70 mt-5">{filtered.length} pin{filtered.length === 1 ? "" : "s"}</div>
         </div>
-        <div className="md:col-span-8 h-[440px] bg-sage">
+        <div className="md:col-span-8 h-[440px] bg-ink">
           <TiranaMap pins={filtered as any} onAdd={onAdd} />
         </div>
       </div>
