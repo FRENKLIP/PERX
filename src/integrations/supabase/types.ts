@@ -96,6 +96,10 @@ export type Database = {
           logo_url: string | null
           name: string
           neighborhood: string | null
+          policy_allowed_categories: string[] | null
+          policy_auto_approve_below_all: number | null
+          policy_default_monthly_budget_all: number
+          policy_max_request_all: number | null
         }
         Insert: {
           address?: string | null
@@ -112,6 +116,10 @@ export type Database = {
           logo_url?: string | null
           name: string
           neighborhood?: string | null
+          policy_allowed_categories?: string[] | null
+          policy_auto_approve_below_all?: number | null
+          policy_default_monthly_budget_all?: number
+          policy_max_request_all?: number | null
         }
         Update: {
           address?: string | null
@@ -128,6 +136,10 @@ export type Database = {
           logo_url?: string | null
           name?: string
           neighborhood?: string | null
+          policy_allowed_categories?: string[] | null
+          policy_auto_approve_below_all?: number | null
+          policy_default_monthly_budget_all?: number
+          policy_max_request_all?: number | null
         }
         Relationships: []
       }
