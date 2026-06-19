@@ -11,12 +11,14 @@ export function Hero3DEmployee({
   spent,
   budget,
   offersNear,
+  simTotal = 0,
 }: {
   greeting: string;
   firstName: string;
   spent: number;
   budget: number;
   offersNear: number;
+  simTotal?: number;
 }) {
   const [mounted, setMounted] = useState(false);
   const [light, setLight] = useState(false);
@@ -37,7 +39,7 @@ export function Hero3DEmployee({
       <div className="absolute inset-0">
         {mounted && !light ? (
           <Suspense fallback={null}>
-            <Scene />
+            <Scene budget={budget} spent={spent} simTotal={simTotal} />
           </Suspense>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-paper via-cream to-paper" />
