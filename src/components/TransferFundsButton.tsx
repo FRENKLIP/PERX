@@ -92,9 +92,9 @@ export function TransferFundsButton({ remaining }: { remaining: number }) {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-cream/70 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink hover:bg-sage hover:text-cream hover:border-sage transition-colors"
+          className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-cream/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-ink hover:bg-sage hover:text-cream hover:border-sage transition-colors"
         >
-          <ArrowRightLeft className="size-3" /> Transfer funds
+          <ArrowRightLeft className="size-4" /> Transfer funds
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
