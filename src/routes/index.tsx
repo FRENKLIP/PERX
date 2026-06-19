@@ -261,17 +261,17 @@ function Landing() {
             <div>
               <div className="text-cream/40 mb-3">Product</div>
               <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
-                <li><a href="#how" className="hover:text-accent-red">How it works</a></li>
-                <li><a href="#what" className="hover:text-accent-red">Features</a></li>
-                <li><a href="#faq" className="hover:text-accent-red">FAQ</a></li>
+                <li><a href="#how" className="hover:text-sage">How it works</a></li>
+                <li><a href="#what" className="hover:text-sage">Features</a></li>
+                <li><a href="#faq" className="hover:text-sage">FAQ</a></li>
               </ul>
             </div>
             <div>
               <div className="text-cream/40 mb-3">For</div>
               <ul className="space-y-2 text-cream/80 normal-case tracking-normal font-medium">
-                <li><a href="#who" className="hover:text-accent-red">Employees</a></li>
-                <li><a href="#who" className="hover:text-accent-red">Employers</a></li>
-                <li><a href="#who" className="hover:text-accent-red">Providers</a></li>
+                <li><a href="#who" className="hover:text-sage">Employees</a></li>
+                <li><a href="#who" className="hover:text-sage">Employers</a></li>
+                <li><a href="#who" className="hover:text-sage">Providers</a></li>
               </ul>
             </div>
             <div>
