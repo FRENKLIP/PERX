@@ -416,6 +416,9 @@ export type Database = {
           id: string
           note: string | null
           pair_invitation_id: string | null
+          redeemed_at: string | null
+          redeemed_by: string | null
+          redemption_code: string | null
           status: Database["public"]["Enums"]["request_status"]
           total_all: number
         }
@@ -429,6 +432,9 @@ export type Database = {
           id?: string
           note?: string | null
           pair_invitation_id?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          redemption_code?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           total_all: number
         }
@@ -442,6 +448,9 @@ export type Database = {
           id?: string
           note?: string | null
           pair_invitation_id?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          redemption_code?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           total_all?: number
         }
@@ -530,6 +539,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      gen_redemption_code: { Args: never; Returns: string }
       has_company_role: {
         Args: {
           _company_id: string
@@ -545,6 +555,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_request_redeemed: { Args: { p_request_id: string }; Returns: string }
       signup_setup_account: {
         Args: {
           p_company_name?: string
