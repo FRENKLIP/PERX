@@ -77,7 +77,7 @@ export function TransferFundsButton({ remaining }: { remaining: number }) {
     const { error } = await supabase.rpc("transfer_funds", {
       p_recipient: selected.id,
       p_amount: amt,
-      p_note: note || null,
+      p_note: note || undefined,
     });
     setSubmitting(false);
     if (error) return toast.error(error.message);
