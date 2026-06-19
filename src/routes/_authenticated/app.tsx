@@ -24,6 +24,7 @@ function AppHome() {
   const { locale } = useLocale();
   const qc = useQueryClient();
   const [mood, setMood] = useState<MoodId>("all");
+  const [picks, setPicks] = useState<Array<{ id: string; title: string; price_all: number; category_slug?: string | null; image_url?: string | null }>>([]);
 
   const { data } = useQuery({
     queryKey: ["app-home"],
@@ -68,6 +69,7 @@ function AppHome() {
 
   const offers = data?.offers ?? [];
   const offersWithLatLng = offers.filter((o: any) => o.companies?.lat != null && o.companies?.lng != null);
+  const simTotal = picks.reduce((s, p) => s + (p.price_all ?? 0), 0);
 
   return (
     <div className="max-w-7xl mx-auto px-6 pt-6 pb-16 space-y-10">
@@ -77,6 +79,7 @@ function AppHome() {
         spent={data?.spent ?? 0}
         budget={data?.budget ?? 25000}
         offersNear={offersWithLatLng.length}
+        simTotal={simTotal}
       />
 
       <div className="sticky top-[64px] z-30 -mx-6 px-6 py-3 bg-cream/85 backdrop-blur border-y border-border-soft">
@@ -88,6 +91,8 @@ function AppHome() {
         budget={data?.budget ?? 25000}
         spent={data?.spent ?? 0}
         mood={mood}
+        picks={picks as any}
+        setPicks={setPicks as any}
         onBudgetChange={async (next) => {
           const { data: u } = await supabase.auth.getUser();
           if (!u.user) return;
