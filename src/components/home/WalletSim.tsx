@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
 import { toast } from "sonner";
-import { Plus, X, Send, RotateCcw } from "lucide-react";
+import { Plus, X, Send, RotateCcw, Pencil, Check } from "lucide-react";
 import type { MoodId } from "./MoodPicker";
 import { moodMatch } from "./MoodPicker";
 
@@ -13,15 +13,20 @@ export function WalletSim({
   budget,
   spent,
   mood,
+  onBudgetChange,
 }: {
   offers: Offer[];
   budget: number;
   spent: number;
   mood: MoodId;
+  onBudgetChange?: (next: number) => Promise<void> | void;
 }) {
   const [picks, setPicks] = useState<Offer[]>([]);
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [draftBudget, setDraftBudget] = useState<string>("");
+  const [savingBudget, setSavingBudget] = useState(false);
 
   const filtered = useMemo(() => offers.filter((o) => moodMatch(mood, o.category_slug)).slice(0, 12), [offers, mood]);
   const simTotal = picks.reduce((s, o) => s + (o.price_all ?? 0), 0);
@@ -95,7 +100,39 @@ export function WalletSim({
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-cream/50">{over ? "Over budget" : "Would be left"}</div>
                   <div className="font-serif text-3xl mt-1">{formatAll(remaining)}</div>
-                  <div className="text-[11px] text-cream/50 mt-1">of {formatAll(budget)}</div>
+                  {editingBudget ? (
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        const next = Math.max(0, Math.round(Number(draftBudget.replace(/[^0-9]/g, "")) || 0));
+                        if (!onBudgetChange || next === budget) { setEditingBudget(false); return; }
+                        setSavingBudget(true);
+                        try { await onBudgetChange(next); setEditingBudget(false); } finally { setSavingBudget(false); }
+                      }}
+                      className="mt-1 flex items-center gap-1 justify-center"
+                    >
+                      <input
+                        autoFocus
+                        inputMode="numeric"
+                        value={draftBudget}
+                        onChange={(e) => setDraftBudget(e.target.value)}
+                        onBlur={() => setEditingBudget(false)}
+                        className="w-20 bg-cream/10 border border-cream/30 rounded px-1.5 py-0.5 text-[11px] text-cream tabular-nums text-center focus:outline-none focus:border-accent-red"
+                      />
+                      <button type="submit" disabled={savingBudget} onMouseDown={(e) => e.preventDefault()} className="size-5 grid place-items-center rounded-full bg-cream/15 hover:bg-cream/25 disabled:opacity-40">
+                        <Check className="size-3" />
+                      </button>
+                    </form>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => { setDraftBudget(String(budget)); setEditingBudget(true); }}
+                      className="text-[11px] text-cream/50 mt-1 inline-flex items-center gap-1 hover:text-cream transition-colors"
+                      title="Edit monthly budget"
+                    >
+                      of {formatAll(budget)} <Pencil className="size-3 opacity-60" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
