@@ -251,9 +251,6 @@ export type Database = {
           is_active: boolean
           is_seasonal: boolean
           location: string | null
-          pair_bonus_note: string | null
-          pair_bonus_pct: number
-          pair_enabled: boolean
           price_all: number
           provider_company_id: string
           tags: string[] | null
@@ -270,9 +267,6 @@ export type Database = {
           is_active?: boolean
           is_seasonal?: boolean
           location?: string | null
-          pair_bonus_note?: string | null
-          pair_bonus_pct?: number
-          pair_enabled?: boolean
           price_all: number
           provider_company_id: string
           tags?: string[] | null
@@ -289,9 +283,6 @@ export type Database = {
           is_active?: boolean
           is_seasonal?: boolean
           location?: string | null
-          pair_bonus_note?: string | null
-          pair_bonus_pct?: number
-          pair_enabled?: boolean
           price_all?: number
           provider_company_id?: string
           tags?: string[] | null
@@ -308,76 +299,6 @@ export type Database = {
           },
           {
             foreignKeyName: "offers_provider_company_id_fkey"
-            columns: ["provider_company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pair_invitations: {
-        Row: {
-          accepted_at: string | null
-          bonus_note: string | null
-          bonus_pct: number
-          created_at: string
-          employer_company_id: string
-          expires_at: string
-          id: string
-          invitee_id: string
-          inviter_id: string
-          offer_id: string
-          provider_company_id: string
-          scheduled_at: string | null
-          status: Database["public"]["Enums"]["pair_invitation_status"]
-        }
-        Insert: {
-          accepted_at?: string | null
-          bonus_note?: string | null
-          bonus_pct?: number
-          created_at?: string
-          employer_company_id: string
-          expires_at?: string
-          id?: string
-          invitee_id: string
-          inviter_id: string
-          offer_id: string
-          provider_company_id: string
-          scheduled_at?: string | null
-          status?: Database["public"]["Enums"]["pair_invitation_status"]
-        }
-        Update: {
-          accepted_at?: string | null
-          bonus_note?: string | null
-          bonus_pct?: number
-          created_at?: string
-          employer_company_id?: string
-          expires_at?: string
-          id?: string
-          invitee_id?: string
-          inviter_id?: string
-          offer_id?: string
-          provider_company_id?: string
-          scheduled_at?: string | null
-          status?: Database["public"]["Enums"]["pair_invitation_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pair_invitations_employer_company_id_fkey"
-            columns: ["employer_company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pair_invitations_offer_id_fkey"
-            columns: ["offer_id"]
-            isOneToOne: false
-            referencedRelation: "offers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pair_invitations_provider_company_id_fkey"
             columns: ["provider_company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -530,13 +451,6 @@ export type Database = {
             columns: ["employer_company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "requests_pair_invitation_id_fkey"
-            columns: ["pair_invitation_id"]
-            isOneToOne: false
-            referencedRelation: "pair_invitations"
             referencedColumns: ["id"]
           },
         ]
