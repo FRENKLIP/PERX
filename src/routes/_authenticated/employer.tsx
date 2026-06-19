@@ -24,7 +24,7 @@ function EmployerDashboard() {
   const qc = useQueryClient();
   const [insight, setInsight] = useState<TalentEdge | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
-  const [tab, setTab] = useState<"overview" | "approvals" | "employees">("overview");
+  const [tab, setTab] = useState<"overview" | "approvals" | "employees" | "talent">("overview");
   const insightInFlight = useRef(false);
   const insightKey = useRef<string | null>(null);
 
@@ -103,9 +103,9 @@ function EmployerDashboard() {
     }
   }
 
-  // Auto-load Talent Edge when overview is visible and inputs change.
+  // Auto-load Talent Edge when its tab is visible and inputs change.
   useEffect(() => {
-    if (tab !== "overview" || !data) return;
+    if (tab !== "talent" || !data) return;
     const cutoffMs = Date.now() - period * 24 * 60 * 60 * 1000;
     const approvedCount = (data.requests ?? []).filter(
       (r) => r.status === "approved" && new Date(r.decided_at ?? r.created_at).getTime() >= cutoffMs,
@@ -196,6 +196,7 @@ function EmployerDashboard() {
             { id: "overview", label: "Overview", badge: 0 },
             { id: "approvals", label: "Approvals", badge: pending.length },
             { id: "employees", label: "Employees", badge: (data?.employees ?? []).length },
+            { id: "talent", label: "Talent Edge", badge: 0 },
           ] as const).map((t) => (
             <button
               key={t.id}
