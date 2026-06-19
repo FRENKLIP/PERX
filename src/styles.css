@@ -57,6 +57,12 @@
 .leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 .leaflet-popup-tip { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 .perx-pin { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: var(--color-ink); color: var(--color-cream); font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); border: 2px solid var(--color-cream); }
+/* Keep Leaflet beneath app overlays (drawers/dialogs use z-50+). Leaflet's
+   default pane (400) and controls (1000) otherwise punch through modals. */
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom { z-index: 1 !important; }
+.leaflet-container { z-index: 0; }
 
 /*
  * Design system definition.
