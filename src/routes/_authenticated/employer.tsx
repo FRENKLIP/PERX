@@ -25,6 +25,8 @@ function EmployerDashboard() {
   const [insight, setInsight] = useState<TalentEdge | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
   const [tab, setTab] = useState<"overview" | "approvals" | "employees">("overview");
+  const insightInFlight = useRef(false);
+  const insightKey = useRef<string | null>(null);
 
   const { data } = useQuery({
     queryKey: ["employer-data"],
