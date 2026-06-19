@@ -63,7 +63,7 @@ function Concierge() {
               "I want a weekend out of the city",
             ].map((s) => (
               <button key={s} onClick={() => setInput(s)}
-                className="text-left hairline rounded-2xl p-6 hover:bg-paper transition-colors font-display text-lg font-medium leading-relaxed">
+                className="text-left bg-sage text-ink rounded-2xl px-5 py-3 hover:bg-sage/80 transition-colors font-display text-sm font-medium whitespace-nowrap border border-ink/10">
                 {s}
               </button>
             ))}
