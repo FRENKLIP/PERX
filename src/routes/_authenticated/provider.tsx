@@ -123,6 +123,12 @@ function ProviderDashboard() {
     else { toast.success(!current ? "Offer activated" : "Offer paused"); qc.invalidateQueries({ queryKey: ["provider-data"] }); }
   }
 
+  async function togglePair(id: string, current: boolean) {
+    const { error } = await supabase.from("offers").update({ pair_enabled: !current }).eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success(!current ? "Pair perk enabled" : "Pair perk disabled"); qc.invalidateQueries({ queryKey: ["provider-data"] }); }
+  }
+
   async function respondInvite(rowId: string, accept: boolean) {
     if (accept) {
       const { error } = await supabase.from("offer_providers").update({ accepted_at: new Date().toISOString() }).eq("id", rowId);
