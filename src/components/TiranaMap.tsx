@@ -51,14 +51,14 @@ export function TiranaMap({ pins, onAdd }: { pins: Pin[]; onAdd: (id: string) =>
           <Popup>
             <div style={{ minWidth: 220 }}>
               {p.image_url && <img src={p.image_url} alt="" style={{ width: "100%", height: 110, objectFit: "cover", borderRadius: 10, marginBottom: 8 }} />}
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.4, color: "#c5503a" }}>{p.category_slug}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.4, color: "#7a8b6f" }}>{p.category_slug}</div>
               <div style={{ fontFamily: "Instrument Serif, serif", fontSize: 20, lineHeight: 1.1, margin: "4px 0" }}>{p.title}</div>
               <div style={{ fontSize: 12, color: "#5a5754", marginBottom: 8 }}>{p.companies?.name} · {p.companies?.address}</div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <strong>{formatAll(p.price_all)}</strong>
                 <button onClick={() => onAdd(p.id)} style={{ background: "#171717", color: "#faf7f2", border: "none", padding: "6px 12px", borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Add</button>
               </div>
-              <Link to="/offer/$offerId" params={{ offerId: p.id }} style={{ display: "block", textAlign: "center", marginTop: 8, fontSize: 11, fontWeight: 700, color: "#c5503a", textDecoration: "none" }}>
+              <Link to="/offer/$offerId" params={{ offerId: p.id }} style={{ display: "block", textAlign: "center", marginTop: 8, fontSize: 11, fontWeight: 700, color: "#7a8b6f", textDecoration: "none" }}>
                 View details →
               </Link>
             </div>

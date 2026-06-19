@@ -13,7 +13,7 @@ function HeroFallback() {
       {Array.from({ length: 18 }).map((_, i) => (
         <rect key={i} x={80 + (i % 3) * 2} y={300 - i * 8} width="240" height="14" rx="3" fill={i === 17 ? "#faf7f2" : i % 4 === 0 ? "#f3efe7" : "#faf7f2"} stroke="#17171712" />
       ))}
-      <rect x="92" y="156" width="40" height="10" fill="#c5503a" />
+      <rect x="92" y="156" width="40" height="10" fill="#7a8b6f" />
       <text x="200" y="166" textAnchor="middle" fontFamily="Sora, sans-serif" fontWeight="700" fontSize="14" fill="#171717">50 000 ALL</text>
       <rect x="92" y="180" width="216" height="2" fill="#7a8b6f" opacity="0.6" />
     </svg>
