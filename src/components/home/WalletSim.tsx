@@ -14,14 +14,22 @@ export function WalletSim({
   spent,
   mood,
   onBudgetChange,
+  picks: picksProp,
+  setPicks: setPicksProp,
 }: {
   offers: Offer[];
   budget: number;
   spent: number;
   mood: MoodId;
   onBudgetChange?: (next: number) => Promise<void> | void;
+  picks?: Offer[];
+  setPicks?: (updater: Offer[] | ((prev: Offer[]) => Offer[])) => void;
 }) {
-  const [picks, setPicks] = useState<Offer[]>([]);
+  const [internalPicks, setInternalPicks] = useState<Offer[]>([]);
+  const picks = picksProp ?? internalPicks;
+  const setPicks: (u: Offer[] | ((p: Offer[]) => Offer[])) => void = setPicksProp
+    ? (u) => setPicksProp(typeof u === "function" ? (u as (p: Offer[]) => Offer[])(picks) : u)
+    : setInternalPicks;
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [editingBudget, setEditingBudget] = useState(false);

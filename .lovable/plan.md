@@ -1,34 +1,41 @@
 ## Goal
-On `/employer`, promote the tab switcher into a sticky sub-bar that sits right under the global top nav, and split **Pending approvals** + recent approvals out into their own **Approvals** tab.
+Replace the abstract floating blobs in the /app hero with a 3D **cash stack** that visibly represents the employee's actual remaining ALL budget — and shrinks in real time as they pick offers in the WalletSim below.
 
-## Tab structure (after)
+## What it actually shows
 
-Sticky bar under the main nav with three pills:
+- A neat stack of 3D banknotes (1,000 ALL notes, the standard denomination). Stack height = `Math.round(remainingAfterPicks / 1000)` notes, capped at ~40 visible (taller stacks render as "40+ stacked" with the top note labeled with the true count).
+- The top of the stack carries an embossed label: remaining ALL, formatted like `12,400 ALL`.
+- A second, smaller "spent" stack lying flat beside it, growing with `spent + simTotal` — so you literally see money moving from "left" to "spent."
+- Subtle PERX wordmark embossed on the side of each note.
+- Behind the stacks, a soft Tirana-cream depth backdrop (no skyline yet — staying ambient).
 
-- **Overview** — stats grid, charts, leaderboards, activity, AI insights, approval-rate card. (Pending list and recent approvals are removed from here.)
-- **Approvals** — Pending approvals (with Approve / Reject actions), then Recent approvals. Period switcher hides here; date stamps stay.
-- **Employees** — existing tab unchanged.
+## Connection to live data
 
-The big page title ("How your team is spending their wellbeing.") stays on Overview only. Approvals gets its own short title ("Approvals · N pending"). Employees keeps its current layout.
+The hero already receives `spent` and `budget`. We add a third prop, `simTotal`, lifted from the existing WalletSim:
 
-## Sticky tab bar
+- `AppHome` keeps the picks state at the route level (move `picks` from `WalletSim` up, or expose a small subscription via a shared store — picks already live in WalletSim; the simplest move is to lift `picks` to `AppHome` and pass `picks`/`setPicks` down).
+- Hero3DEmployee computes `remaining = budget - spent - simTotal` and animates note count toward that value with a spring (lerp). So when the user drags an offer into the basket below, banknotes literally peel off the stack above.
+- If `remaining < 0` (over budget), the stack flashes accent-red and a single note flips red on top.
 
-- Wrapped in `<div className="sticky top-[72px] z-30 bg-cream/85 backdrop-blur border-b border-border-soft">` so it sits below the existing sticky `<nav>` (which is `top-0`, ~64–72px tall).
-- Tab pills as today (`bg-ink text-cream` for the active one). Adds a small count badge for Approvals when pending > 0.
-- The Period switcher moves into the Overview tab content (top-right of the stats row), so it doesn't crowd the sticky bar.
+## Ambient motion (low CPU)
 
-## Files to touch
+- Stack idly breathes: ±2px vertical, 4s ease-in-out.
+- Cursor parallax: full scene tilts up to 4°, no per-mesh rotation work.
+- When a note is removed: it lifts, fades, drifts off to bottom-right in 600ms (one mesh animated at a time, max). When added back: reverse.
+- `dpr: [1, 1.5]`, mobile/reduced-motion still falls back to the current static gradient — no behavior change there.
 
-- `src/routes/_authenticated/employer.tsx`
-  - Pull out three tab panels in place: `<OverviewPanel />`, `<ApprovalsPanel />`, plus the existing `<EmployeesTab />`.
-  - Move the tab switcher to a sticky wrapper at the top of the page (above the H1 area).
-  - Move Pending approvals + Recent approvals JSX into the Approvals panel.
-  - Period switcher relocates into Overview.
+## Files
 
-No new files, no database changes, no other routes touched.
+- `src/components/home/HomeHeroScene.tsx` — rewrite. New `<CashStack remaining note count />` and `<SpentSlab amount />`. Drop the torus + perks.
+- `src/components/home/Hero3DEmployee.tsx` — add `simTotal` prop, pass through to `Scene`. Keep WalletRing badge in the corner (still useful as a numeric truth source).
+- `src/routes/_authenticated/app.tsx` — lift `picks` state out of WalletSim, derive `simTotal = sum(picks.price_all)`, pass to both Hero3D and WalletSim.
+- `src/components/home/WalletSim.tsx` — accept controlled `picks`/`setPicks` props (fallback to internal state if not provided, to keep it reusable).
+
+No new packages — three / drei / fiber are already in use.
 
 ## Out of scope
 
-- Filtering/sorting approvals.
-- Bulk approve/reject.
-- Notifications when something new lands in Approvals.
+- Real banknote artwork / textures of currency (avoiding any look-alike issues). Notes are abstract beige rectangles with the PERX wordmark and the amount, not photoreal Lek banknotes.
+- Clickable notes that add/remove specific offers (you picked Ambient).
+- Skyline / map (option C from the question).
+- Mobile keeps the existing static fallback.
