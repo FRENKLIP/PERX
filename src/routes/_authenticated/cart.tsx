@@ -64,40 +64,15 @@ function Cart() {
     if ((data.items ?? []).length === 0) return;
     setSubmitting(true);
     try {
-      const { data: req, error } = await supabase.from("requests").insert({
-        employee_id: data.userId,
-        employer_company_id: employerId,
-        total_all: total,
-        note,
-        ai_package_name: packageName || null,
-      }).select().single();
-      if (error) throw error;
-      // Resolve share % per line from offer_providers
-      const offerIds = (data.items as any[]).map((it) => it.offers.id);
-      const { data: opRows } = offerIds.length
-        ? await supabase.from("offer_providers").select("offer_id, provider_company_id, share_pct, is_owner, accepted_at").in("offer_id", offerIds)
-        : { data: [] as any[] };
-      const rows = (data.items as any[]).map((it) => {
-        const all = (opRows ?? []).filter((r) => r.offer_id === it.offers.id);
-        const fulfillingId = it.chosen_provider_id ?? it.offers.provider_company_id;
-        const row = all.find((r) => r.provider_company_id === fulfillingId);
-        const share = row?.share_pct ?? 100;
-        return {
-          request_id: req.id,
-          offer_id: it.offers.id,
-          provider_company_id: fulfillingId,
-          offer_title: it.offers.title,
-          price_all: it.offers.price_all,
-          qty: it.qty,
-          share_pct_snapshot: share,
-        };
-      });
-      const { error: e2 } = await supabase.from("request_items").insert(rows);
-      if (e2) throw e2;
-      await supabase.from("cart_items").delete().eq("user_id", data.userId);
+      const result = await submitFn({ data: { note, packageName } });
       qc.invalidateQueries();
-      toast.success("Sent to your employer for approval");
-      navigate({ to: "/_authenticated/requests" });
+      if (result.autoApproved) {
+        toast.success("Auto-approved · payment routed");
+        navigate({ to: "/redeem/$requestId", params: { requestId: result.requestId } });
+      } else {
+        toast.success("Sent to your employer for approval");
+        navigate({ to: "/_authenticated/requests" });
+      }
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
     } finally {
