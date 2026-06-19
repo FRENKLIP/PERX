@@ -1,20 +1,20 @@
-Make the ProviderMapPanel widget fully green with black text, leaving the map itself unchanged.
+## Goal
+Update the `ProviderMapPanel` widget styling to make text bolder, filter-button selections black-on-green, and ensure the entire widget box is green.
 
-## What to change
+## Changes
 
-**File: `src/components/home/ProviderMapPanel.tsx`**
+### 1. Bolder text
+- Heading: add `font-bold`
+- Description: bump to `font-medium`
+- Label: add `font-bold` (already uppercase tracking)
 
-1. **Green the whole widget background**
-   - Change the outer `<section>` class from `bg-cream` to `bg-sage`
-   - Remove the explicit `bg-sage` from the left panel div (now inherited from the section)
+### 2. Black selection buttons
+- Active filter button: change from `bg-cream text-ink` to `bg-ink text-cream` (black background, light text)
+- Inactive filter button: keep transparent background with `text-ink border-ink/30`
 
-2. **Flip all text from cream (light) to ink (dark/black)**
-   - Label "TIRANA, ON THE MAP": `text-cream/70` → `text-ink/70`
-   - Heading "Find perks by neighborhood.": `text-cream` → `text-ink`
-   - Description paragraph: `text-cream/70` → `text-ink/70`
-   - Inactive filter buttons: `text-cream border-cream/30` → `text-ink border-ink/30`
-   - Active filter button stays `bg-cream text-ink border-cream` (cream pill on green bg)
-   - Pin count: `text-cream/70` → `text-ink/70`
+### 3. Whole widget box green
+- The map column (`md:col-span-8`) currently inherits the page background at its edges/behind the map. Add `bg-sage` to that container so the entire widget box is green, with the Leaflet map still rendering on top.
+- Verify the section’s `overflow-hidden` and rounded corners remain intact.
 
-3. **Leave the map untouched**
-   - The right-column map div and `<TiranaMap />` component remain exactly as-is. The Leaflet tiles and paper background cover that area, so the green section background only shows on the left panel and any widget edges/corners.
+## File
+- `src/components/home/ProviderMapPanel.tsx`
