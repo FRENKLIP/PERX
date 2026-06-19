@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles, MapPin } from "lucide-react";
 import { Hero3DEmployee } from "@/components/home/Hero3DEmployee";
-import { MoodPicker, type MoodId } from "@/components/home/MoodPicker";
+import { MoodPicker, moodMatch, type MoodId } from "@/components/home/MoodPicker";
 import { ProviderMapPanel } from "@/components/home/ProviderMapPanel";
 import { WeeklyMarquee } from "@/components/home/WeeklyMarquee";
 import { WalletRing } from "@/components/WalletRing";
@@ -128,14 +128,17 @@ function AppHome() {
         </div>
 
         {/* Mood strip */}
-        <div className="tile col-span-12 sticky top-[64px] z-30 px-5 py-3">
+        <div className="tile col-span-12 px-5 py-3">
           <MoodPicker value={mood} onChange={setMood} />
         </div>
 
         {/* Map panel — full width */}
         {offersWithLatLng.length > 0 && (
           <div className="tile col-span-12 p-6 md:p-7">
-            <ProviderMapPanel offers={offersWithLatLng as any} onAdd={addToCart} />
+            <ProviderMapPanel
+              offers={offersWithLatLng.filter((o: any) => moodMatch(mood, o.category_slug)) as any}
+              onAdd={addToCart}
+            />
           </div>
         )}
 
