@@ -8,6 +8,7 @@ import { Sparkles, CheckCircle2, XCircle, Clock, ArrowUpRight, ArrowDownRight } 
 import { StatTile } from "@/components/StatTile";
 import { TrendArea, CategoryDonut, TopBars, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
 import { EmployeesTab } from "@/components/employer/EmployeesTab";
+import { PolicyTab } from "@/components/employer/PolicyTab";
 import { TalentEdgeCard, type TalentEdge } from "@/components/employer/TalentEdgeCard";
 import { categorizeTitle } from "@/lib/categorize";
 
@@ -24,7 +25,7 @@ function EmployerDashboard() {
   const qc = useQueryClient();
   const [insight, setInsight] = useState<TalentEdge | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
-  const [tab, setTab] = useState<"overview" | "approvals" | "employees" | "talent">("overview");
+  const [tab, setTab] = useState<"overview" | "approvals" | "employees" | "talent" | "policy">("overview");
   const insightInFlight = useRef(false);
   const insightKey = useRef<string | null>(null);
 
@@ -197,6 +198,7 @@ function EmployerDashboard() {
             { id: "approvals", label: "Approvals", badge: pending.length },
             { id: "employees", label: "Employees", badge: (data?.employees ?? []).length },
             { id: "talent", label: "Talent Edge", badge: 0 },
+            { id: "policy", label: "Policy", badge: 0 },
           ] as const).map((t) => (
             <button
               key={t.id}
@@ -221,6 +223,17 @@ function EmployerDashboard() {
       <div className="max-w-6xl mx-auto px-6 pt-10">
       {tab === "employees" ? (
         <EmployeesTab companyIds={data?.companyIds ?? []} />
+      ) : tab === "policy" ? (
+        data?.companyIds[0] ? (
+          <>
+            <div className="fade-up mb-8">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Employer console</div>
+              <h1 className="font-serif text-5xl tracking-tight">Policy.</h1>
+              <p className="text-ink-soft mt-3 max-w-xl">Set spending caps, allowed categories, auto-approval and employee budget defaults.</p>
+            </div>
+            <PolicyTab companyId={data.companyIds[0]} />
+          </>
+        ) : null
       ) : tab === "talent" ? (
         <>
           <div className="flex items-end justify-between gap-6 mb-10 fade-up flex-wrap">
