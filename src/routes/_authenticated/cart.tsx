@@ -144,8 +144,23 @@ function Cart() {
               <>
                 <input value={packageName} onChange={(e) => setPackageName(e.target.value)} placeholder="Name this package (optional)" className="w-full bg-paper rounded-xl px-4 py-3 text-sm mb-3 outline-none placeholder:text-ink-soft/60" />
                 <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note to your employer (optional)" className="w-full bg-paper rounded-xl px-4 py-3 text-sm mb-4 outline-none placeholder:text-ink-soft/60" rows={2} />
-                <button onClick={submit} disabled={submitting || total > budget} className="w-full bg-ink text-cream rounded-full py-4 font-semibold disabled:opacity-50 hover:bg-accent-red transition-colors">
-                  {submitting ? "Sending…" : total > budget ? "Over budget" : t("submit_for_approval")}
+                {overCap && (
+                  <div className="text-xs text-accent-red bg-accent-red/10 rounded-xl px-3 py-2 mb-3">
+                    Exceeds employer cap of {formatAll(maxAmt!)} per request.
+                  </div>
+                )}
+                {disallowedItems.length > 0 && (
+                  <div className="text-xs text-accent-red bg-accent-red/10 rounded-xl px-3 py-2 mb-3">
+                    Remove {disallowedItems.length} item{disallowedItems.length === 1 ? "" : "s"} not allowed by your employer.
+                  </div>
+                )}
+                {willAutoApprove && !blocked && (
+                  <div className="text-xs text-sage bg-sage/10 rounded-xl px-3 py-2 mb-3">
+                    Under {formatAll(autoBelow!)} — will auto-approve.
+                  </div>
+                )}
+                <button onClick={submit} disabled={submitting || total > budget || blocked} className="w-full bg-ink text-cream rounded-full py-4 font-semibold disabled:opacity-50 hover:bg-accent-red transition-colors">
+                  {submitting ? "Sending…" : total > budget ? "Over budget" : overCap ? "Over employer cap" : disallowedItems.length > 0 ? "Remove blocked items" : willAutoApprove ? "Send · auto-approve" : t("submit_for_approval")}
                 </button>
                 <p className="text-xs text-ink-soft text-center mt-4">Your employer approves and payment routes directly to providers.</p>
               </>
