@@ -3,11 +3,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
 import { toast } from "sonner";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, CheckCircle2, XCircle, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { StatTile } from "@/components/StatTile";
 import { TrendArea, CategoryDonut, TopBars, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
 import { EmployeesTab } from "@/components/employer/EmployeesTab";
+import { TalentEdgeCard, type TalentEdge } from "@/components/employer/TalentEdgeCard";
+import { categorizeTitle } from "@/lib/categorize";
 
 export const Route = createFileRoute("/_authenticated/employer")({
   head: () => ({ meta: [{ title: "Employer — PERX" }] }),
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/employer")({
 
 function EmployerDashboard() {
   const qc = useQueryClient();
-  const [insight, setInsight] = useState<string | null>(null);
+  const [insight, setInsight] = useState<TalentEdge | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
   const [tab, setTab] = useState<"overview" | "approvals" | "employees">("overview");
 
@@ -69,17 +71,26 @@ function EmployerDashboard() {
     if (!data) return;
     setLoadingInsight(true);
     try {
-      const summary = (data.requests ?? []).map((r) => ({
-        status: r.status,
-        total: r.total_all,
-        items: (r as any).request_items?.map((i: any) => ({ title: i.offer_title, price: i.price_all })),
-      }));
+      const cutoffMs = Date.now() - period * 24 * 60 * 60 * 1000;
+      const approvedInWindow = (data.requests ?? []).filter(
+        (r) => r.status === "approved" && new Date(r.decided_at ?? r.created_at).getTime() >= cutoffMs,
+      );
+      const items = approvedInWindow.flatMap((r) =>
+        ((r as any).request_items ?? []).map((i: any) => ({
+          offer_title: i.offer_title ?? "",
+          price_all: i.price_all ?? 0,
+        })),
+      );
       const res = await fetch("/api/insights", {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ requests: summary }),
+        body: JSON.stringify({
+          items,
+          period_days: period,
+          approved_count: approvedInWindow.length,
+        }),
       });
-      const json = await res.json();
-      setInsight(json.text ?? "Could not generate insights.");
+      const json = (await res.json()) as TalentEdge;
+      setInsight(json);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -105,19 +116,11 @@ function EmployerDashboard() {
     period,
   ), [approved, period]);
 
-  const categoryNames: Record<string, RegExp> = {
-    wellness: /(gym|yoga|spa|pool|sauna|pilates|massage|fitness)/i,
-    travel: /(ksamil|theth|dajti|dhërmi|llogara|trip|hotel|getaway|weekend)/i,
-    learning: /(coding|language|coolab|destil|course|class|workshop)/i,
-    food: /./,
-  };
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
     approvedInPeriod.forEach((r) => {
       (r as any).request_items?.forEach((it: any) => {
-        const title = it.offer_title ?? "";
-        let key = "food";
-        for (const [k, re] of Object.entries(categoryNames)) { if (re.test(title)) { key = k; break; } }
+        const key = categorizeTitle(it.offer_title ?? "");
         map.set(key, (map.get(key) ?? 0) + (it.price_all ?? 0));
       });
     });
