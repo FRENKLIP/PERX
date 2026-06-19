@@ -28,7 +28,7 @@ export function ProviderMapPanel({ offers, onAdd }: { offers: Offer[]; onAdd: (i
   );
 
   return (
-    <section className="rounded-[2rem] hairline overflow-hidden bg-cream">
+    <section className="rounded-[2rem] hairline overflow-hidden bg-sage">
       <div className="grid md:grid-cols-12">
         <div className="md:col-span-4 p-6 md:p-8 bg-sage text-cream">
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cream/70 mb-2">Tirana, on the map</div>
