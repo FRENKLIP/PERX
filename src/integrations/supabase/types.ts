@@ -593,10 +593,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      same_employer_as_current_user: {
-        Args: { _profile_employer_company_id: string }
-        Returns: boolean
-      }
       signup_setup_account: {
         Args: {
           p_company_name?: string
