@@ -46,16 +46,16 @@ function Concierge() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 pt-10 pb-32 md:pb-12 flex flex-col" style={{ minHeight: "calc(100vh - 96px)" }}>
+    <div className="max-w-2xl mx-auto px-6 pt-16 pb-32 md:pb-12 flex flex-col" style={{ minHeight: "calc(100vh - 96px)" }}>
       <header className="mb-8 fade-up">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 flex items-center gap-2"><Sparkles className="size-3.5 text-accent-red" /> AI concierge</div>
-        <h1 className="font-serif text-5xl tracking-tight leading-tight">What are you in the mood for?</h1>
-        <p className="text-ink-soft mt-3 max-w-lg">Describe a craving — a slow weekend, a date night, a course you've been postponing — and I'll match it to your wallet.</p>
+        <div className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 flex items-center gap-2"><Sparkles className="size-3.5 text-accent-red" /> AI concierge</div>
+        <h1 className="font-serif text-6xl md:text-7xl tracking-tight leading-tight">What are you in the mood for?</h1>
+        <p className="text-ink-soft mt-4 max-w-xl text-lg md:text-xl">Describe a craving — a slow weekend, a date night, a course you've been postponing — and I'll match it to your wallet.</p>
       </header>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-6 mb-6 -mx-2 px-2">
         {messages.length === 0 && (
-          <div className="grid sm:grid-cols-2 gap-2 mt-2">
+          <div className="grid sm:grid-cols-2 gap-3 mt-2">
             {[
               "A relaxing Sunday under 8,000 ALL",
               "Build a healthy week in Blloku",
@@ -63,8 +63,8 @@ function Concierge() {
               "I want a weekend out of the city",
             ].map((s) => (
               <button key={s} onClick={() => setInput(s)}
-                className="text-left hairline rounded-2xl p-4 hover:bg-paper transition-colors text-sm font-serif text-lg italic leading-snug">
-                "{s}"
+                className="text-left hairline rounded-2xl p-6 hover:bg-paper transition-colors font-display text-lg font-medium leading-relaxed">
+                {s}
               </button>
             ))}
           </div>
@@ -116,10 +116,10 @@ function Concierge() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
           placeholder="Ask anything…"
-          className="flex-1 resize-none px-3 py-2.5 outline-none text-sm bg-transparent max-h-32"
+          className="flex-1 resize-none px-3 py-3.5 outline-none text-base bg-transparent max-h-32"
           rows={1}
         />
-        <button onClick={submit} disabled={!input.trim() || status === "submitted" || status === "streaming"} className="size-11 bg-ink text-cream rounded-full grid place-items-center disabled:opacity-40 shrink-0 hover:bg-accent-red transition-colors">
+        <button onClick={submit} disabled={!input.trim() || status === "submitted" || status === "streaming"} className="size-12 bg-ink text-cream rounded-full grid place-items-center disabled:opacity-40 shrink-0 hover:bg-accent-red transition-colors">
           <Send className="size-4" />
         </button>
       </div>
