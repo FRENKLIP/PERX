@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { avatarFor } from "@/lib/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Pencil, Search, Check, Users } from "lucide-react";
@@ -160,7 +161,7 @@ export function EmployeesTab({ companyIds }: { companyIds: string[] }) {
                 <li key={e.id} className="grid grid-cols-12 gap-3 px-5 py-4 items-center border-t border-border-soft first:border-t-0 hover:bg-paper/30">
                   <div className="col-span-5 flex items-center gap-3 min-w-0">
                     <Avatar className="size-9 shrink-0">
-                      <AvatarImage src={e.avatar_url ?? undefined} alt={e.full_name ?? ""} />
+                      <AvatarImage src={avatarFor({ avatar_url: e.avatar_url, seed: e.id }, 72)} alt={e.full_name ?? ""} />
                       <AvatarFallback>{(e.full_name ?? "?").slice(0, 1).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
