@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, X } from "lucide-react";
+import { LogOut, X, Building2, MapPin, Wallet, Globe, Users, ShieldCheck, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
+import { avatarFor } from "@/lib/avatar";
 import {
   BUCKET_META,
   PASSPORT_BUCKETS,
@@ -18,7 +19,7 @@ import { StampCard } from "@/components/passport/StampCard";
 type Role = "employee" | "employer_admin" | "provider_admin";
 
 type Ctx = {
-  user: { email?: string | null } | null;
+  user: { id?: string; email?: string | null } | null;
   profile: any;
   roles: Array<{ role: Role; company_id: string | null }>;
 } | null | undefined;
@@ -54,8 +55,79 @@ export function ProfileDrawer({
 
   const isEmployee =
     !ctx?.roles?.length || ctx.roles.some((r) => r.role === "employee");
+  const isEmployer = !!ctx?.roles?.some((r) => r.role === "employer_admin");
+  const isProvider = !!ctx?.roles?.some((r) => r.role === "provider_admin");
 
+  // Company id derived from role assignment first, then profile fallback.
+  const companyId =
+    ctx?.roles?.find((r) => r.company_id)?.company_id ??
+    ctx?.profile?.employer_company_id ??
+    null;
+
+  // --- Employer / org details ---
+  const { data: org } = useQuery({
+    queryKey: ["profile-drawer-org", companyId, isEmployer, isProvider],
+    enabled: open && !!companyId,
+    queryFn: async () => {
+      const { data: company } = await supabase
+        .from("companies")
+        .select("id,name,kind,country,city,address,logo_url")
+        .eq("id", companyId!)
+        .maybeSingle();
+      return company;
+    },
+  });
+
+  // --- Employer admin team stats ---
   const monthStart = startOfMonthISO();
+  const { data: teamStats } = useQuery({
+    queryKey: ["profile-drawer-team", companyId, monthStart],
+    enabled: open && isEmployer && !!companyId,
+    queryFn: async () => {
+      const [{ count: employeeCount }, { data: reqs }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("employer_company_id", companyId!),
+        supabase
+          .from("requests")
+          .select("id,status,total_all,created_at,employee_id")
+          .eq("employer_company_id", companyId!)
+          .gte("created_at", monthStart),
+      ]);
+      const list = reqs ?? [];
+      const pending = list.filter((r) => r.status === "pending").length;
+      const approved = list.filter((r) => r.status === "approved");
+      const committed = approved.reduce((s, r) => s + (r.total_all ?? 0), 0);
+      const activeEmployees = new Set(list.map((r) => r.employee_id)).size;
+      return {
+        employeeCount: employeeCount ?? 0,
+        pending,
+        approvedCount: approved.length,
+        committed,
+        activeEmployees,
+      };
+    },
+  });
+
+  // --- Employee personal budget snapshot ---
+  const { data: budget } = useQuery({
+    queryKey: ["profile-drawer-budget", ctx?.user?.id, monthStart],
+    enabled: open && isEmployee && !!ctx?.user?.id,
+    queryFn: async () => {
+      const { data: reqs } = await supabase
+        .from("requests")
+        .select("status,total_all,created_at")
+        .eq("employee_id", ctx!.user!.id!)
+        .gte("created_at", monthStart);
+      const list = reqs ?? [];
+      const committed = list
+        .filter((r) => r.status === "approved" || r.status === "pending")
+        .reduce((s, r) => s + (r.total_all ?? 0), 0);
+      return { committed };
+    },
+  });
+
   const label = monthLabel();
 
   const { data } = useQuery({
@@ -97,14 +169,15 @@ export function ProfileDrawer({
   const profile = ctx?.profile;
   const email = ctx?.user?.email ?? "";
   const fullName = profile?.full_name ?? email ?? "Member";
-  const initials = (profile?.full_name ?? email ?? "??")
-    .slice(0, 2)
-    .toUpperCase();
-  const roleLabel = ctx?.roles?.some((r) => r.role === "employer_admin")
-    ? "Employer admin"
-    : ctx?.roles?.some((r) => r.role === "provider_admin")
-      ? "Provider admin"
-      : "Employee";
+  const seed = ctx?.user?.id || email || fullName;
+  const avatarUrl = avatarFor({ avatar_url: profile?.avatar_url, seed }, 160);
+  const roleLabel = isEmployer ? "Employer admin" : isProvider ? "Provider admin" : "Employee";
+  const RoleIcon = isEmployer ? ShieldCheck : isProvider ? Sparkles : Wallet;
+
+  const monthlyBudget = profile?.monthly_budget_all ?? 0;
+  const committedThisMonth = budget?.committed ?? 0;
+  const remaining = Math.max(monthlyBudget - committedThisMonth, 0);
+  const utilPct = monthlyBudget > 0 ? Math.min(100, Math.round((committedThisMonth / monthlyBudget) * 100)) : 0;
 
   return (
     <>
@@ -124,43 +197,160 @@ export function ProfileDrawer({
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between px-6 pt-5 pb-3">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
-            Profile
-          </div>
+        {/* Cover + identity */}
+        <div className="relative">
+          <div className="h-32 bg-gradient-to-br from-ink via-ink to-accent-red/70" />
           <button
             onClick={onClose}
-            className="size-9 rounded-full hover:bg-paper grid place-items-center"
+            className="absolute top-4 right-4 size-9 rounded-full bg-cream/90 hover:bg-cream grid place-items-center backdrop-blur"
             aria-label="Close"
           >
             <X className="size-4" />
           </button>
+          <div className="absolute top-4 left-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-cream/80">
+            Profile
+          </div>
+          <img
+            src={avatarUrl}
+            alt={fullName}
+            className="absolute -bottom-10 left-6 size-24 rounded-full ring-4 ring-cream bg-paper object-cover"
+          />
         </div>
 
-        {/* Identity */}
-        <div className="px-6 pb-6 flex items-center gap-4">
-          <div className="size-16 rounded-full bg-ink text-cream grid place-items-center font-bold text-base">
-            {initials}
+        <div className="px-6 pt-14 pb-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-serif text-2xl tracking-tight truncate">{fullName}</div>
+              <div className="text-xs text-ink-soft truncate">{email}</div>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="font-serif text-2xl tracking-tight truncate">
-              {fullName}
-            </div>
-            <div className="text-xs text-ink-soft truncate">{email}</div>
-            <div className="mt-1.5 inline-flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-[0.18em] font-semibold hairline rounded-full px-2.5 py-0.5 bg-white text-ink-soft">
-                {roleLabel}
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] font-semibold rounded-full px-2.5 py-1 bg-ink text-cream">
+              <RoleIcon className="size-3" />
+              {roleLabel}
+            </span>
+            {org?.name && (
+              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] font-semibold hairline rounded-full px-2.5 py-1 bg-white text-ink-soft">
+                <Building2 className="size-3" />
+                {org.name}
               </span>
-            </div>
+            )}
+            {profile?.locale && (
+              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] font-semibold hairline rounded-full px-2.5 py-1 bg-white text-ink-soft">
+                <Globe className="size-3" />
+                {profile.locale}
+              </span>
+            )}
           </div>
         </div>
 
         <div className="mx-6 border-t border-border-soft" />
 
+        {/* Employer admin block */}
+        {isEmployer && (
+          <div className="px-6 pt-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-3">
+              Your organization
+            </div>
+            <div className="hairline rounded-2xl bg-white p-5 flex items-center gap-4 mb-4">
+              {org?.logo_url ? (
+                <img src={org.logo_url} alt={org.name} className="size-12 rounded-xl object-cover bg-paper" />
+              ) : (
+                <div className="size-12 rounded-xl bg-ink text-cream grid place-items-center">
+                  <Building2 className="size-5" />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="font-serif text-lg leading-tight truncate">{org?.name ?? "Your company"}</div>
+                {(org?.city || org?.country) && (
+                  <div className="text-[11px] text-ink-soft mt-0.5 flex items-center gap-1">
+                    <MapPin className="size-3" />
+                    {[org?.city, org?.country].filter(Boolean).join(", ")}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-2">
+              <MiniStat icon={Users} label="Employees" value={String(teamStats?.employeeCount ?? "—")} />
+              <MiniStat icon={Sparkles} label="Active · mo" value={String(teamStats?.activeEmployees ?? 0)} />
+              <MiniStat label="Pending" value={String(teamStats?.pending ?? 0)} accent={teamStats?.pending ? "red" : undefined} />
+              <MiniStat label="Committed · mo" value={formatAll(teamStats?.committed ?? 0)} />
+            </div>
+            <Link
+              to="/employer"
+              onClick={onClose}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 bg-ink text-cream rounded-full px-5 py-2.5 text-xs font-semibold"
+            >
+              Open employer console
+            </Link>
+          </div>
+        )}
+
+        {/* Provider admin block */}
+        {isProvider && (
+          <div className="px-6 pt-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-3">
+              Your studio
+            </div>
+            <div className="hairline rounded-2xl bg-white p-5 flex items-center gap-4">
+              {org?.logo_url ? (
+                <img src={org.logo_url} alt={org.name} className="size-12 rounded-xl object-cover bg-paper" />
+              ) : (
+                <div className="size-12 rounded-xl bg-ink text-cream grid place-items-center">
+                  <Sparkles className="size-5" />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="font-serif text-lg leading-tight truncate">{org?.name ?? "Your studio"}</div>
+                {(org?.city || org?.country) && (
+                  <div className="text-[11px] text-ink-soft mt-0.5 flex items-center gap-1">
+                    <MapPin className="size-3" />
+                    {[org?.city, org?.country].filter(Boolean).join(", ")}
+                  </div>
+                )}
+              </div>
+            </div>
+            <Link
+              to="/provider"
+              onClick={onClose}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 bg-ink text-cream rounded-full px-5 py-2.5 text-xs font-semibold"
+            >
+              Open provider console
+            </Link>
+          </div>
+        )}
+
+        {/* Employee budget snapshot */}
+        {isEmployee && monthlyBudget > 0 && (
+          <div className="px-6 pt-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-3">
+              Wellbeing wallet · {label}
+            </div>
+            <div className="hairline rounded-2xl bg-white p-5">
+              <div className="flex items-end justify-between mb-2">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">Remaining</div>
+                  <div className="font-serif text-3xl tracking-tight">{formatAll(remaining)}</div>
+                </div>
+                <div className="text-right text-[11px] text-ink-soft">
+                  {formatAll(committedThisMonth)} of {formatAll(monthlyBudget)}
+                </div>
+              </div>
+              <div className="h-2 rounded-full bg-paper overflow-hidden">
+                <div
+                  className="h-full bg-ink"
+                  style={{ width: `${utilPct}%` }}
+                />
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft mt-2">{utilPct}% used</div>
+            </div>
+          </div>
+        )}
+
         {isEmployee && (
           <>
             {/* Passport header */}
-            <div className="px-6 pt-6 flex items-end justify-between gap-4">
+            <div className="px-6 pt-8 flex items-end justify-between gap-4">
               <div>
                 <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-1">
                   Benefit Passport
@@ -244,6 +434,29 @@ function Stat({ label, value }: { label: string; value: string }) {
         {label}
       </div>
       <div className="font-serif text-2xl mt-1 tracking-tight">{value}</div>
+    </div>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+  icon: Icon,
+  accent,
+}: {
+  label: string;
+  value: string;
+  icon?: any;
+  accent?: "red";
+}) {
+  return (
+    <div className="hairline rounded-2xl bg-white p-4">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft flex items-center gap-1.5">
+        {Icon && <Icon className="size-3" />} {label}
+      </div>
+      <div className={`font-serif text-2xl mt-1 tracking-tight ${accent === "red" ? "text-accent-red" : ""}`}>
+        {value}
+      </div>
     </div>
   );
 }
