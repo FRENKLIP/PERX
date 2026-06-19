@@ -352,22 +352,12 @@ function EmployerDashboard() {
       </div>
 
       <div className="grid md:grid-cols-5 gap-6 mb-10">
-        <div className="md:col-span-3 bg-ink text-cream rounded-3xl p-8 fade-up">
-          <div className="flex items-start justify-between mb-4 gap-4">
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream/60 mb-2 flex items-center gap-2"><Sparkles className="size-3 text-accent-red" /> PERX AI · Team insights</div>
-              <h3 className="font-serif text-2xl">What your people actually value.</h3>
-            </div>
-            <button onClick={generateInsight} disabled={loadingInsight} className="bg-cream text-ink px-5 py-2.5 rounded-full font-semibold text-sm disabled:opacity-50 shrink-0">
-              {loadingInsight ? "Thinking…" : insight ? "Regenerate" : "Generate"}
-            </button>
-          </div>
-          {insight ? (
-            <p className="text-sm leading-relaxed opacity-90 whitespace-pre-wrap font-serif text-lg">{insight}</p>
-          ) : (
-            <p className="text-sm text-cream/60">Click Generate to read this period in plain English.</p>
-          )}
-        </div>
+        <TalentEdgeCard
+          insight={insight}
+          loading={loadingInsight}
+          periodDays={period}
+          onRefresh={generateInsight}
+        />
         <div className="md:col-span-2 hairline rounded-3xl p-6 fade-up bg-paper/50 flex flex-col justify-between">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Approval rate</div>
