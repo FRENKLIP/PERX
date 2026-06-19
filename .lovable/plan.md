@@ -1,40 +1,47 @@
-## What's actually happening
+# Benefit Passport
 
-Those toasts aren't decorations — they're real errors from the database:
-**`infinite recursion detected in policy for relation "requests"`**.
+After each approved request, the employee earns a "stamp" tied to the offer's category bucket (Wellness, Food, Travel, Learning, Other). The passport is a new page that shows collected stamps for the current month, progress toward a full set, and a "Your month in benefits" recap.
 
-The recursion was introduced last turn when I added a SELECT policy on `requests` that does `EXISTS (SELECT … FROM request_items …)`, while `request_items`'s own SELECT policy already does `EXISTS (SELECT … FROM requests …)`. Postgres re-enters RLS evaluation on each side and aborts. Every cart / requests / redeem query is currently failing.
+## UX
 
-So this plan does two things: **fix the recursion** (so the toasts stop happening), and **restyle the Toaster** (so when toasts *do* show, they live bottom-left in the PERX cream/ink/red palette).
+New route `/_authenticated/passport`:
+- Header: "Benefit Passport — <Month Year>" with a stamped-paper aesthetic (cream bg, hairline borders, serif title — matches existing PERX look).
+- Stamp grid (4 categories): Wellness, Food, Travel, Learning. Each card shows:
+  - Icon + label
+  - Count this month (e.g. "3 stamps")
+  - Stamped vs un-stamped visual (rotated wax-stamp style when count > 0, faded outline otherwise)
+  - Last item redeemed in that category
+- "Your month in benefits" recap strip below grid:
+  - Total approved requests
+  - Total ALL spent
+  - Top category
+  - Streak text (e.g. "You unlocked 3 of 4 categories")
+- Empty state: "No stamps yet — approved requests this month will appear here."
 
-## 1. Fix the RLS recursion
+Entry points:
+- Add a "Passport" link in the authenticated nav (next to Requests).
+- On the redeem page success state, add a small "View in your Passport →" link.
 
-Migration:
-- `DROP POLICY "Provider sees requests with their items" ON public.requests`.
-- Add a `SECURITY DEFINER` helper `public.user_is_request_provider(_user uuid, _request uuid) RETURNS boolean` that does the `EXISTS … request_items … has_company_role …` lookup with RLS bypassed (same pattern as `has_role`).
-- Recreate the policy using only that function — no direct subquery on `request_items` from a `requests` policy, so no recursion.
+## Data
 
-Result: providers can still load `/redeem/$id` for requests that include their items; the cart / requests pages stop erroring.
+No schema changes. Derive everything client-side from existing tables:
+- `requests` filtered by `employee_id = auth.uid()`, `status = 'approved'`, `created_at >= start of current month`.
+- Join `request_items` → `offers` → `categories` to map each request to a category bucket.
+- Bucket mapping (category slug/name → passport bucket): wellness/spa/fitness/health → Wellness; food/dining/restaurant/coffee → Food; travel/hotel/transport → Travel; learning/education/books/course → Learning; everything else → Other (shown as a small "+N other" chip, not a main stamp).
 
-## 2. Move and theme the Toaster
-
-Edit `src/routes/__root.tsx` (the one place `<Toaster>` is mounted):
-
-- `position="bottom-left"` instead of `top-center`.
-- Drop `richColors` (it forces sonner's default red/green palette).
-- Pass `toastOptions` so toasts use the PERX palette:
-  - background: `cream` (`#faf7f2`-ish, via CSS var `--cream`)
-  - text: `ink`
-  - border: hairline 1px `border-soft`
-  - rounded-2xl, serif title, small caps label strip for the type (`Error` / `Done`)
-  - Error variant: left accent bar in `accent-red`; success: `sage`.
-- Keep the same `<Toaster>` API — no per-call changes needed at the 14 `toast(...)` sites.
+Single TanStack Query (`['passport', userId, monthKey]`) running one Supabase select with nested joins, then reduced in memory.
 
 ## Files
-- `supabase/migrations/<ts>_fix_requests_recursion.sql`
-- `src/routes/__root.tsx` — Toaster props + className
-- (optionally `src/components/ui/sonner.tsx` if we want the theming centralized there instead of on the root mount — I'll put it on the root mount to keep the change small)
+
+- `src/routes/_authenticated/passport.tsx` — new route, page component, query, recap.
+- `src/components/passport/StampCard.tsx` — single stamp visual.
+- `src/lib/passport.ts` — category→bucket mapping + reducer helpers (pure, unit-friendly).
+- `src/routes/_authenticated/redeem.$requestId.tsx` — add small link to passport on success.
+- Nav component (whichever renders the authenticated top nav links) — add "Passport" entry.
 
 ## Out of scope
-- No changes to the `mark_request_redeemed` function or to `request_items` policies.
-- No new toast call sites; existing `toast.success/error(...)` calls just inherit the new look.
+
+- Historical months / archive view (only current month for now).
+- Sharing / export of the passport.
+- Push notifications or animations beyond the stamp reveal.
+- Schema changes, new tables, or new RPCs.
