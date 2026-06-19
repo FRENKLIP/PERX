@@ -8,7 +8,6 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles, MapPin } from "lucide-react";
 import { Hero3DEmployee } from "@/components/home/Hero3DEmployee";
 import { MoodPicker, type MoodId } from "@/components/home/MoodPicker";
-import { WalletSim } from "@/components/home/WalletSim";
 import { ProviderMapPanel } from "@/components/home/ProviderMapPanel";
 import { WeeklyMarquee } from "@/components/home/WeeklyMarquee";
 import { EditorBento } from "@/components/home/EditorBento";
@@ -27,7 +26,6 @@ function AppHome() {
   const { locale } = useLocale();
   const qc = useQueryClient();
   const [mood, setMood] = useState<MoodId>("all");
-  const [picks, setPicks] = useState<Array<{ id: string; title: string; price_all: number; category_slug?: string | null; image_url?: string | null }>>([]);
 
   const { data } = useQuery({
     queryKey: ["app-home"],
@@ -72,7 +70,6 @@ function AppHome() {
 
   const offers = data?.offers ?? [];
   const offersWithLatLng = offers.filter((o: any) => o.companies?.lat != null && o.companies?.lng != null);
-  const simTotal = picks.reduce((s, p) => s + (p.price_all ?? 0), 0);
   const daysLeft = (() => {
     const now = new Date();
     const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -87,7 +84,6 @@ function AppHome() {
           <Hero3DEmployee
             spent={data?.spent ?? 0}
             budget={data?.budget ?? 25000}
-            simTotal={simTotal}
           />
         </div>
 
@@ -98,11 +94,11 @@ function AppHome() {
               {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
             </div>
             <h1 className="font-serif text-4xl md:text-5xl leading-[0.95] tracking-tight mt-4">
-              {greeting},<br /><span className="text-accent-red">{data?.firstName ?? "there"}.</span>
+              {greeting},<br /><span className="text-sage">{data?.firstName ?? "there"}.</span>
             </h1>
           </div>
           <div className="flex flex-wrap gap-2 mt-6">
-            <Link to="/concierge" className="inline-flex items-center gap-2 bg-cream text-ink px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-accent-red hover:text-cream transition-colors">
+            <Link to="/concierge" className="inline-flex items-center gap-2 bg-cream text-ink px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-sage hover:text-cream transition-colors">
               <Sparkles className="size-3.5" /> Concierge
             </Link>
             <Link to="/marketplace" className="inline-flex items-center gap-2 border border-cream/20 text-cream px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-cream/10 transition-colors">
@@ -119,8 +115,8 @@ function AppHome() {
               <div className="font-serif text-6xl md:text-7xl leading-none tracking-tight mt-3">{offersWithLatLng.length}</div>
               <div className="text-sm text-ink-soft mt-2">offers in Tirana right now</div>
             </div>
-            <div className="grid place-items-center size-10 rounded-full bg-paper hairline">
-              <MapPin className="size-4 text-accent-red" />
+            <div className="grid place-items-center size-10 rounded-full bg-sage-soft hairline">
+              <MapPin className="size-4 text-sage-deep" />
             </div>
           </div>
           <div className="mt-6 flex items-center justify-between">
@@ -137,30 +133,9 @@ function AppHome() {
           <MoodPicker value={mood} onChange={setMood} />
         </div>
 
-        {/* Wallet sim */}
-        <div className="tile col-span-12 lg:col-span-5 p-6 md:p-7">
-          <WalletSim
-            offers={offers as any}
-            budget={data?.budget ?? 25000}
-            spent={data?.spent ?? 0}
-            mood={mood}
-            picks={picks as any}
-            setPicks={setPicks as any}
-            onBudgetChange={async (next) => {
-              const { data: u } = await supabase.auth.getUser();
-              if (!u.user) return;
-              const { error } = await supabase.from("profiles").update({ monthly_budget_all: next }).eq("id", u.user.id);
-              if (error) { toast.error(error.message); return; }
-              toast.success("Monthly budget updated");
-              qc.invalidateQueries({ queryKey: ["app-home"] });
-              qc.invalidateQueries({ queryKey: ["app-context"] });
-            }}
-          />
-        </div>
-
-        {/* Map panel */}
+        {/* Map panel — full width */}
         {offersWithLatLng.length > 0 && (
-          <div className="tile col-span-12 lg:col-span-7 p-6 md:p-7">
+          <div className="tile col-span-12 p-6 md:p-7">
             <ProviderMapPanel offers={offersWithLatLng as any} onAdd={addToCart} />
           </div>
         )}

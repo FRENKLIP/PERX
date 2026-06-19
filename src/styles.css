@@ -15,6 +15,8 @@
   --color-ink-soft: #5a5754;
   --color-accent-red: #c5503a;
   --color-sage: #7a8b6f;
+  --color-sage-soft: #e7ece2;
+  --color-sage-deep: #5e6e54;
   --color-border-soft: #17171712;
   --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
@@ -41,6 +43,8 @@
 .tile { background: var(--color-cream); border: 1px solid var(--color-border-soft); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
 .tile-dark { background: var(--color-ink); color: var(--color-cream); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
 .tile-accent { background: var(--color-accent-red); color: var(--color-cream); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
+.tile-sage { background: var(--color-sage); color: var(--color-cream); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
+.tile-sage-soft { background: var(--color-sage-soft); border: 1px solid var(--color-border-soft); border-radius: var(--radius-tile); position: relative; overflow: hidden; }
 .tile-paper { background: var(--color-paper); border: 1px solid var(--color-border-soft); border-radius: var(--radius-tile); position: relative; overflow: hidden; }
 .bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; grid-auto-flow: dense; }
 .hover-lift { transition: transform .35s var(--ease-out-expo), box-shadow .35s var(--ease-out-expo); }

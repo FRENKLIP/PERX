@@ -1,6 +1,4 @@
-import { Suspense, useRef, useState, useEffect, lazy } from "react";
-
-const Scene = lazy(() => import("./Hero3DScene"));
+import { useRef } from "react";
 
 function HeroFallback() {
   return (
@@ -17,33 +15,21 @@ function HeroFallback() {
       ))}
       <rect x="92" y="156" width="40" height="10" fill="#c5503a" />
       <text x="200" y="166" textAnchor="middle" fontFamily="Sora, sans-serif" fontWeight="700" fontSize="14" fill="#171717">50 000 ALL</text>
+      <rect x="92" y="180" width="216" height="2" fill="#7a8b6f" opacity="0.6" />
     </svg>
   );
 }
 
 export default function Hero3D() {
-  const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-    setIsMobile(window.matchMedia("(max-width: 768px)").matches);
-  }, []);
-
   const ref = useRef<HTMLDivElement>(null);
 
   return (
     <div ref={ref} className="relative w-full aspect-square rounded-[2rem] overflow-hidden bg-paper hairline">
-      {mounted && !isMobile ? (
-        <Suspense fallback={<HeroFallback />}>
-          <Scene />
-        </Suspense>
-      ) : (
-        <HeroFallback />
-      )}
+      <HeroFallback />
       <div className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-[0.06]"
            style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }} />
       <div className="absolute bottom-5 left-5 text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft">
-        Live · WebGL
+        PERX · tax-free wallet
       </div>
     </div>
   );
