@@ -1,5 +1,5 @@
-Change the mood selection bar background from green to black, and ensure the inactive buttons remain visible on the dark background. The map widget already has a green background; no changes needed there.
+Two changes:
 
-Files to modify:
-- `src/routes/_authenticated/app.tsx`: change the mood strip container class from `tile-sage` to `tile-dark` (or equivalent black background).
-- `src/components/home/MoodPicker.tsx`: update inactive button text color from `text-ink` to `text-cream` so it is readable on the black background.
+1. **Active mood button → green**: In `src/components/home/MoodPicker.tsx`, change the active state from cream background to sage (green) background with black text: `bg-sage text-ink border-sage`.
+
+2. **Map widget outer container → black**: In `src/routes/_authenticated/app.tsx`, change the map panel wrapper class from `tile-sage` to `tile-dark` so the outer container (the part visible around the inner green map panel) is black. The inner `ProviderMapPanel` keeps its green `bg-sage`.
