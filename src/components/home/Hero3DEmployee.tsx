@@ -1,23 +1,18 @@
 import { Suspense, lazy, useEffect, useState } from "react";
-import { WalletRing } from "@/components/WalletRing";
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, Sparkles } from "lucide-react";
 
 const Scene = lazy(() => import("./HomeHeroScene"));
 
 export function Hero3DEmployee({
-  greeting,
-  firstName,
   spent,
   budget,
-  offersNear,
   simTotal = 0,
 }: {
-  greeting: string;
-  firstName: string;
+  // legacy props accepted but ignored (compact bento variant)
+  greeting?: string;
+  firstName?: string;
   spent: number;
   budget: number;
-  offersNear: number;
+  offersNear?: number;
   simTotal?: number;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -28,14 +23,11 @@ export function Hero3DEmployee({
     setLight(mq.matches);
   }, []);
 
-  const daysLeft = (() => {
-    const now = new Date();
-    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    return Math.max(1, Math.ceil((+next - +now) / 86400000));
-  })();
+  const remaining = Math.max(0, budget - spent - simTotal);
+  const over = budget - spent - simTotal < 0;
 
   return (
-    <section className="relative overflow-hidden rounded-[2rem] hairline bg-paper">
+    <div className="relative h-full min-h-[420px] md:min-h-[560px] w-full">
       <div className="absolute inset-0">
         {mounted && !light ? (
           <Suspense fallback={null}>
@@ -48,48 +40,22 @@ export function Hero3DEmployee({
       <div className="absolute inset-0 pointer-events-none opacity-[0.05] mix-blend-multiply"
         style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.85'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }} />
 
-      <div className="relative grid md:grid-cols-12 gap-8 items-center p-8 md:p-12 min-h-[520px]">
-        <div className="md:col-span-7">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-4">
-            {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
-          </div>
-          <h1 className="font-serif text-5xl md:text-7xl leading-[0.95] tracking-tight text-balance">
-            {greeting}, {firstName}.<br />
-            <em className="text-accent-red">What sounds good?</em>
-          </h1>
-          <p className="text-ink-soft text-lg mt-6 max-w-md text-pretty">
-            Drag, drop, explore — your tax-free wallet is yours to shape this month.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-8">
-            <Link to="/concierge" className="inline-flex items-center gap-2 bg-ink text-cream px-6 py-3 rounded-full text-sm font-semibold hover:bg-accent-red transition-colors">
-              <Sparkles className="size-4" /> Ask concierge
-            </Link>
-            <Link to="/marketplace" className="inline-flex items-center gap-2 hairline rounded-full px-6 py-3 text-sm font-semibold hover:bg-paper bg-cream/70 backdrop-blur">
-              Browse marketplace <ArrowRight className="size-4" />
-            </Link>
-          </div>
+      <div className="relative h-full flex flex-col justify-between p-6 md:p-9">
+        <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft">
+          Your wallet · this month
         </div>
-        <div className="md:col-span-5 grid place-items-center">
-          <div className="bg-cream/70 backdrop-blur-md rounded-full p-4 hairline">
-            <WalletRing spent={spent} budget={budget} />
+        <div className="max-w-md">
+          <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft mb-2">
+            {over ? "Over budget" : "Remaining"}
+          </div>
+          <div className={`font-serif text-6xl md:text-8xl leading-none tracking-tight ${over ? "text-accent-red" : "text-ink"}`}>
+            {remaining.toLocaleString()}<span className="text-2xl md:text-3xl text-ink-soft ml-2 align-middle">ALL</span>
+          </div>
+          <div className="text-sm text-ink-soft mt-3">
+            of {budget.toLocaleString()} ALL · {spent.toLocaleString()} pending{simTotal ? ` · ${simTotal.toLocaleString()} simulated` : ""}
           </div>
         </div>
       </div>
-
-      <div className="relative grid grid-cols-3 divide-x divide-border-soft bg-cream/80 backdrop-blur border-t border-border-soft">
-        <Stat label="Refreshes in" value={`${daysLeft}d`} />
-        <Stat label="Untouched" value={`${Math.max(0, budget - spent).toLocaleString()} ALL`} />
-        <Stat label="Offers near you" value={String(offersNear)} />
-      </div>
-    </section>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="p-5 md:p-6">
-      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft">{label}</div>
-      <div className="font-serif text-2xl md:text-3xl mt-1">{value}</div>
     </div>
   );
 }
