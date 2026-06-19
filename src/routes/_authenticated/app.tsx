@@ -88,6 +88,15 @@ function AppHome() {
         budget={data?.budget ?? 25000}
         spent={data?.spent ?? 0}
         mood={mood}
+        onBudgetChange={async (next) => {
+          const { data: u } = await supabase.auth.getUser();
+          if (!u.user) return;
+          const { error } = await supabase.from("profiles").update({ monthly_budget_all: next }).eq("id", u.user.id);
+          if (error) { toast.error(error.message); return; }
+          toast.success("Monthly budget updated");
+          qc.invalidateQueries({ queryKey: ["app-home"] });
+          qc.invalidateQueries({ queryKey: ["app-context"] });
+        }}
       />
 
       {offersWithLatLng.length > 0 && (
