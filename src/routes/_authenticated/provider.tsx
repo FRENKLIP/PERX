@@ -313,6 +313,14 @@ function ProviderDashboard() {
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Description</span>
             <textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none" rows={3} />
           </label>
+          {data?.companyIds[0] && (
+            <CoProviderEditor
+              ownerCompanyId={data.companyIds[0]}
+              ownerName={data.companies?.find((c: any) => c.id === data.companyIds[0])?.name ?? "Your company"}
+              value={coProviders}
+              onChange={setCoProviders}
+            />
+          )}
           <div className="sm:col-span-2">
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Cover image</span>
             {imagePreview ? (
