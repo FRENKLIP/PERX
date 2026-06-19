@@ -403,7 +403,7 @@ function ProviderDashboard() {
               <div className="text-xs text-ink-soft">{it.requests?.status} · {new Date(it.requests?.created_at).toLocaleDateString()}</div>
             </div>
             {it.redemption_code && <span className="text-xs font-mono bg-paper px-2 py-1 rounded">{it.redemption_code}</span>}
-            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${it.payment_status === "simulated_paid" ? "bg-sage/15 text-sage" : "bg-accent-orange/15 text-accent-orange"}`}>
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${it.payment_status === "simulated_paid" ? "bg-sage/15 text-sage" : "bg-accent-red/15 text-accent-red"}`}>
               {it.payment_status === "simulated_paid" ? "Paid" : "Pending"}
             </span>
             <span className="font-semibold">{formatAll(it.price_all)}</span>
@@ -441,7 +441,7 @@ function ProviderDashboard() {
               {isCoListed && (
                 <div className="mb-3 text-[11px] text-ink-soft">
                   Your share: <strong className="text-ink">{myRow?.share_pct ?? 0}%</strong>
-                  {!isOwner && !myRow?.accepted_at && <span className="ml-2 text-accent-orange font-semibold">Pending your acceptance</span>}
+                  {!isOwner && !myRow?.accepted_at && <span className="ml-2 text-accent-red font-semibold">Pending your acceptance</span>}
                 </div>
               )}
               <div className="flex justify-between items-center">

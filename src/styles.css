@@ -11,15 +11,17 @@
   --color-cream: #faf7f2;
   --color-paper: #f3efe7;
   --color-ink: #171717;
+  --color-ink-2: #2a2a28;
   --color-ink-soft: #5a5754;
   --color-accent-red: #c5503a;
-  --color-accent-orange: #d98b5f;
   --color-sage: #7a8b6f;
   --color-border-soft: #17171712;
   --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
   --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --radius-tile: 24px;
+  --shadow-tile: 0 1px 0 #17171710, 0 24px 48px -28px #17171733;
 }
 
 @keyframes entrance {
@@ -34,6 +36,16 @@
 .hairline { border: 1px solid var(--color-border-soft); }
 .font-serif { font-family: var(--font-serif); }
 .skeleton { background: linear-gradient(90deg, #00000008 0%, #00000014 50%, #00000008 100%); background-size: 200% 100%; animation: shimmer 1.6s linear infinite; }
+
+/* Bento / Tile system */
+.tile { background: var(--color-cream); border: 1px solid var(--color-border-soft); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
+.tile-dark { background: var(--color-ink); color: var(--color-cream); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
+.tile-accent { background: var(--color-accent-red); color: var(--color-cream); border-radius: var(--radius-tile); box-shadow: var(--shadow-tile); position: relative; overflow: hidden; }
+.tile-paper { background: var(--color-paper); border: 1px solid var(--color-border-soft); border-radius: var(--radius-tile); position: relative; overflow: hidden; }
+.bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; grid-auto-flow: dense; }
+.hover-lift { transition: transform .35s var(--ease-out-expo), box-shadow .35s var(--ease-out-expo); }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 1px 0 #17171710, 0 32px 60px -28px #17171744; }
+.grain::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .05; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
 
 /* Leaflet polish */
 .leaflet-container { font-family: var(--font-body); background: var(--color-paper); }

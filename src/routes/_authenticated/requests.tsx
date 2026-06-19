@@ -89,7 +89,7 @@ function Requests() {
 
 function StatusBadge({ status }: { status: string }) {
   const map = {
-    pending: { Icon: Clock, label: "Pending", cls: "bg-accent-orange/15 text-accent-orange" },
+    pending: { Icon: Clock, label: "Pending", cls: "bg-accent-red/15 text-accent-red" },
     approved: { Icon: CheckCircle2, label: "Approved", cls: "bg-sage/15 text-sage" },
     rejected: { Icon: XCircle, label: "Rejected", cls: "bg-accent-red/15 text-accent-red" },
   } as const;

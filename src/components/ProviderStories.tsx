@@ -19,7 +19,7 @@ export function ProviderStories({ stories, onAdd }: { stories: Story[]; onAdd: (
       <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-none">
         {stories.map((s) => (
           <button key={s.id} onClick={() => setOpen(s)} className="shrink-0 flex flex-col items-center gap-2 w-20 group">
-            <div className="size-20 rounded-full p-[2px] bg-gradient-to-tr from-accent-red via-accent-orange to-sage group-hover:scale-105 transition-transform">
+            <div className="size-20 rounded-full p-[2px] bg-gradient-to-tr from-accent-red via-accent-red to-sage group-hover:scale-105 transition-transform">
               <div className="size-full rounded-full overflow-hidden bg-paper">
                 {s.hero_image_url && <img src={s.hero_image_url} alt="" className="w-full h-full object-cover" />}
               </div>

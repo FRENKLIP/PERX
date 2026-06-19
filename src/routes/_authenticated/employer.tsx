@@ -186,7 +186,7 @@ function EmployerDashboard() {
                 <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
                   tab === t.id
                     ? "bg-cream/20 text-cream"
-                    : t.id === "approvals" ? "bg-accent-orange/20 text-accent-orange" : "bg-paper text-ink-soft"
+                    : t.id === "approvals" ? "bg-accent-red/20 text-accent-red" : "bg-paper text-ink-soft"
                 }`}>{t.badge}</span>
               )}
             </button>
@@ -352,7 +352,7 @@ function EmployerDashboard() {
         <div className="md:col-span-3 bg-ink text-cream rounded-3xl p-8 fade-up">
           <div className="flex items-start justify-between mb-4 gap-4">
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream/60 mb-2 flex items-center gap-2"><Sparkles className="size-3 text-accent-orange" /> PERX AI · Team insights</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream/60 mb-2 flex items-center gap-2"><Sparkles className="size-3 text-accent-red" /> PERX AI · Team insights</div>
               <h3 className="font-serif text-2xl">What your people actually value.</h3>
             </div>
             <button onClick={generateInsight} disabled={loadingInsight} className="bg-cream text-ink px-5 py-2.5 rounded-full font-semibold text-sm disabled:opacity-50 shrink-0">

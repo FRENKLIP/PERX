@@ -1,5 +1,5 @@
 export function StatTile({ label, value, hint, accent }: { label: string; value: string; hint?: string; accent?: "ink" | "red" | "sage" | "orange" }) {
-  const dot = accent === "red" ? "bg-accent-red" : accent === "sage" ? "bg-sage" : accent === "orange" ? "bg-accent-orange" : "bg-ink";
+  const dot = accent === "red" ? "bg-accent-red" : accent === "sage" ? "bg-sage" : accent === "orange" ? "bg-accent-red" : "bg-ink";
   return (
     <div className="bg-white p-5 flex flex-col gap-2 min-h-[112px]">
       <div className="flex items-center gap-2">

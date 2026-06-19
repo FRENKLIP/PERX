@@ -1,41 +1,56 @@
-## Goal
-Replace the abstract floating blobs in the /app hero with a 3D **cash stack** that visibly represents the employee's actual remaining ALL budget — and shrinks in real time as they pick offers in the WalletSim below.
+# Whole-site redesign — modern, clean, 3D-forward
 
-## What it actually shows
+## Direction lock
+- **Palette**: keep current cream/paper/ink/red/sage. **Drop orange** (`--color-accent-orange`) everywhere. Red becomes the single warm accent; sage is the cool counterpoint; ink/cream/paper carry surfaces.
+- **Type**: Sora (display) + Manrope (body). Already wired — enforce consistently, remove Instrument Serif decorative drops unless intentional.
+- **Layout backbone**: bento grid. Every section that today is a stacked row becomes a tile composition with mixed sizes, hairline borders, generous whitespace, and one expressive tile per section.
+- **3D scope**: recurring across landing, employee app, employer, provider, and key CTAs. Each scene is *purposeful* (continues the cash-stack metaphor or shows real product data) — no abstract floaters.
 
-- A neat stack of 3D banknotes (1,000 ALL notes, the standard denomination). Stack height = `Math.round(remainingAfterPicks / 1000)` notes, capped at ~40 visible (taller stacks render as "40+ stacked" with the top note labeled with the true count).
-- The top of the stack carries an embossed label: remaining ALL, formatted like `12,400 ALL`.
-- A second, smaller "spent" stack lying flat beside it, growing with `spent + simTotal` — so you literally see money moving from "left" to "spent."
-- Subtle PERX wordmark embossed on the side of each note.
-- Behind the stacks, a soft Tirana-cream depth backdrop (no skyline yet — staying ambient).
+## Visual system updates (`src/styles.css`)
+- Remove `--color-accent-orange` and replace usages with `--color-accent-red` or `--color-sage`.
+- Add tokens: `--color-ink-2` (#2a2a28), `--radius-tile` (20px), `--shadow-tile` (0 1px 0 #17171710, 0 20px 40px -24px #17171720), `--grain` overlay utility.
+- New utilities: `.tile` (cream surface, hairline, radius-tile, shadow-tile), `.tile-dark` (ink surface, cream text), `.tile-accent` (red), `.bento` (CSS grid 12-col, auto-flow dense, gap-3).
+- Refined motion: shared `--ease-out-expo`, add `.reveal` (IntersectionObserver fade+rise), `.hover-lift` (translateY -2px + shadow grow).
+- Drop Instrument Serif import unless still used; keep bundle lean.
 
-## Connection to live data
+## Landing page (`src/routes/index.tsx` + `src/components/landing/*`)
+Rebuild as a bento composition, top to bottom:
+1. **Hero bento** — left tile: oversized Sora wordmark + value prop + auth CTA. Right tile: existing `Hero3DScene` reskinned to the cash-stack metaphor (banknote stack representing the average ALL budget per employee, breathing). Below: 3 small tiles (counters, "How it works in 30s", logo marquee).
+2. **How it works** — 4 bento tiles, each with a small 3D vignette: (a) employer funds → coin tower, (b) employee picks → mini cash stack peeling, (c) provider redeems → pin dropping on map, (d) tax saved → ledger card flipping.
+3. **Audiences** — 3 tall tiles (Employees, Employers, Providers), each with a subtle 3D motif and a single CTA.
+4. **Bento feature grid** — repurpose existing `BentoGrid` with the new tile system, real screenshots in tiles.
+5. **FAQ + footer** — quiet, hairline tiles.
 
-The hero already receives `spent` and `budget`. We add a third prop, `simTotal`, lifted from the existing WalletSim:
+Replace orange gradients/buttons with red; convert section dividers to hairlines.
 
-- `AppHome` keeps the picks state at the route level (move `picks` from `WalletSim` up, or expose a small subscription via a shared store — picks already live in WalletSim; the simplest move is to lift `picks` to `AppHome` and pass `picks`/`setPicks` down).
-- Hero3DEmployee computes `remaining = budget - spent - simTotal` and animates note count toward that value with a spring (lerp). So when the user drags an offer into the basket below, banknotes literally peel off the stack above.
-- If `remaining < 0` (over budget), the stack flashes accent-red and a single note flips red on top.
+## 3D scenes (recurring language)
+- **Shared scene kit** (`src/components/three/`): extract `CashStack`, `CoinTower`, `MapPin`, `LedgerCard`, `BudgetRing` as small reusable `<Canvas>` islands with `dpr={[1,1.5]}`, ambient parallax, no click interaction (matches earlier "ambient low-CPU" decision).
+- **Landing hero**: cash-stack (already built) — reskin notes to PERX cream/ink with red band.
+- **Employee `/app` hero**: keep the live cash stack (already tied to WalletSim picks).
+- **Employer `/employer`**: replace any decorative header with a coin-tower scene whose height = `funded - spent`, plus a small ledger card flipping on approvals.
+- **Provider `/provider`**: map-pin scene with pins scaled by redemption count this week.
+- **Offer detail**: a small floating "ticket" 3D card in the header.
+- All scenes share lighting, materials, and motion timing so they read as one language.
 
-## Ambient motion (low CPU)
+## Page-by-page bento refactor
+- `/app` (employee home) — convert `EditorBento`, `WalletSim`, `ProviderMapPanel`, `MoodPicker`, `WeeklyMarquee` into a 12-col bento where the cash-stack scene occupies a hero tile and the rest are sized tiles around it.
+- `/marketplace` — filters become a left sticky tile; offer cards become uniform bento cards with hairlines, no orange chips.
+- `/employer` — KPI tiles + coin-tower hero tile + tabs (Overview / Employees / Approvals) styled as bento.
+- `/provider`, `/cart`, `/saved`, `/requests`, `/concierge` — same tile language, no per-page bespoke chrome.
+- Shared `AppShell` topbar: thinner, hairline border, Sora wordmark, remove orange hover states.
 
-- Stack idly breathes: ±2px vertical, 4s ease-in-out.
-- Cursor parallax: full scene tilts up to 4°, no per-mesh rotation work.
-- When a note is removed: it lifts, fades, drifts off to bottom-right in 600ms (one mesh animated at a time, max). When added back: reverse.
-- `dpr: [1, 1.5]`, mobile/reduced-motion still falls back to the current static gradient — no behavior change there.
+## Components touched (high level)
+- Edit: `src/styles.css`, `src/routes/index.tsx`, `src/routes/_authenticated/*.tsx`, `AppShell.tsx`, all `src/components/landing/*`, all `src/components/home/*`, `src/components/employer/*`.
+- Add: `src/components/three/{CashStack,CoinTower,MapPin,LedgerCard,BudgetRing,SceneCanvas}.tsx`, `src/components/ui/Tile.tsx`, `src/components/ui/Bento.tsx`.
+- Remove orange usages project-wide (grep `accent-orange`, `#d98b5f`, orange gradient classes).
 
-## Files
+## Out of scope (this pass)
+- No backend / schema / auth changes.
+- No new routes or features — purely visual + 3D reskin.
+- No photoreal textures; 3D stays stylized matte to match the editorial palette.
+- Mobile uses static poster images for heavy 3D tiles to stay performant.
 
-- `src/components/home/HomeHeroScene.tsx` — rewrite. New `<CashStack remaining note count />` and `<SpentSlab amount />`. Drop the torus + perks.
-- `src/components/home/Hero3DEmployee.tsx` — add `simTotal` prop, pass through to `Scene`. Keep WalletRing badge in the corner (still useful as a numeric truth source).
-- `src/routes/_authenticated/app.tsx` — lift `picks` state out of WalletSim, derive `simTotal = sum(picks.price_all)`, pass to both Hero3D and WalletSim.
-- `src/components/home/WalletSim.tsx` — accept controlled `picks`/`setPicks` props (fallback to internal state if not provided, to keep it reusable).
-
-No new packages — three / drei / fiber are already in use.
-
-## Out of scope
-
-- Real banknote artwork / textures of currency (avoiding any look-alike issues). Notes are abstract beige rectangles with the PERX wordmark and the amount, not photoreal Lek banknotes.
-- Clickable notes that add/remove specific offers (you picked Ambient).
-- Skyline / map (option C from the question).
-- Mobile keeps the existing static fallback.
+## Verification
+- Build passes, no orange tokens left (`rg accent-orange`).
+- Visit `/`, `/app`, `/employer`, `/marketplace`, `/provider` in preview; confirm bento layout + 3D scenes render.
+- Lighthouse perf budget: 3D canvases lazy-mount via IntersectionObserver.
