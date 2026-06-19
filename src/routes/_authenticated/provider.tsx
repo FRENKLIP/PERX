@@ -453,13 +453,22 @@ function ProviderDashboard() {
               <div className="flex justify-between items-center">
                 <span className="font-semibold">{formatAll(o.price_all)}</span>
                 {isOwner ? (
-                <button
-                  onClick={() => toggleActive(o.id, o.is_active !== false)}
-                  className="text-[11px] font-semibold flex items-center gap-1.5 text-ink-soft hover:text-ink"
-                  title={o.is_active === false ? "Activate" : "Pause"}
-                >
-                  {o.is_active === false ? <><Power className="size-3.5" /> Activate</> : <><PowerOff className="size-3.5" /> Pause</>}
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => togglePair(o.id, !!o.pair_enabled)}
+                    className={`text-[10px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 transition-colors ${o.pair_enabled ? "bg-sage text-cream" : "hairline text-ink-soft hover:text-ink"}`}
+                    title={o.pair_enabled ? "Disable pair perk" : "Enable pair perk"}
+                  >
+                    <Users className="size-3" /> Pair{o.pair_enabled ? " · on" : ""}
+                  </button>
+                  <button
+                    onClick={() => toggleActive(o.id, o.is_active !== false)}
+                    className="text-[11px] font-semibold flex items-center gap-1.5 text-ink-soft hover:text-ink"
+                    title={o.is_active === false ? "Activate" : "Pause"}
+                  >
+                    {o.is_active === false ? <><Power className="size-3.5" /> Activate</> : <><PowerOff className="size-3.5" /> Pause</>}
+                  </button>
+                </div>
                 ) : (
                   <span className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Co-listed</span>
                 )}
