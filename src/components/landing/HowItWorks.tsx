@@ -21,7 +21,7 @@ export default function HowItWorks() {
             className={`bg-cream p-10 md:p-12 transition-all duration-700 ${shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
             style={{ transitionDelay: `${i * 140}ms` }}
           >
-            <div className="text-accent-red font-serif text-6xl mb-8 tabular-nums">{s.n}</div>
+            <div className="inline-grid place-items-center size-16 rounded-2xl bg-sage-soft text-sage-deep font-serif text-3xl mb-8 tabular-nums">{s.n}</div>
             <h3 className="font-serif text-2xl mb-3 leading-tight">{s.title}</h3>
             <p className="text-ink-soft text-sm leading-relaxed">{s.body}</p>
           </div>
@@ -34,7 +34,7 @@ export default function HowItWorks() {
 export function SectionLabel({ index, label }: { index: string; label: string }) {
   return (
     <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-[0.24em] text-ink-soft">
-      <span className="text-accent-red tabular-nums">Issue {index}</span>
+      <span className="text-sage-deep tabular-nums flex items-center gap-2"><span className="inline-block size-1.5 rounded-full bg-sage" />Issue {index}</span>
       <span className="h-px flex-1 max-w-32 bg-border-soft" />
       <span>{label}</span>
     </div>

@@ -8,6 +8,7 @@ const PANELS = [
     title: "Spend like it's your own card.",
     bullets: ["Browse 120+ providers", "AI builds packages for you", "Redeem in seconds"],
     tone: "cream" as const,
+    accent: "red" as const,
     image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1000",
   },
   {
@@ -15,6 +16,7 @@ const PANELS = [
     title: "Welfare that pays itself back.",
     bullets: ["Set budgets per team", "Approve in one click", "Live dashboards & exports"],
     tone: "ink" as const,
+    accent: "sage" as const,
     image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1000",
   },
   {
@@ -22,6 +24,7 @@ const PANELS = [
     title: "Get discovered, get paid.",
     bullets: ["List your space free", "Reach 100s of teams", "Paid on approval, no chasing"],
     tone: "cream" as const,
+    accent: "sage" as const,
     image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1000",
   },
 ];
@@ -43,7 +46,7 @@ export default function AudiencePanels() {
 }
 
 function Panel({
-  tag, title, bullets, tone, image, index,
+  tag, title, bullets, tone, accent, image, index,
 }: typeof PANELS[number] & { index: number }) {
   const { ref, shown } = useReveal<HTMLDivElement>(0.2);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -62,6 +65,8 @@ function Panel({
 
   const dark = tone === "ink";
   const reverse = index % 2 === 1;
+  const accentText = accent === "sage" ? (dark ? "text-sage" : "text-sage-deep") : "text-accent-red";
+  const accentBg = accent === "sage" ? "bg-sage" : "bg-accent-red";
 
   return (
     <div
@@ -69,12 +74,12 @@ function Panel({
       className={`rounded-[2rem] overflow-hidden p-10 md:p-16 grid md:grid-cols-2 gap-10 items-center transition-all duration-700 ${shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${dark ? "bg-ink text-cream" : "bg-paper text-ink"}`}
     >
       <div className={reverse ? "md:order-2" : ""}>
-        <div className={`text-[10px] font-bold uppercase tracking-[0.24em] mb-6 ${dark ? "text-accent-red" : "text-accent-red"}`}>{tag}</div>
+        <div className={`text-[10px] font-bold uppercase tracking-[0.24em] mb-6 ${accentText}`}>{tag}</div>
         <h3 className="font-serif text-4xl md:text-6xl leading-[1.02] tracking-tight">{title}</h3>
         <ul className="mt-8 space-y-3">
           {bullets.map((b) => (
             <li key={b} className={`flex items-center gap-3 text-sm ${dark ? "text-cream/80" : "text-ink-soft"}`}>
-              <span className={`h-px w-6 ${dark ? "bg-accent-red" : "bg-accent-red"}`} />
+              <span className={`h-px w-6 ${accentBg}`} />
               {b}
             </li>
           ))}

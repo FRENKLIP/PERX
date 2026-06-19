@@ -32,7 +32,7 @@ export function MoodPicker({ value, onChange }: { value: MoodId; onChange: (v: M
             className={`shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold border transition-all duration-300 ${
               active
                 ? "bg-ink text-cream border-ink scale-[1.02] shadow-[0_8px_22px_-12px_rgba(0,0,0,0.4)]"
-                : "bg-cream border-border-soft text-ink hover:border-ink hover:-translate-y-0.5"
+                : "bg-cream border-border-soft text-ink hover:border-sage hover:text-sage-deep hover:-translate-y-0.5"
             }`}
           >
             <Icon className="size-4" />
