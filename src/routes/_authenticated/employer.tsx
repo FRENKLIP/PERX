@@ -428,36 +428,6 @@ function EmployerDashboard() {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-5 gap-6 mb-10">
-        <TalentEdgeCard
-          insight={insight}
-          loading={loadingInsight}
-          periodDays={period}
-          onRefresh={generateInsight}
-        />
-        <div className="md:col-span-2 hairline rounded-3xl p-6 fade-up bg-paper/50 flex flex-col justify-between">
-          <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2">Approval rate</div>
-            <div className="font-serif text-5xl">
-              {(approved.length + rejected.length) > 0 ? Math.round((approved.length / (approved.length + rejected.length)) * 100) : 0}%
-            </div>
-            <div className="text-xs text-ink-soft mt-1">{approved.length} approved · {rejected.length} rejected · {pending.length} waiting</div>
-          </div>
-          <div className="text-sm text-ink-soft pt-6 border-t border-border-soft mt-6">
-            Avg approval time:&nbsp;
-            <span className="text-ink font-semibold">
-              {(() => {
-                const decided = approved.filter((r) => r.decided_at);
-                if (decided.length === 0) return "—";
-                const avgMs = decided.reduce((s, r) => s + (+new Date(r.decided_at!) - +new Date(r.created_at)), 0) / decided.length;
-                const h = avgMs / 36e5;
-                return h < 24 ? `${h.toFixed(1)}h` : `${(h/24).toFixed(1)}d`;
-              })()}
-            </span>
-          </div>
-        </div>
-      </div>
-
       </>
       )}
       </div>
