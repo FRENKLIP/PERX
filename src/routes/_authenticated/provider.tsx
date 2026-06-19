@@ -249,7 +249,7 @@ function ProviderDashboard() {
               <div className="font-serif text-2xl">{formatAll(trend.reduce((s, t) => s + t.value, 0))}</div>
             </div>
           </div>
-          <TrendArea data={trend} color="#c5503a" />
+          <TrendArea data={trend} color="#7a8b6f" />
         </div>
         <div className="lg:col-span-5 hairline bg-white rounded-3xl p-6 fade-up">
           <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Order status</div>
@@ -262,7 +262,7 @@ function ProviderDashboard() {
         <div className="lg:col-span-7 hairline bg-white rounded-3xl p-6 fade-up">
           <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-1">Top offers</div>
           <h3 className="font-serif text-2xl mb-4">Your bestsellers</h3>
-          <TopBars data={topOffers} color="#c5503a" />
+          <TopBars data={topOffers} color="#7a8b6f" />
         </div>
         <div className="lg:col-span-5 grid grid-cols-2 gap-px bg-border-soft hairline rounded-3xl overflow-hidden fade-up self-start">
           <div className="bg-white p-6">
