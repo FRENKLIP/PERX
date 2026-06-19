@@ -2,8 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
-import { ArrowLeft, Plus, Sparkles, MapPin } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, MapPin, Users, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { OfferReviews } from "@/components/OfferReviews";
 
@@ -30,26 +31,45 @@ function OfferDetail() {
   const { locale } = useLocale();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [chosenProvider, setChosenProvider] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["offer", offerId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("offers")
-        .select("*, companies:provider_company_id(name,description,city,neighborhood,address,lat,lng,hero_image_url,logo_url)")
-        .eq("id", offerId)
-        .maybeSingle();
+      const [{ data: offer, error }, { data: providers }] = await Promise.all([
+        supabase
+          .from("offers")
+          .select("*, companies:provider_company_id(name,description,city,neighborhood,address,lat,lng,hero_image_url,logo_url)")
+          .eq("id", offerId)
+          .maybeSingle(),
+        supabase
+          .from("offer_providers")
+          .select("provider_company_id, share_pct, is_owner, accepted_at, companies:provider_company_id(name,neighborhood,city,logo_url)")
+          .eq("offer_id", offerId),
+      ]);
       if (error) throw error;
-      return data;
+      return { offer, providers: providers ?? [] };
     },
   });
+
+  const offer: any = data?.offer;
+  const acceptedProviders = (data?.providers ?? []).filter((p: any) => p.accepted_at);
+  const multipleProviders = acceptedProviders.length > 1;
+
+  useEffect(() => {
+    if (chosenProvider) return;
+    if (acceptedProviders.length === 0) return;
+    const owner = acceptedProviders.find((p: any) => p.is_owner) ?? acceptedProviders[0];
+    setChosenProvider(owner.provider_company_id);
+  }, [acceptedProviders, chosenProvider]);
 
   async function add() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
+    if (multipleProviders && !chosenProvider) { toast.error("Pick a provider first"); return; }
     const { error } = await supabase
       .from("cart_items")
-      .upsert({ user_id: u.user.id, offer_id: offerId, qty: 1 }, { onConflict: "user_id,offer_id" });
+      .upsert({ user_id: u.user.id, offer_id: offerId, qty: 1, chosen_provider_id: chosenProvider }, { onConflict: "user_id,offer_id" });
     if (error) toast.error(error.message);
     else { toast.success("Added to cart"); qc.invalidateQueries({ queryKey: ["app-context"] }); }
   }
@@ -57,7 +77,7 @@ function OfferDetail() {
   if (isLoading) {
     return <div className="max-w-7xl mx-auto px-6 py-20 text-ink-soft">Loading…</div>;
   }
-  if (error || !data) {
+  if (error || !offer) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-20 text-center">
         <h1 className="font-serif text-3xl">Offer not found</h1>
@@ -66,7 +86,7 @@ function OfferDetail() {
     );
   }
 
-  const o: any = data;
+  const o: any = offer;
   const title = locale === "sq" && o.title_sq ? o.title_sq : o.title;
   const description = locale === "sq" && o.description_sq ? o.description_sq : o.description;
   const company = o.companies;
@@ -113,6 +133,43 @@ function OfferDetail() {
             {company && (
               <div className="mt-3 text-sm text-ink-soft">
                 by <span className="font-semibold text-ink">{company.name}</span>
+                {multipleProviders && <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.18em] bg-ink/90 text-cream px-2 py-0.5 rounded-full"><Users className="size-3" /> +{acceptedProviders.length - 1} more</span>}
+              </div>
+            )}
+
+            {multipleProviders && (
+              <div className="hairline rounded-3xl p-5 mt-6 bg-white">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-3 flex items-center gap-2">
+                  <Users className="size-3.5" /> Pick where to redeem
+                </div>
+                <div className="space-y-2">
+                  {acceptedProviders.map((p: any) => {
+                    const selected = chosenProvider === p.provider_company_id;
+                    return (
+                      <button
+                        key={p.provider_company_id}
+                        type="button"
+                        onClick={() => setChosenProvider(p.provider_company_id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-colors ${selected ? "bg-ink text-cream" : "bg-paper hover:bg-paper/70"}`}
+                      >
+                        {p.companies?.logo_url ? (
+                          <img src={p.companies.logo_url} alt="" className="size-9 rounded-full object-cover bg-white" />
+                        ) : (
+                          <div className={`size-9 rounded-full grid place-items-center text-[10px] font-bold ${selected ? "bg-cream/15 text-cream" : "bg-white text-ink-soft"}`}>
+                            {(p.companies?.name ?? "?").slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold truncate">{p.companies?.name}</div>
+                          <div className={`text-[11px] truncate ${selected ? "text-cream/70" : "text-ink-soft"}`}>
+                            {p.companies?.neighborhood ?? p.companies?.city ?? ""}{p.is_owner ? " · Owner" : ""}
+                          </div>
+                        </div>
+                        {selected && <Check className="size-4 shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 

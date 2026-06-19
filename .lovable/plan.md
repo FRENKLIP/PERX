@@ -1,65 +1,56 @@
-## Goal
 
-Turn the employee home (`/app`) from a stacked feed into a playful, interactive cockpit. Tone dial = 4: bold, tactile, a little loud — but still on the existing cream/ink/red palette so it stays coherent with the rest of PERX.
+# Multi-provider (co-listed) offers
 
-## Layout (top → bottom)
+Today every offer belongs to exactly one provider via `offers.provider_company_id`. We'll keep that column as the **creator/owner**, and add a join table for **co-providers** with revenue-share percentages. At checkout the employee picks one of the attached providers; that provider gets the redemption code and the order is stamped with their split for reporting.
 
-```
-┌───────────────────────────────────────────────────────────────┐
-│ 1 · 3D PARALLAX HERO                                          │
-│   greeting + wallet ring + floating perk objects (r3f)        │
-│   mouse tilts the scene; scroll parallaxes the cards          │
-├───────────────────────────────────────────────────────────────┤
-│ 2 · MOOD PICKER                                               │
-│   5 chips (Energized · Cozy · Social · Curious · Treat)       │
-│   selecting one re-sorts the rails below with a smooth        │
-│   FLIP-style animation                                        │
-├───────────────────────────────────────────────────────────────┤
-│ 3 · LIVE WALLET SIMULATOR                                     │
-│   left: animated wallet ring + "what if" basket               │
-│   right: draggable offer chips → drop into basket;            │
-│   ring depletes in real time, shows "you'd have X left"       │
-│   one-click "send for approval" turns sim into real cart      │
-├───────────────────────────────────────────────────────────────┤
-│ 4 · TIRANA MAP                                                │
-│   interactive SVG/Leaflet map of Tirana neighborhoods         │
-│   provider pins; hover = mini card; click = offer drawer      │
-│   neighborhood filter chips above                             │
-├───────────────────────────────────────────────────────────────┤
-│ 5 · WEEKLY DROP (kept, restyled as marquee strip)             │
-├───────────────────────────────────────────────────────────────┤
-│ 6 · EDITOR'S PICKS (kept, re-skinned as bento, not grid)      │
-└───────────────────────────────────────────────────────────────┘
-```
+## Data model changes
 
-## Sections in detail
+1. New table `public.offer_providers`
+   - `offer_id` (FK offers, cascade)
+   - `provider_company_id` (FK companies)
+   - `share_pct` int (0–100, default 0)
+   - `is_owner` bool (true for the creator row)
+   - `accepted_at` timestamptz null (null = invitation pending)
+   - `created_at` timestamptz
+   - Unique (`offer_id`, `provider_company_id`)
+   - Trigger: ensure total `share_pct` across accepted rows ≤ 100.
+   - RLS: any provider admin in the row can read; only the owner can insert/delete; an invited provider can update their own `accepted_at`.
+   - GRANTs to authenticated + service_role.
 
-**1 · 3D parallax hero** — `Hero3DEmployee.tsx` using `@react-three/fiber` (already installed). Floating coffee cup, dumbbell, luggage tag, theatre mask orbit a central WalletRing rendered as a 3D torus. Mouse moves the camera 5°, scroll moves objects on the z-axis. Mobile + reduced-motion fallback = static SVG composition. Greeting + CTAs sit in front of the canvas. Stat ribbon below: "Refreshes in N days · X ALL untouched · N offers near you".
+2. Backfill: insert one `offer_providers` row per existing offer with `is_owner=true`, `share_pct=100`, `accepted_at=now()`.
 
-**2 · Mood picker** — `MoodPicker.tsx`. Five pill chips, each tagged with category slugs (Energized→fitness, Cozy→food/wellness, Social→dining/events, Curious→learning/culture, Treat→travel/beauty). Selection sets a `mood` state shared with sections 3 & 6; cards reorder via `layout` prop simulation (CSS transitions on translate).
+3. `request_items` gets two new columns:
+   - `fulfilling_provider_id uuid` (which provider was chosen at checkout — already covered by existing `provider_company_id`, so we just repurpose it: keep it as the chosen one).
+   - `share_pct_snapshot int` so revenue reports reflect the split at purchase time.
 
-**3 · Live wallet simulator** — `WalletSim.tsx`. Native HTML5 drag-and-drop (no extra deps): offer chips on the right are draggable, basket on the left is a drop zone. Each drop pushes to local `sim` state, the WalletRing animates the new "after" value with a ghosted arc showing the delta. "Clear", "Send to cart" buttons. "Send to cart" loops upserts into `cart_items` (existing table) — no schema changes.
+## Provider dashboard (`/_authenticated/provider`)
 
-**4 · Tirana map** — `TiranaMap.tsx` already exists in the project; extend it. Pull `companies` rows (kind=provider, lat/lng or neighborhood centroid fallback). Hover pin → floating card with name + offer count + cheapest price; click → opens an offer drawer (shadcn Sheet) listing that provider's offers with add-to-cart.
+- New-offer form: after entering details, an "Co-providers" section lets the owner search companies (kind = provider) by name, add them as rows, and set each share %. Owner's share auto-fills to `100 - sum(others)`. Submit creates the offer + N `offer_providers` rows in one call (server fn).
+- "Your offers" grid shows offers where the current company is in `offer_providers` (owner or co). A "Co-listed" pill appears when >1 provider; owners see "Manage co-providers"; invitees see "Accept / decline".
+- Incoming orders list filters to items where `fulfilling_provider_id = your company`. Revenue stats use `price_all * share_pct_snapshot / 100` for co-listed orders so each provider sees their cut.
 
-**5 · Weekly drop** — same `/api/weekly-drop` data, restyled as a horizontal marquee of 3 cards inside an ink panel with the AI label.
+## Employee flow
 
-**6 · Editor's picks bento** — same offers, rendered as an asymmetric bento (1 tall hero + 4 small) instead of a uniform 3-col grid; respects current mood filter.
+- Offer detail page (`offer.$offerId`): shows a "Available from" row with logos/names of all accepted providers. If >1, a small selector ("Redeem at: …") appears and is required before "Add to cart" / checkout.
+- Marketplace card: small "+N venues" badge when an offer has multiple providers.
+- Cart / checkout: persists the selected `provider_company_id` per line. The redemption code, on payment, is generated for that provider only.
 
-## Files
+## Out of scope
 
-- create `src/components/home/Hero3DEmployee.tsx` (r3f scene + SVG fallback)
-- create `src/components/home/MoodPicker.tsx`
-- create `src/components/home/WalletSim.tsx`
-- create `src/components/home/ProviderMapPanel.tsx` (wraps existing `TiranaMap`, adds drawer + filters)
-- create `src/components/home/WeeklyMarquee.tsx`
-- create `src/components/home/EditorBento.tsx`
-- rewrite `src/routes/_authenticated/app.tsx` to compose them; keep existing query + addToCart logic
-- add a tiny `useMood` context (single file, no new dep) for sections 2/3/6
+- No revenue payouts integration (we already simulate payment). Split is for reporting only.
+- No public discovery / opt-in marketplace for providers to find offers — strictly invite-by-name.
+- No editing of share % after the offer has paid orders (we just block it in the UI / server fn).
 
-## Constraints & non-goals
+## Files to touch
 
-- No schema changes, no new packages — `three`, `@react-three/fiber`, `@react-three/drei` are already installed for the landing page; reuse them. `sonner`, `lucide-react`, shadcn `Sheet` already present.
-- Keep cream / ink / accent-red tokens — no new colors.
-- Reduced motion + mobile both fall back to a static hero and disable drag (tap-to-add instead).
-- Employer and provider dashboards untouched.
+- DB: one migration (new table, trigger, RLS, GRANTs, backfill, two new `request_items` columns).
+- `src/routes/_authenticated/provider.tsx` — new-offer form additions, manage / accept UI, dashboard filtering.
+- `src/routes/_authenticated/offer.$offerId.tsx` — provider list + selector.
+- `src/routes/_authenticated/cart.tsx` — pass selected provider into request_items, stamp share_pct.
+- `src/routes/_authenticated/marketplace.tsx`, `EditorBento.tsx`, `WalletSim.tsx` — "+N venues" badge.
+- New server fn `src/lib/offers.functions.ts` (`createOfferWithProviders`, `setShare`, `respondToInvite`).
+
+## Open questions
+
+- Should an invited provider be able to **counter-propose** a share %, or only accept/decline? (Default plan: accept/decline only.)
+- For pending invites, should the offer still be live to employees? (Default plan: yes — only accepted providers appear in the "redeem at" list.)
