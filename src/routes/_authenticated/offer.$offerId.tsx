@@ -181,9 +181,6 @@ function OfferDetail() {
               <button onClick={add} className="mt-5 w-full bg-ink text-cream rounded-2xl py-4 font-bold hover:bg-accent-red transition-colors inline-flex items-center justify-center gap-2">
                 <Plus className="size-4" /> Add to cart
               </button>
-              <button onClick={() => navigate({ to: "/concierge" })} className="mt-2 w-full hairline bg-cream rounded-2xl py-3.5 font-semibold text-sm hover:border-ink/30 transition-colors inline-flex items-center justify-center gap-2">
-                <Sparkles className="size-4" /> Ask the concierge
-              </button>
               <p className="text-[11px] text-ink-soft mt-3 leading-relaxed">
                 Funded by your employer wallet. Pay nothing at checkout — your provider gets paid directly when the request is approved.
               </p>
