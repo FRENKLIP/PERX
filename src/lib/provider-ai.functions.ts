@@ -131,7 +131,7 @@ export const generateProviderInsights = createServerFn({ method: "POST" })
     const cutoff = new Date(Date.now() - 30 * 86400000).toISOString();
     const [{ data: offers }, { data: items }, { data: reviews }] = await Promise.all([
       supabase.from("offers").select("id,title,price_all,category_slug,is_active").in("provider_company_id", companyIds),
-      supabase.from("request_items").select("offer_title,price_all,payment_status,created_at").in("provider_company_id", companyIds).gte("created_at", cutoff),
+      supabase.from("request_items").select("offer_title,price_all,payment_status,requests!inner(created_at)").in("provider_company_id", companyIds).gte("requests.created_at", cutoff),
       supabase.from("offer_reviews").select("rating,comment,offer_id").in("offer_id", ((await supabase.from("offers").select("id").in("provider_company_id", companyIds)).data ?? []).map((o: any) => o.id)).limit(20),
     ]);
 
