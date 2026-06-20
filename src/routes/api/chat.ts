@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { messages } = (await request.json()) as { messages: UIMessage[] };
+        const { messages, variant } = (await request.json()) as { messages: UIMessage[]; variant?: "employee" | "provider" };
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
 
@@ -21,14 +21,21 @@ export const Route = createFileRoute("/api/chat")({
         const gateway = createLovableAiGatewayProvider(key);
         const model = gateway("google/gemini-3-flash-preview");
 
-        const result = streamText({
-          model,
-          system: `You are PERX, a warm, witty AI concierge for an employee benefits marketplace in Albania.
+        const employeeSystem = `You are PERX, a warm, witty AI concierge for an employee benefits marketplace in Albania.
 You help employees pick tax-free benefits using their monthly wallet (typically 25,000 ALL).
 Prices are always Albanian Lek (ALL). Speak in English unless user uses Albanian.
 Categories: wellness, food, travel, learning, family, tech, lifestyle.
 When users ask for recommendations or packages, ALWAYS call search_offers to fetch real options.
-Be concise — 1-2 short sentences max, then let the offer cards do the talking. Albanian flavor welcome ("Mirëmëngjes!").`,
+Be concise — 1-2 short sentences max, then let the offer cards do the talking. Albanian flavor welcome ("Mirëmëngjes!").`;
+
+        const providerSystem = `You are PERX Studio AI, an assistant for benefit providers in Albania selling on PERX.
+Help them: brainstorm offer ideas, suggest fair retail prices in Albanian Lek (ALL), write punchy descriptions, and analyze which categories sell best (wellness, food, travel, learning, family, tech, lifestyle).
+You can call search_offers to look up comparable offers on the marketplace when discussing pricing or positioning.
+Be concise — 2-4 short sentences. Concrete numbers in ALL, no fluff. Speak English unless user uses Albanian.`;
+
+        const result = streamText({
+          model,
+          system: variant === "provider" ? providerSystem : employeeSystem,
           messages: await convertToModelMessages(messages),
           stopWhen: stepCountIs(50),
           tools: {

@@ -7,7 +7,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
 import { toast } from "sonner";
 
-export function ConciergeBubble() {
+type Variant = "employee" | "provider";
+
+const GREETINGS: Record<Variant, { title: string; subtitle: string; prompts: string[] }> = {
+  employee: {
+    title: "PERX Concierge",
+    subtitle: "AI · this session only",
+    prompts: [
+      "Relaxing Sunday under 8,000 ALL",
+      "Healthy week in Blloku",
+      "Date night in Tirana",
+    ],
+  },
+  provider: {
+    title: "PERX Studio AI",
+    subtitle: "Pricing & growth · this session only",
+    prompts: [
+      "How should I price a yoga class in Tirana?",
+      "Give me 3 offer ideas for wellness",
+      "Which categories sell best on PERX?",
+    ],
+  },
+};
+
+export function ConciergeBubble({ variant = "employee" }: { variant?: Variant } = {}) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [chatId, setChatId] = useState(() => crypto.randomUUID());
@@ -17,7 +40,7 @@ export function ConciergeBubble() {
 
   const { messages, sendMessage, status, setMessages } = useChat({
     id: chatId,
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
+    transport: new DefaultChatTransport({ api: "/api/chat", body: { variant } }),
     onError: (e) => toast.error(e.message),
   });
 
@@ -59,7 +82,7 @@ export function ConciergeBubble() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-24 md:bottom-6 left-6 z-[60] size-14 rounded-full bg-ink text-cream shadow-xl grid place-items-center hover:bg-accent-red transition-colors"
+          className="fixed bottom-24 md:bottom-6 right-6 z-[60] size-14 rounded-full bg-ink text-cream shadow-xl grid place-items-center hover:bg-accent-red transition-colors"
           aria-label="Open AI concierge"
         >
           <MessageCircle className="size-6" />
@@ -70,15 +93,15 @@ export function ConciergeBubble() {
       )}
 
       {open && (
-        <div className="fixed bottom-24 md:bottom-6 left-6 z-[60] w-[calc(100vw-3rem)] sm:w-[380px] h-[560px] max-h-[80vh] bg-cream rounded-3xl shadow-2xl border border-border-soft flex flex-col overflow-hidden">
+        <div className="fixed bottom-24 md:bottom-6 right-6 z-[60] w-[calc(100vw-3rem)] sm:w-[380px] h-[560px] max-h-[80vh] bg-cream rounded-3xl shadow-2xl border border-border-soft flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-soft bg-cream">
             <div className="flex items-center gap-2">
               <div className="size-8 rounded-full bg-ink text-cream grid place-items-center">
                 <Sparkles className="size-4" />
               </div>
               <div>
-                <div className="font-serif text-base leading-tight">PERX Concierge</div>
-                <div className="text-[10px] text-ink-soft">AI · this session only</div>
+                <div className="font-serif text-base leading-tight">{GREETINGS[variant].title}</div>
+                <div className="text-[10px] text-ink-soft">{GREETINGS[variant].subtitle}</div>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -94,13 +117,9 @@ export function ConciergeBubble() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
             {messages.length === 0 && (
               <div className="space-y-3">
-                <p className="font-serif text-xl leading-snug">What are you in the mood for?</p>
+                <p className="font-serif text-xl leading-snug">{variant === "provider" ? "How can I help your business today?" : "What are you in the mood for?"}</p>
                 <div className="grid gap-2">
-                  {[
-                    "Relaxing Sunday under 8,000 ALL",
-                    "Healthy week in Blloku",
-                    "Date night in Tirana",
-                  ].map((s) => (
+                  {GREETINGS[variant].prompts.map((s) => (
                     <button key={s} onClick={() => setInput(s)}
                       className="text-left text-sm bg-sage/40 hover:bg-sage/60 rounded-2xl px-3 py-2 transition-colors">
                       {s}

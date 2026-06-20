@@ -9,6 +9,7 @@ import { StatTile } from "@/components/StatTile";
 import { TrendArea, TopBars, CategoryDonut, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
 import { CoProviderEditor, type CoProviderDraft } from "@/components/CoProviderEditor";
 import { OfferEditSheet } from "@/components/provider/OfferEditSheet";
+import { AIInsightsCard } from "@/components/provider/AIInsightsCard";
 
 export const Route = createFileRoute("/_authenticated/provider")({
   head: () => ({ meta: [{ title: "Provider — PERX" }] }),
@@ -237,6 +238,8 @@ function ProviderDashboard() {
         <StatTile label="Conversion" value={`${conversion}%`} hint={`${paid.length} / ${totalOrders} orders`} accent="ink" />
         <StatTile label="Avg order" value={formatAll(avgOrder)} hint={paid.length ? "per paid order" : "no sales yet"} accent="ink" />
       </div>
+
+      <AIInsightsCard />
 
       {/* Charts row */}
       <div className="grid lg:grid-cols-12 gap-6 mb-10">

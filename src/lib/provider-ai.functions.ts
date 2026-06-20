@@ -114,3 +114,72 @@ Description: ${data.description ?? "(none)"}`,
       throw new Error("Could not parse category suggestion");
     }
   });
+
+export const generateProviderInsights = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const { supabase, userId } = context;
+
+    const { data: roles } = await supabase
+      .from("user_roles").select("company_id")
+      .eq("user_id", userId).eq("role", "provider_admin");
+    const companyIds = (roles ?? []).map((r: any) => r.company_id).filter(Boolean);
+    if (companyIds.length === 0) throw new Error("No provider company");
+
+    const cutoff = new Date(Date.now() - 30 * 86400000).toISOString();
+    const [{ data: offers }, { data: items }, { data: reviews }] = await Promise.all([
+      supabase.from("offers").select("id,title,price_all,category_slug,is_active").in("provider_company_id", companyIds),
+      supabase.from("request_items").select("offer_title,price_all,payment_status,requests!inner(created_at)").in("provider_company_id", companyIds).gte("requests.created_at", cutoff),
+      supabase.from("offer_reviews").select("rating,comment,offer_id").in("offer_id", ((await supabase.from("offers").select("id").in("provider_company_id", companyIds)).data ?? []).map((o: any) => o.id)).limit(20),
+    ]);
+
+    const paid = (items ?? []).filter((i: any) => i.payment_status === "simulated_paid");
+    const revenue = paid.reduce((s: number, i: any) => s + (i.price_all ?? 0), 0);
+    const byCat = new Map<string, { count: number; revenue: number }>();
+    for (const o of offers ?? []) {
+      byCat.set(o.category_slug, byCat.get(o.category_slug) ?? { count: 0, revenue: 0 });
+    }
+    for (const it of paid) {
+      const offer = (offers ?? []).find((o: any) => o.title === it.offer_title);
+      if (offer) {
+        const cur = byCat.get(offer.category_slug) ?? { count: 0, revenue: 0 };
+        cur.count += 1; cur.revenue += it.price_all ?? 0;
+        byCat.set(offer.category_slug, cur);
+      }
+    }
+    const catSummary = Array.from(byCat.entries()).map(([slug, v]) => ({ slug, ...v }));
+    const avgRating = (reviews ?? []).length
+      ? Math.round((reviews ?? []).reduce((s: number, r: any) => s + r.rating, 0) / (reviews ?? []).length * 10) / 10
+      : null;
+
+    const gateway = createLovableAiGatewayProvider(key);
+    const { text } = await generateText({
+      model: gateway(MODEL),
+      system:
+        "You are a growth analyst for an Albanian benefits marketplace provider. Reply with ONLY a JSON object: {\"summary\":\"...\",\"topCategories\":[\"...\"],\"pricingSuggestions\":[\"...\"],\"opportunities\":[\"...\"]}. Each array has 2-3 short, concrete items. Use ALL for amounts. No prose outside JSON.",
+      prompt: `Past 30 days for this provider:
+Offers: ${(offers ?? []).length} (${(offers ?? []).filter((o: any) => o.is_active !== false).length} active)
+Paid orders: ${paid.length}
+Revenue: ${revenue} ALL
+Category breakdown: ${JSON.stringify(catSummary)}
+Avg rating: ${avgRating ?? "n/a"}
+Top selling titles: ${paid.slice(0, 5).map((p: any) => p.offer_title).join(" | ") || "(none)"}
+
+Write actionable, concrete advice. Don't restate numbers verbatim — interpret them.`,
+    });
+    try {
+      const cleaned = text.trim().replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+      const parsed = JSON.parse(cleaned);
+      return {
+        summary: String(parsed.summary ?? ""),
+        topCategories: (parsed.topCategories ?? []).map(String).slice(0, 4),
+        pricingSuggestions: (parsed.pricingSuggestions ?? []).map(String).slice(0, 4),
+        opportunities: (parsed.opportunities ?? []).map(String).slice(0, 4),
+        stats: { offers: (offers ?? []).length, paid: paid.length, revenue, avgRating },
+      };
+    } catch {
+      throw new Error("Could not parse insights");
+    }
+  });

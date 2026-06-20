@@ -1,116 +1,101 @@
-## Goals
+## 1. Chatbot to bottom-right
 
-1. **Quests** — new employer tab where companies complete quests to earn **discount points** spent on platform-fee discounts.
-2. **Plans & billing** — Starter / Growth / Enterprise subscription for companies, simulated payment.
-3. **Floating AI chatbot** — bottom-left bubble on every employee page; delete `/concierge` route.
-4. **Cart icon** — top-right of header (replaces text tab on desktop and `ShoppingBag` slot on mobile bottom bar).
-5. **Provider AI** — inline "Generate description", "Suggest price", "Suggest category" buttons inside `OfferEditSheet`.
+`src/components/ConciergeBubble.tsx`: change `left-6` → `right-6` on bubble button and panel. Keep mobile `bottom-24` (clears bottom nav) and desktop `bottom-6`.
 
----
+Provider-side variant: mount the same component (provider-flavored system prompt) in provider layout — see §3.
 
-## 1. Quests (employer tab)
+## 2. Employee quests + points system (workers page)
 
-**Data (migration)**
-- `public.quest_definitions` (seeded, read-only-ish): `slug text pk`, `title`, `description`, `points int`, `target int`, `metric text` — e.g. `employees_onboarded`, `requests_approved`, `policy_configured`, `first_topup`, `monthly_active`.
-- `public.company_quests`: `id`, `company_id fk companies`, `quest_slug fk quest_definitions`, `progress int default 0`, `completed_at timestamptz`, `claimed_at timestamptz`, unique `(company_id, quest_slug)`.
-- Add `companies.discount_points int not null default 0`.
-- RLS: SELECT/UPDATE on `company_quests` and SELECT on `quest_definitions` for `has_company_role(uid, company_id, 'employer_admin')`. Standard grants.
+Workers = employees. Their landing is `/app` (`src/routes/_authenticated/app.tsx`).
 
-**Server fn** `src/lib/quests.functions.ts`
-- `claimQuest({ companyId, slug })` — validates `progress >= target`, sets `claimed_at`, adds `points` to `companies.discount_points`. Idempotent.
-- `recomputeQuests({ companyId })` — recalculates `progress` for each quest from live counts (employees, approved requests, has policy set, etc.). Called on tab open.
+### Schema (new migration)
 
-**UI** `src/components/employer/QuestsTab.tsx`
-- Header strip: big "Discount points: 1,240" + "Redeem" button (opens dialog → applies `points → % off next invoice` on the Billing tab as a credit line).
-- Grid of quest cards: title, description, progress bar (`progress/target`), "+N pts" pill, **Claim** button when complete.
-- Tab registered as `"quests"` in `employer.tsx`.
+- `profiles`: add `discount_points integer NOT NULL DEFAULT 0`.
+- `employee_quest_definitions` (seeded, read-only to authenticated):
+  - `slug, title, description, points, target, metric, sort_order`.
+  - Seeded quests: `complete_profile` (target 1, 100 pts), `first_request` (target 1, 150 pts), `redeem_first` (target 1, 200 pts), `save_five_favorites` (target 5, 100 pts), `write_review` (target 1, 150 pts), `redeem_ten` (target 10, 500 pts).
+- `employee_quests` (per-user progress):
+  - `user_id, quest_slug, progress, completed_at, claimed_at, updated_at`, unique `(user_id, quest_slug)`.
+  - RLS: user can select/insert/update own rows.
+- `points_ledger` (audit + cart spend):
+  - `user_id, delta, reason ('quest_claim'|'cart_redeem'|'refund'), ref_id, created_at`.
+  - RLS: user reads own rows; inserts via server fn only.
 
----
+All tables get GRANTs (`authenticated` SELECT/INSERT/UPDATE on own; `service_role` ALL), RLS enabled, policies as above.
 
-## 2. Plans & Billing (employer tab)
+### Server functions (`src/lib/employee-quests.functions.ts`)
 
-**Data (migration)**
-- Add to `public.companies`: `plan text not null default 'starter'` (check in `'starter','growth','enterprise'`), `plan_period text not null default 'monthly'`, `plan_renews_at timestamptz`, `plan_seats int`.
-- `public.company_invoices`: `id`, `company_id`, `amount_all int`, `discount_points_applied int default 0`, `status text` (`paid|pending`), `period_start`, `period_end`, `created_at`. RLS: employer_admin SELECT, server fn writes.
+- `recomputeEmployeeQuests()` — middleware `requireSupabaseAuth`. Computes metrics for current user:
+  - `complete_profile`: profile has full_name + avatar_url.
+  - `first_request` / `redeem_ten`: count of own requests with status approved.
+  - `redeem_first`: count of own requests with redeemed_at not null.
+  - `save_five_favorites`: count of own favorites.
+  - `write_review`: count of own offer_reviews.
+  - Upserts `employee_quests` rows, sets `completed_at` when progress ≥ target.
+- `claimEmployeeQuest({ slug })` — verifies completed & not claimed, sets `claimed_at`, increments `profiles.discount_points`, inserts `points_ledger` row (`reason='quest_claim'`).
 
-**Server fn** `src/lib/billing.functions.ts`
-- `changePlan({ companyId, plan, period })` — updates plan + renewal, creates a simulated `company_invoices` row, optionally deducts `discount_points` (1 pt = 1 ALL off, capped at 50% of amount).
-- `applyPointsToInvoice({ invoiceId, points })`.
+### Cart redemption (`src/lib/cart.functions.ts`)
 
-**UI** `src/components/employer/BillingTab.tsx`
-- Plan grid (3 cards, monthly/yearly toggle):
-  - **Starter** — up to 10 employees, basic policy, community support — 0 ALL.
-  - **Growth** — up to 50 employees, analytics, auto-approve, priority support — 49,900 ALL/mo.
-  - **Enterprise** — unlimited, SSO, custom policy, dedicated CSM — "Contact sales" (still allows simulated activation).
-- Current plan highlighted; "Switch plan" triggers `changePlan` with a confirm.
-- Invoice history table with downloadable (just printable) rows; shows points applied.
-- Sticky "Apply discount points" widget linked to Quests.
+- Add `applyPointsToCart({ points })` returning a server-computed discount preview (1 pt = 1 ALL, capped at 50% of cart total).
+- Extend the existing "submit request" server fn (or add `submitRequestWithPoints({ pointsToUse })`):
+  - Validates `pointsToUse ≤ profile.discount_points` and `≤ 50% of total`.
+  - Deducts points, writes `points_ledger` row (`reason='cart_redeem'`, `ref_id=request_id`), stores `points_redeemed` + `discount_all` on the request row.
+- Migration also adds `requests.points_redeemed integer DEFAULT 0` and `requests.discount_all integer DEFAULT 0`.
 
-Tab registered as `"billing"` in `employer.tsx`.
+### UI
 
----
+- `src/components/employee/QuestsPanel.tsx` — quest cards (progress bar, points reward, Claim button when ready). Header shows total points balance with coin icon.
+- Mount on `/app`: new "Quests" section beneath the existing hero/feed, plus a small points-balance chip in the page header.
+- `src/routes/_authenticated/cart.tsx`: add a "Use points" row above totals — slider/input bounded by `min(balance, floor(total*0.5))`, live discount preview, sends `pointsToUse` on checkout. Shows updated balance after submit via toast + query invalidation.
 
-## 3. Floating AI chatbot (replaces /concierge)
+## 3. Provider AI
 
-- Delete `src/routes/_authenticated/concierge.tsx`. Remove "Concierge" nav link in `AppShell.tsx`.
-- New `src/components/ConciergeBubble.tsx`:
-  - Fixed `bottom-6 left-6 z-50` round button (sparkle/chat icon — generated logo, not lucide `Sparkles` per chat-ui rules) on every authenticated employee route.
-  - Opens a 380px × 560px floating panel (Popover/Dialog-like, draggable not required) with AI Elements composition: `Conversation`, `Message`, `MessageResponse`, `PromptInput`, `Shimmer`.
-  - Uses `useChat` + `DefaultChatTransport({ api: "/api/chat" })`, **no persistence** — messages live in component state, "New chat" clears. (Matches user choice: fresh per session.)
-  - Reuses existing `/api/chat` route and offer-search tool already wired; "Add to cart" buttons still work.
-- Mount in `AppShell.tsx` only when `isEmployee`.
-- Remove `<NavTab to="/concierge">` and any other references; update `routeTree.gen.ts` regenerates automatically.
+### Floating bubble (bottom-right, provider-flavored)
 
----
+- New thin wrapper `src/components/ProviderConciergeBubble.tsx` reusing `ConciergeBubble` internals but passing a provider system prompt (pricing tips, offer ideas, performance Q&A about their own offers).
+- Refactor `ConciergeBubble` to accept `variant: 'employee' | 'provider'` and choose system prompt + greeting accordingly. Single component, two mounts.
+- `AppShell.tsx`: mount employee variant for employees, provider variant for provider admins. Both positioned bottom-right.
 
-## 4. Cart as top-right icon
+### Dashboard insights panel
 
-- In `AppShell.tsx`:
-  - Desktop nav: remove the `Cart · N` text tab; in the right-side button cluster (before profile avatar) add a `Link to="/cart"` with `ShoppingBag` icon + badge bubble for `cartCount`.
-  - Mobile bottom bar: replace the cart slot with **Saved** (or keep Saved + drop one of the lesser-used tabs) so the bottom bar reads Home / Marketplace / Saved / Requests. Cart is accessed from the same top-right icon (visible on mobile too).
-- Top-right order becomes: language, **cart icon w/ badge**, profile avatar.
+- `src/components/provider/AIInsightsCard.tsx` placed on `src/routes/_authenticated/provider.tsx` above the offers table.
+- Server fn `generateProviderInsights()` (`src/lib/provider-ai.functions.ts`):
+  - Loads provider's offers, last 30 days of `request_items` and `offer_reviews`.
+  - Calls `google/gemini-3-flash-preview` with `Output.object` schema: `{ summary, topCategories[], pricingSuggestions[], opportunities[] }`.
+- Card shows skeleton → 4 sections. "Refresh" button re-runs. Result cached in TanStack Query for 10 min.
 
----
+Existing inline AI buttons in `OfferEditSheet.tsx` stay as-is.
 
-## 5. Provider AI assists (inline only)
+## 4. Remove employer Quests tab
 
-`src/lib/provider-ai.functions.ts` — three `createServerFn`s, all `.middleware([requireSupabaseAuth])`, using Lovable AI Gateway (`google/gemini-3-flash-preview`) with `generateText` + `Output.object` Zod schemas:
-
-- `generateOfferDescription({ title, category, providerName })` → `{ description: string }` (~60–90 words, warm marketing tone).
-- `suggestOfferPrice({ title, category, description, city })` → `{ priceAll: number, rationale: string }` — reads a few comparable `offers` server-side for grounding.
-- `suggestOfferCategory({ title, description })` → `{ categorySlug: string, confidence: number }` constrained to existing `categories.slug` values.
-
-**UI** in `src/components/provider/OfferEditSheet.tsx`:
-- Small "✨ AI" button next to the Description textarea → calls `generateOfferDescription`, streams into the field with "Replace / Append / Discard".
-- "Suggest" link next to the Price input → fills the input + shows rationale tooltip.
-- "Auto-detect" link next to the Category select → sets the select value + confidence chip.
-- All buttons disabled while pending; show inline spinner. Errors surface via `toast`.
-
-No floating chatbot on provider side (per user choice).
-
----
-
-## Out of scope
-
-- Real payment processing (plans simulate).
-- Quest auto-trigger events / webhooks (recompute on tab open is enough).
-- Employee-facing view of plan tier.
-- Persisting concierge chats / cross-device sync.
-- Provider-side floating chatbot.
-- Translating AI outputs to SQ (English only this pass).
-
----
+- `src/routes/_authenticated/employer.tsx`: remove `"quests"` from tab list and the `<QuestsTab/>` render branch. Default tab stays Employees.
+- Delete `src/components/employer/QuestsTab.tsx`.
+- Keep `recomputeQuests`/`claimQuest` server fns and `company_quests`/`quest_definitions` tables untouched (still referenced by Billing for company `discount_points` discount on invoices). No data migration.
 
 ## Files
 
-- migrations: quests + billing + `companies.discount_points` + `plan` columns
-- `src/lib/quests.functions.ts` (new)
-- `src/lib/billing.functions.ts` (new)
-- `src/lib/provider-ai.functions.ts` (new)
-- `src/components/employer/QuestsTab.tsx` (new)
-- `src/components/employer/BillingTab.tsx` (new)
-- `src/components/ConciergeBubble.tsx` (new, with AI Elements install)
-- `src/components/provider/OfferEditSheet.tsx` (add AI buttons)
-- `src/routes/_authenticated/employer.tsx` (register Quests + Billing tabs)
-- `src/components/AppShell.tsx` (cart icon top-right, mount ConciergeBubble, drop Concierge nav)
-- `src/routes/_authenticated/concierge.tsx` (delete)
+Created:
+- `supabase/migrations/<ts>_employee_points.sql`
+- `src/lib/employee-quests.functions.ts`
+- `src/components/employee/QuestsPanel.tsx`
+- `src/components/provider/AIInsightsCard.tsx`
+- `src/components/ProviderConciergeBubble.tsx` (thin wrapper) — or just reuse via `variant` prop
+
+Updated:
+- `src/components/ConciergeBubble.tsx` (right-side position, `variant` prop)
+- `src/components/AppShell.tsx` (mount provider bubble; remove left-side positioning)
+- `src/routes/_authenticated/app.tsx` (mount QuestsPanel + points chip)
+- `src/routes/_authenticated/cart.tsx` (use-points row + checkout wiring)
+- `src/lib/cart.functions.ts` (points validation + ledger)
+- `src/lib/provider-ai.functions.ts` (add `generateProviderInsights`)
+- `src/routes/_authenticated/provider.tsx` (insights card)
+- `src/routes/_authenticated/employer.tsx` (drop Quests tab)
+
+Deleted:
+- `src/components/employer/QuestsTab.tsx`
+
+## Out of scope
+
+- Real-time quest auto-recompute via triggers (called on `/app` mount + after relevant mutations instead).
+- Translating AI outputs to Albanian.
+- Provider chatbot persistence (fresh session like employee).
