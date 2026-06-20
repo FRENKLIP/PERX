@@ -124,7 +124,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
       <ProfileDrawer open={profileOpen} onClose={() => setProfileOpen(false)} ctx={ctx} onSignOut={signOut} />
-      {isEmployee && <ConciergeBubble />}
+      {isEmployee && <ConciergeBubble variant="employee" />}
+      {isProvider && <ConciergeBubble variant="provider" />}
     </div>
   );
 }
