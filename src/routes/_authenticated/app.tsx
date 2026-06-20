@@ -11,8 +11,6 @@ import { MoodPicker, moodMatch, type MoodId } from "@/components/home/MoodPicker
 import { ProviderMapPanel } from "@/components/home/ProviderMapPanel";
 import { WeeklyMarquee } from "@/components/home/WeeklyMarquee";
 import { WalletRing } from "@/components/WalletRing";
-import { QuestsPanel } from "@/components/employee/QuestsPanel";
-
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Home — PERX" }] }),
   beforeLoad: async () => {
@@ -26,8 +24,6 @@ function AppHome() {
   const { locale } = useLocale();
   const qc = useQueryClient();
   const [mood, setMood] = useState<MoodId>("all");
-  const [userId, setUserId] = useState<string | null>(null);
-  useEffect(() => { supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null)); }, []);
 
   const { data } = useQuery({
     queryKey: ["app-home"],
@@ -144,8 +140,6 @@ function AppHome() {
         </div>
 
       </div>
-
-      {userId && <QuestsPanel userId={userId} />}
     </div>
   );
 }

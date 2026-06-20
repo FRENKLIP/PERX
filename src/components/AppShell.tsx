@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocale, setLocale } from "@/lib/i18n";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Languages, Home, Store, ShoppingBag, Inbox, BarChart3, Wrench, Heart } from "lucide-react";
+import { Languages, Home, Store, ShoppingBag, Inbox, BarChart3, Wrench, Heart, Sparkles } from "lucide-react";
 import { ProfileDrawer } from "@/components/ProfileDrawer";
 import { avatarFor } from "@/lib/avatar";
 import { ConciergeBubble } from "@/components/ConciergeBubble";
@@ -69,6 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {isEmployee && <NavTab to="/marketplace" label={t("marketplace")} />}
             {isEmployee && <NavTab to="/saved" label="Saved" />}
             {isEmployee && <NavTab to="/requests" label={t("requests")} />}
+            {isEmployee && <NavTab to="/quests" label="Quests" />}
             {isEmployer && <NavTab to="/employer" label={t("employer_dashboard")} />}
             {isProvider && <NavTab to="/provider" label={t("provider_dashboard")} />}
           </div>
@@ -115,6 +116,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <BottomTab to="/marketplace" icon={Store} />
           <BottomTab to="/saved" icon={Heart} />
           <BottomTab to="/requests" icon={Inbox} />
+          <BottomTab to="/quests" icon={Sparkles} />
         </div>
       )}
       {(isEmployer || isProvider) && (
