@@ -88,6 +88,7 @@ export type Database = {
           created_at: string
           currency: string
           description: string | null
+          discount_points: number
           hero_image_url: string | null
           id: string
           kind: Database["public"]["Enums"]["company_kind"]
@@ -96,6 +97,10 @@ export type Database = {
           logo_url: string | null
           name: string
           neighborhood: string | null
+          plan: string
+          plan_period: string
+          plan_renews_at: string | null
+          plan_seats: number | null
           policy_allowed_categories: string[] | null
           policy_auto_approve_below_all: number | null
           policy_default_monthly_budget_all: number
@@ -108,6 +113,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          discount_points?: number
           hero_image_url?: string | null
           id?: string
           kind: Database["public"]["Enums"]["company_kind"]
@@ -116,6 +122,10 @@ export type Database = {
           logo_url?: string | null
           name: string
           neighborhood?: string | null
+          plan?: string
+          plan_period?: string
+          plan_renews_at?: string | null
+          plan_seats?: number | null
           policy_allowed_categories?: string[] | null
           policy_auto_approve_below_all?: number | null
           policy_default_monthly_budget_all?: number
@@ -128,6 +138,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          discount_points?: number
           hero_image_url?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["company_kind"]
@@ -136,12 +147,111 @@ export type Database = {
           logo_url?: string | null
           name?: string
           neighborhood?: string | null
+          plan?: string
+          plan_period?: string
+          plan_renews_at?: string | null
+          plan_seats?: number | null
           policy_allowed_categories?: string[] | null
           policy_auto_approve_below_all?: number | null
           policy_default_monthly_budget_all?: number
           policy_max_request_all?: number | null
         }
         Relationships: []
+      }
+      company_invoices: {
+        Row: {
+          amount_all: number
+          company_id: string
+          created_at: string
+          discount_points_applied: number
+          id: string
+          period_end: string | null
+          period_start: string
+          plan: string
+          plan_period: string
+          status: string
+        }
+        Insert: {
+          amount_all: number
+          company_id: string
+          created_at?: string
+          discount_points_applied?: number
+          id?: string
+          period_end?: string | null
+          period_start?: string
+          plan: string
+          plan_period: string
+          status?: string
+        }
+        Update: {
+          amount_all?: number
+          company_id?: string
+          created_at?: string
+          discount_points_applied?: number
+          id?: string
+          period_end?: string | null
+          period_start?: string
+          plan?: string
+          plan_period?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_quests: {
+        Row: {
+          claimed_at: string | null
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          progress: number
+          quest_slug: string
+          updated_at: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          quest_slug: string
+          updated_at?: string
+        }
+        Update: {
+          claimed_at?: string | null
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          quest_slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_quests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_quests_quest_slug_fkey"
+            columns: ["quest_slug"]
+            isOneToOne: false
+            referencedRelation: "quest_definitions"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       favorites: {
         Row: {
@@ -365,6 +475,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      quest_definitions: {
+        Row: {
+          created_at: string
+          description: string
+          metric: string
+          points: number
+          slug: string
+          sort_order: number
+          target: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          metric: string
+          points?: number
+          slug: string
+          sort_order?: number
+          target?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          metric?: string
+          points?: number
+          slug?: string
+          sort_order?: number
+          target?: number
+          title?: string
+        }
+        Relationships: []
       }
       request_items: {
         Row: {
