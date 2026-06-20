@@ -1,8 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
-import { ArrowLeft, Plus, Sparkles, MapPin, Check, Users } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, Check, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -30,7 +30,6 @@ function OfferDetail() {
   const { offerId } = Route.useParams();
   const { locale } = useLocale();
   const qc = useQueryClient();
-  const navigate = useNavigate();
   const [chosenProvider, setChosenProvider] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
@@ -180,9 +179,6 @@ function OfferDetail() {
               </div>
               <button onClick={add} className="mt-5 w-full bg-ink text-cream rounded-2xl py-4 font-bold hover:bg-accent-red transition-colors inline-flex items-center justify-center gap-2">
                 <Plus className="size-4" /> Add to cart
-              </button>
-              <button onClick={() => navigate({ to: "/concierge" })} className="mt-2 w-full hairline bg-cream rounded-2xl py-3.5 font-semibold text-sm hover:border-ink/30 transition-colors inline-flex items-center justify-center gap-2">
-                <Sparkles className="size-4" /> Ask the concierge
               </button>
               <p className="text-[11px] text-ink-soft mt-3 leading-relaxed">
                 Funded by your employer wallet. Pay nothing at checkout — your provider gets paid directly when the request is approved.

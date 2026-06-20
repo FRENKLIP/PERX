@@ -5,7 +5,7 @@ import { useLocale } from "@/lib/i18n";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Sparkles, MapPin } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 import { Hero3DEmployee } from "@/components/home/Hero3DEmployee";
 import { MoodPicker, moodMatch, type MoodId } from "@/components/home/MoodPicker";
 import { ProviderMapPanel } from "@/components/home/ProviderMapPanel";
@@ -97,9 +97,6 @@ function AppHome() {
             </h1>
           </div>
           <div className="flex flex-wrap gap-2 mt-6">
-            <Link to="/concierge" className="inline-flex items-center gap-2 bg-cream text-ink px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-sage hover:text-cream transition-colors">
-              <Sparkles className="size-3.5" /> Concierge
-            </Link>
             <Link to="/marketplace" className="inline-flex items-center gap-2 border border-cream/20 text-cream px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-cream/10 transition-colors">
               Browse <ArrowRight className="size-3.5" />
             </Link>

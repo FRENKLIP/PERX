@@ -9,6 +9,8 @@ import { StatTile } from "@/components/StatTile";
 import { TrendArea, CategoryDonut, TopBars, PeriodSwitcher, trendBuckets } from "@/components/DashboardCharts";
 import { EmployeesTab } from "@/components/employer/EmployeesTab";
 import { PolicyTab } from "@/components/employer/PolicyTab";
+import { QuestsTab } from "@/components/employer/QuestsTab";
+import { BillingTab } from "@/components/employer/BillingTab";
 import { TalentEdgeCard, type TalentEdge } from "@/components/employer/TalentEdgeCard";
 import { categorizeTitle } from "@/lib/categorize";
 
@@ -25,7 +27,7 @@ function EmployerDashboard() {
   const qc = useQueryClient();
   const [insight, setInsight] = useState<TalentEdge | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
-  const [tab, setTab] = useState<"overview" | "approvals" | "employees" | "talent" | "policy">("overview");
+  const [tab, setTab] = useState<"overview" | "approvals" | "employees" | "talent" | "policy" | "quests" | "billing">("overview");
   const insightInFlight = useRef(false);
   const insightKey = useRef<string | null>(null);
 
@@ -199,6 +201,8 @@ function EmployerDashboard() {
             { id: "employees", label: "Employees", badge: (data?.employees ?? []).length },
             { id: "talent", label: "Talent Edge", badge: 0 },
             { id: "policy", label: "Policy", badge: 0 },
+            { id: "quests", label: "Quests", badge: 0 },
+            { id: "billing", label: "Billing", badge: 0 },
           ] as const).map((t) => (
             <button
               key={t.id}
@@ -223,6 +227,10 @@ function EmployerDashboard() {
       <div className="max-w-6xl mx-auto px-6 pt-10">
       {tab === "employees" ? (
         <EmployeesTab companyIds={data?.companyIds ?? []} />
+      ) : tab === "quests" ? (
+        data?.companyIds[0] ? <QuestsTab companyId={data.companyIds[0]} /> : null
+      ) : tab === "billing" ? (
+        data?.companyIds[0] ? <BillingTab companyId={data.companyIds[0]} /> : null
       ) : tab === "policy" ? (
         data?.companyIds[0] ? (
           <>
