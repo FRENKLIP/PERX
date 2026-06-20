@@ -3,9 +3,10 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const submitCartRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { note?: string; packageName?: string }) => ({
+  .inputValidator((input: { note?: string; packageName?: string; pointsToUse?: number }) => ({
     note: input?.note ?? "",
     packageName: input?.packageName ?? "",
+    pointsToUse: Math.max(0, Math.floor(input?.pointsToUse ?? 0)),
   }))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -13,7 +14,7 @@ export const submitCartRequest = createServerFn({ method: "POST" })
     // Load profile (for employer) + cart items + offers
     const { data: profile, error: pErr } = await supabase
       .from("profiles")
-      .select("employer_company_id")
+      .select("employer_company_id, discount_points")
       .eq("id", userId)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
@@ -59,13 +60,21 @@ export const submitCartRequest = createServerFn({ method: "POST" })
     const autoApprove = !!(autoBelow && autoBelow > 0 && total <= autoBelow);
     const decidedAt = autoApprove ? new Date().toISOString() : null;
 
+    // Points redemption (1 pt = 1 ALL, capped at 50% of total, capped at balance)
+    const balance = profile?.discount_points ?? 0;
+    const maxDiscount = Math.floor(total * 0.5);
+    const pointsToUse = Math.min(data.pointsToUse, balance, maxDiscount);
+    const discountAll = pointsToUse;
+
     // Create request
     const { data: req, error: rErr } = await supabase
       .from("requests")
       .insert({
         employee_id: userId,
         employer_company_id: employerId,
-        total_all: total,
+        total_all: total - discountAll,
+        points_redeemed: pointsToUse,
+        discount_all: discountAll,
         note: data.note || null,
         ai_package_name: data.packageName || null,
         ...(autoApprove
@@ -111,6 +120,19 @@ export const submitCartRequest = createServerFn({ method: "POST" })
     if (iErr) throw new Error(iErr.message);
 
     await supabase.from("cart_items").delete().eq("user_id", userId);
+
+    if (pointsToUse > 0) {
+      await supabase
+        .from("profiles")
+        .update({ discount_points: balance - pointsToUse })
+        .eq("id", userId);
+      await supabase.from("points_ledger").insert({
+        user_id: userId,
+        delta: -pointsToUse,
+        reason: "cart_redeem",
+        ref_id: req.id,
+      });
+    }
 
     return { requestId: req.id as string, autoApproved: autoApprove, total };
   });
