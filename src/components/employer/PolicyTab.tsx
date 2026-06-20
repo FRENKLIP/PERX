@@ -9,15 +9,12 @@ export function PolicyTab({ companyId }: { companyId: string }) {
   const { data, isLoading } = useQuery({
     queryKey: ["employer-policy", companyId],
     queryFn: async () => {
-      const [{ data: co }, { data: cats }] = await Promise.all([
-        supabase
-          .from("companies")
-          .select("id, name, policy_max_request_all, policy_allowed_categories, policy_auto_approve_below_all, policy_default_monthly_budget_all")
-          .eq("id", companyId)
-          .maybeSingle(),
+      const [{ data: coRows }, { data: cats }] = await Promise.all([
+        supabase.rpc("get_company_policy", { p_company_id: companyId } as any),
         supabase.from("categories").select("slug, name_en").order("name_en"),
       ]);
-      return { company: co, categories: cats ?? [] };
+      const co = Array.isArray(coRows) ? (coRows[0] ?? null) : coRows;
+      return { company: co as any, categories: cats ?? [] };
     },
   });
 

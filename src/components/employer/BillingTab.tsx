@@ -35,14 +35,13 @@ export function BillingTab({ companyId }: { companyId: string }) {
   const { data } = useQuery({
     queryKey: ["company-billing", companyId],
     queryFn: async () => {
-      const [{ data: company }, { data: invoices }] = await Promise.all([
-        supabase.from("companies")
-          .select("plan, plan_period, plan_renews_at, plan_seats, discount_points")
-          .eq("id", companyId).maybeSingle(),
+      const [{ data: coRows }, { data: invoices }] = await Promise.all([
+        supabase.rpc("get_company_billing", { p_company_id: companyId } as any),
         supabase.from("company_invoices")
           .select("*").eq("company_id", companyId)
           .order("created_at", { ascending: false }),
       ]);
+      const company = Array.isArray(coRows) ? (coRows[0] ?? null) : coRows;
       return { company, invoices: invoices ?? [] };
     },
     enabled: !!companyId,
