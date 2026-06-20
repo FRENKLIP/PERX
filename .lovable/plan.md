@@ -1,102 +1,116 @@
-## Goal
+## Goals
 
-Give employer admins a **Policy** control room with four levers that actually shape what employees can submit and how requests get decided:
-
-1. **Max request amount** — caps `total_all` per request at submit time.
-2. **Allowed categories** — restricts which `category_slug`s can appear in a request.
-3. **Auto-approve below threshold** — requests with `total_all ≤ threshold` (and within rules) skip manual review and are immediately marked approved + paid.
-4. **Monthly budget default** — used when seeding new employees and when an employer admin uses "Reset to default" on an employee.
-
----
-
-## 1. Data model (migration)
-
-Add to `public.companies` (employer rows only; ignored for `kind='provider'`):
-
-- `policy_max_request_all int` — null = no cap.
-- `policy_allowed_categories text[]` — null/empty = all categories allowed.
-- `policy_auto_approve_below_all int` — null/0 = off.
-- `policy_default_monthly_budget_all int NOT NULL DEFAULT 25000`.
-
-No new table, no RLS changes (companies already public-read; updates restricted via existing employer-admin policies… we'll verify and add one if missing — `companies` currently has only public SELECT, so add an UPDATE policy: `has_company_role(auth.uid(), id, 'employer_admin')`).
+1. **Quests** — new employer tab where companies complete quests to earn **discount points** spent on platform-fee discounts.
+2. **Plans & billing** — Starter / Growth / Enterprise subscription for companies, simulated payment.
+3. **Floating AI chatbot** — bottom-left bubble on every employee page; delete `/concierge` route.
+4. **Cart icon** — top-right of header (replaces text tab on desktop and `ShoppingBag` slot on mobile bottom bar).
+5. **Provider AI** — inline "Generate description", "Suggest price", "Suggest category" buttons inside `OfferEditSheet`.
 
 ---
 
-## 2. Server function: `submitCartRequest` (replaces inline cart insert)
+## 1. Quests (employer tab)
 
-Today `cart.tsx` does the insert client-side. RLS lets the employee insert any `total_all` and any categories, so policy enforcement must move server-side.
+**Data (migration)**
+- `public.quest_definitions` (seeded, read-only-ish): `slug text pk`, `title`, `description`, `points int`, `target int`, `metric text` — e.g. `employees_onboarded`, `requests_approved`, `policy_configured`, `first_topup`, `monthly_active`.
+- `public.company_quests`: `id`, `company_id fk companies`, `quest_slug fk quest_definitions`, `progress int default 0`, `completed_at timestamptz`, `claimed_at timestamptz`, unique `(company_id, quest_slug)`.
+- Add `companies.discount_points int not null default 0`.
+- RLS: SELECT/UPDATE on `company_quests` and SELECT on `quest_definitions` for `has_company_role(uid, company_id, 'employer_admin')`. Standard grants.
 
-New `src/lib/cart.functions.ts` with `submitCartRequest`:
+**Server fn** `src/lib/quests.functions.ts`
+- `claimQuest({ companyId, slug })` — validates `progress >= target`, sets `claimed_at`, adds `points` to `companies.discount_points`. Idempotent.
+- `recomputeQuests({ companyId })` — recalculates `progress` for each quest from live counts (employees, approved requests, has policy set, etc.). Called on tab open.
 
-- `.middleware([requireSupabaseAuth])`.
-- Reads cart_items + offers + the employee's `employer_company_id` + the employer's policy columns.
-- Validates:
-  - `total_all <= policy_max_request_all` (if set) — else throw with a clear message.
-  - Every line's `category_slug` is in `policy_allowed_categories` (if set) — else throw with the offending titles.
-- Inserts the request + items (same logic as today's `cart.tsx`).
-- If `total_all <= policy_auto_approve_below_all` (and >0): immediately set `status='approved'`, `decided_at=now()`, `decided_by=employee_id` (system auto), and mark all items `payment_status='simulated_paid'` with redemption codes. Returns `{ requestId, autoApproved: boolean }`.
-- Clears cart_items for the user.
-
-`cart.tsx` calls it via `useServerFn`. Toast becomes "Auto-approved · payment routed" when applicable, and the user is sent to `/redeem/$requestId` instead of `/requests` in that case.
-
----
-
-## 3. UI: new **Policy** tab in employer console
-
-Add `"policy"` to the tab union in `src/routes/_authenticated/employer.tsx`. Tab content lives in a new `src/components/employer/PolicyTab.tsx`:
-
-- **Spending limits** card
-  - Number input "Max per request (ALL)" with clear/empty = no cap.
-  - Number input "Auto-approve below (ALL)" with helper "Requests at or under this amount skip manual review."
-- **Allowed categories** card
-  - Checkbox grid of all `categories` rows. Empty selection = all allowed.
-- **Employee defaults** card
-  - Number input "Default monthly budget (ALL)" — applies to new employees and the "Reset to default" action.
-  - Secondary action: "Apply default to all employees now" (bulk `UPDATE profiles SET monthly_budget_all = default WHERE employer_company_id = X`). Confirm modal.
-- Save bar (sticky bottom of card): "Discard" / "Save policy".
-
-All loaded from `companies` row for `companyIds[0]`. Save via supabase client (employer admin RLS update policy added in step 1).
+**UI** `src/components/employer/QuestsTab.tsx`
+- Header strip: big "Discount points: 1,240" + "Redeem" button (opens dialog → applies `points → % off next invoice` on the Billing tab as a credit line).
+- Grid of quest cards: title, description, progress bar (`progress/target`), "+N pts" pill, **Claim** button when complete.
+- Tab registered as `"quests"` in `employer.tsx`.
 
 ---
 
-## 4. Employee-side surfacing (light touch)
+## 2. Plans & Billing (employer tab)
 
-- `cart.tsx`: if cart total exceeds employer cap, show an inline warning and disable "Send to employer".
-- `cart.tsx`: line items in a disallowed category get a small "Not allowed by your employer" pill, and submit is blocked until removed.
-- `marketplace.tsx`: out of scope to filter the grid — keep scope tight; the cart check is enough.
+**Data (migration)**
+- Add to `public.companies`: `plan text not null default 'starter'` (check in `'starter','growth','enterprise'`), `plan_period text not null default 'monthly'`, `plan_renews_at timestamptz`, `plan_seats int`.
+- `public.company_invoices`: `id`, `company_id`, `amount_all int`, `discount_points_applied int default 0`, `status text` (`paid|pending`), `period_start`, `period_end`, `created_at`. RLS: employer_admin SELECT, server fn writes.
+
+**Server fn** `src/lib/billing.functions.ts`
+- `changePlan({ companyId, plan, period })` — updates plan + renewal, creates a simulated `company_invoices` row, optionally deducts `discount_points` (1 pt = 1 ALL off, capped at 50% of amount).
+- `applyPointsToInvoice({ invoiceId, points })`.
+
+**UI** `src/components/employer/BillingTab.tsx`
+- Plan grid (3 cards, monthly/yearly toggle):
+  - **Starter** — up to 10 employees, basic policy, community support — 0 ALL.
+  - **Growth** — up to 50 employees, analytics, auto-approve, priority support — 49,900 ALL/mo.
+  - **Enterprise** — unlimited, SSO, custom policy, dedicated CSM — "Contact sales" (still allows simulated activation).
+- Current plan highlighted; "Switch plan" triggers `changePlan` with a confirm.
+- Invoice history table with downloadable (just printable) rows; shows points applied.
+- Sticky "Apply discount points" widget linked to Quests.
+
+Tab registered as `"billing"` in `employer.tsx`.
 
 ---
 
-## 5. EmployeesTab tweak
+## 3. Floating AI chatbot (replaces /concierge)
 
-Add a "Reset to default" button per employee row that sets `monthly_budget_all = policy_default_monthly_budget_all`. Already permitted by existing profile update policy.
+- Delete `src/routes/_authenticated/concierge.tsx`. Remove "Concierge" nav link in `AppShell.tsx`.
+- New `src/components/ConciergeBubble.tsx`:
+  - Fixed `bottom-6 left-6 z-50` round button (sparkle/chat icon — generated logo, not lucide `Sparkles` per chat-ui rules) on every authenticated employee route.
+  - Opens a 380px × 560px floating panel (Popover/Dialog-like, draggable not required) with AI Elements composition: `Conversation`, `Message`, `MessageResponse`, `PromptInput`, `Shimmer`.
+  - Uses `useChat` + `DefaultChatTransport({ api: "/api/chat" })`, **no persistence** — messages live in component state, "New chat" clears. (Matches user choice: fresh per session.)
+  - Reuses existing `/api/chat` route and offer-search tool already wired; "Add to cart" buttons still work.
+- Mount in `AppShell.tsx` only when `isEmployee`.
+- Remove `<NavTab to="/concierge">` and any other references; update `routeTree.gen.ts` regenerates automatically.
 
 ---
 
-## Files
+## 4. Cart as top-right icon
 
-- migration (companies columns + UPDATE policy)
-- `src/lib/cart.functions.ts` (new)
-- `src/routes/_authenticated/cart.tsx` (swap insert → server fn, add validation UI)
-- `src/components/employer/PolicyTab.tsx` (new)
-- `src/routes/_authenticated/employer.tsx` (register tab)
-- `src/components/employer/EmployeesTab.tsx` (Reset to default button)
+- In `AppShell.tsx`:
+  - Desktop nav: remove the `Cart · N` text tab; in the right-side button cluster (before profile avatar) add a `Link to="/cart"` with `ShoppingBag` icon + badge bubble for `cartCount`.
+  - Mobile bottom bar: replace the cart slot with **Saved** (or keep Saved + drop one of the lesser-used tabs) so the bottom bar reads Home / Marketplace / Saved / Requests. Cart is accessed from the same top-right icon (visible on mobile too).
+- Top-right order becomes: language, **cart icon w/ badge**, profile avatar.
+
+---
+
+## 5. Provider AI assists (inline only)
+
+`src/lib/provider-ai.functions.ts` — three `createServerFn`s, all `.middleware([requireSupabaseAuth])`, using Lovable AI Gateway (`google/gemini-3-flash-preview`) with `generateText` + `Output.object` Zod schemas:
+
+- `generateOfferDescription({ title, category, providerName })` → `{ description: string }` (~60–90 words, warm marketing tone).
+- `suggestOfferPrice({ title, category, description, city })` → `{ priceAll: number, rationale: string }` — reads a few comparable `offers` server-side for grounding.
+- `suggestOfferCategory({ title, description })` → `{ categorySlug: string, confidence: number }` constrained to existing `categories.slug` values.
+
+**UI** in `src/components/provider/OfferEditSheet.tsx`:
+- Small "✨ AI" button next to the Description textarea → calls `generateOfferDescription`, streams into the field with "Replace / Append / Discard".
+- "Suggest" link next to the Price input → fills the input + shows rationale tooltip.
+- "Auto-detect" link next to the Category select → sets the select value + confidence chip.
+- All buttons disabled while pending; show inline spinner. Errors surface via `toast`.
+
+No floating chatbot on provider side (per user choice).
 
 ---
 
 ## Out of scope
 
-- Per-category caps (e.g. wellness max 5k). Just one global cap.
-- Per-employee policy overrides.
-- Approval workflows beyond a single threshold (no multi-step approvers).
-- Filtering marketplace by allowed categories.
-- Notifying employees when policy changes.
-- History/audit log of policy edits.
+- Real payment processing (plans simulate).
+- Quest auto-trigger events / webhooks (recompute on tab open is enough).
+- Employee-facing view of plan tier.
+- Persisting concierge chats / cross-device sync.
+- Provider-side floating chatbot.
+- Translating AI outputs to SQ (English only this pass).
 
 ---
 
-## Technical notes
+## Files
 
-- Policy enforcement is **server-side only**. Client checks are UX hints; the server fn is the source of truth so a malicious client can't bypass.
-- Auto-approve uses `decided_by = employee_id` (so the existing `decided_by` FK stays valid) and a new `note` suffix `"[auto-approved]"` so it's visible in approval lists if needed later — alternative: add `auto_approved boolean` column. **Chosen:** keep it simple with no new column; UI shows "Auto-approved" when `status='approved' AND decided_by = employee_id`.
-- The `fill_redemption_code` trigger already populates `requests.redemption_code` on status→approved; the server fn relies on it.
+- migrations: quests + billing + `companies.discount_points` + `plan` columns
+- `src/lib/quests.functions.ts` (new)
+- `src/lib/billing.functions.ts` (new)
+- `src/lib/provider-ai.functions.ts` (new)
+- `src/components/employer/QuestsTab.tsx` (new)
+- `src/components/employer/BillingTab.tsx` (new)
+- `src/components/ConciergeBubble.tsx` (new, with AI Elements install)
+- `src/components/provider/OfferEditSheet.tsx` (add AI buttons)
+- `src/routes/_authenticated/employer.tsx` (register Quests + Billing tabs)
+- `src/components/AppShell.tsx` (cart icon top-right, mount ConciergeBubble, drop Concierge nav)
+- `src/routes/_authenticated/concierge.tsx` (delete)
