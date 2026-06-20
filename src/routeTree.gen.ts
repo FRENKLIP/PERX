@@ -16,6 +16,7 @@ import { Route as ApiInsightsRouteImport } from './routes/api/insights'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedSavedRouteImport } from './routes/_authenticated/saved'
 import { Route as AuthenticatedRequestsRouteImport } from './routes/_authenticated/requests'
+import { Route as AuthenticatedQuestsRouteImport } from './routes/_authenticated/quests'
 import { Route as AuthenticatedProviderRouteImport } from './routes/_authenticated/provider'
 import { Route as AuthenticatedMarketplaceRouteImport } from './routes/_authenticated/marketplace'
 import { Route as AuthenticatedEmployerRouteImport } from './routes/_authenticated/employer'
@@ -57,6 +58,11 @@ const AuthenticatedSavedRoute = AuthenticatedSavedRouteImport.update({
 const AuthenticatedRequestsRoute = AuthenticatedRequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedQuestsRoute = AuthenticatedQuestsRouteImport.update({
+  id: '/quests',
+  path: '/quests',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedProviderRoute = AuthenticatedProviderRouteImport.update({
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/employer': typeof AuthenticatedEmployerRoute
   '/marketplace': typeof AuthenticatedMarketplaceRoute
   '/provider': typeof AuthenticatedProviderRoute
+  '/quests': typeof AuthenticatedQuestsRoute
   '/requests': typeof AuthenticatedRequestsRoute
   '/saved': typeof AuthenticatedSavedRoute
   '/api/chat': typeof ApiChatRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/employer': typeof AuthenticatedEmployerRoute
   '/marketplace': typeof AuthenticatedMarketplaceRoute
   '/provider': typeof AuthenticatedProviderRoute
+  '/quests': typeof AuthenticatedQuestsRoute
   '/requests': typeof AuthenticatedRequestsRoute
   '/saved': typeof AuthenticatedSavedRoute
   '/api/chat': typeof ApiChatRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/_authenticated/employer': typeof AuthenticatedEmployerRoute
   '/_authenticated/marketplace': typeof AuthenticatedMarketplaceRoute
   '/_authenticated/provider': typeof AuthenticatedProviderRoute
+  '/_authenticated/quests': typeof AuthenticatedQuestsRoute
   '/_authenticated/requests': typeof AuthenticatedRequestsRoute
   '/_authenticated/saved': typeof AuthenticatedSavedRoute
   '/api/chat': typeof ApiChatRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/employer'
     | '/marketplace'
     | '/provider'
+    | '/quests'
     | '/requests'
     | '/saved'
     | '/api/chat'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/employer'
     | '/marketplace'
     | '/provider'
+    | '/quests'
     | '/requests'
     | '/saved'
     | '/api/chat'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/_authenticated/employer'
     | '/_authenticated/marketplace'
     | '/_authenticated/provider'
+    | '/_authenticated/quests'
     | '/_authenticated/requests'
     | '/_authenticated/saved'
     | '/api/chat'
@@ -265,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRequestsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/quests': {
+      id: '/_authenticated/quests'
+      path: '/quests'
+      fullPath: '/quests'
+      preLoaderRoute: typeof AuthenticatedQuestsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/provider': {
       id: '/_authenticated/provider'
       path: '/provider'
@@ -330,6 +349,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedEmployerRoute: typeof AuthenticatedEmployerRoute
   AuthenticatedMarketplaceRoute: typeof AuthenticatedMarketplaceRoute
   AuthenticatedProviderRoute: typeof AuthenticatedProviderRoute
+  AuthenticatedQuestsRoute: typeof AuthenticatedQuestsRoute
   AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
   AuthenticatedSavedRoute: typeof AuthenticatedSavedRoute
   AuthenticatedOfferOfferIdRoute: typeof AuthenticatedOfferOfferIdRoute
@@ -342,6 +362,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedEmployerRoute: AuthenticatedEmployerRoute,
   AuthenticatedMarketplaceRoute: AuthenticatedMarketplaceRoute,
   AuthenticatedProviderRoute: AuthenticatedProviderRoute,
+  AuthenticatedQuestsRoute: AuthenticatedQuestsRoute,
   AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
   AuthenticatedSavedRoute: AuthenticatedSavedRoute,
   AuthenticatedOfferOfferIdRoute: AuthenticatedOfferOfferIdRoute,
