@@ -23,16 +23,13 @@ export const recomputeQuests = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await assertEmployerAdmin(supabase, userId, data.companyId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [{ data: defs }, { data: employees }, { data: approved }, { data: company }] = await Promise.all([
+    const [{ data: defs }, { data: employees }, { data: approved }, { data: policyRows }] = await Promise.all([
       supabase.from("quest_definitions").select("*").order("sort_order"),
       supabase.from("profiles").select("id").eq("employer_company_id", data.companyId),
       supabase.from("requests").select("id").eq("employer_company_id", data.companyId).eq("status", "approved"),
-      supabaseAdmin.from("companies")
-        .select("policy_max_request_all, policy_allowed_categories, policy_auto_approve_below_all")
-        .eq("id", data.companyId)
-        .maybeSingle(),
+      supabase.rpc("get_company_policy" as any, { p_company_id: data.companyId }),
     ]);
+    const company = Array.isArray(policyRows) ? (policyRows[0] ?? null) : policyRows;
 
     const empCount = (employees ?? []).length;
     const apprCount = (approved ?? []).length;
@@ -97,12 +94,13 @@ export const claimQuest = createServerFn({ method: "POST" })
       .eq("id", row.id)
       .is("claimed_at", null);
     if (claimErr) throw new Error(claimErr.message);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: company, error: cErr } = await supabaseAdmin
-      .from("companies").select("discount_points").eq("id", data.companyId).maybeSingle();
+    const { data: billingRows, error: cErr } = await supabase.rpc("get_company_billing" as any, {
+      p_company_id: data.companyId,
+    });
     if (cErr) throw new Error(cErr.message);
+    const company = Array.isArray(billingRows) ? (billingRows[0] ?? null) : billingRows;
     const newPoints = (company?.discount_points ?? 0) + def.points;
-    const { error: upErr } = await supabaseAdmin
+    const { error: upErr } = await supabase
       .from("companies").update({ discount_points: newPoints }).eq("id", data.companyId);
     if (upErr) throw new Error(upErr.message);
 

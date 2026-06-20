@@ -1,16 +1,54 @@
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { generateProviderInsights } from "@/lib/provider-ai.functions";
+import { useState } from "react";
 import { Sparkles, RefreshCw, TrendingUp, DollarSign, Lightbulb } from "lucide-react";
 
+const demoInsights = {
+  summary:
+    "Your strongest demo signal is practical, easy-to-redeem offers in wellness and meals. Keep the offer titles concrete, price entry packages clearly, and use premium bundles where the included value is obvious to employers.",
+  topCategories: [
+    "Wellness is best for recurring monthly usage",
+    "Meals convert well when the package is specific",
+    "Travel works best as a limited weekend perk",
+  ],
+  pricingSuggestions: [
+    "Keep everyday perks around 2,500-3,500 ALL",
+    "Use 5,000-6,000 ALL for premium weekend packages",
+    "Round prices to the nearest 500 ALL for easier approvals",
+  ],
+  opportunities: [
+    "Add one weekday-friendly offer for office teams",
+    "Lead descriptions with what is included",
+    "Bundle partner experiences for higher perceived value",
+  ],
+};
+
 export function AIInsightsCard() {
-  const generate = useServerFn(generateProviderInsights);
-  const { data, isFetching, refetch, error } = useQuery({
-    queryKey: ["provider-ai-insights"],
-    queryFn: async () => generate({ data: {} as any }),
-    staleTime: 10 * 60 * 1000,
-    retry: false,
-  });
+  const [data, setData] = useState(demoInsights);
+  const [isFetching, setIsFetching] = useState(false);
+
+  async function refreshDemoInsights() {
+    setIsFetching(true);
+    await new Promise((resolve) => window.setTimeout(resolve, 650));
+    setData({
+      summary:
+        "The demo trend still favors clear, low-friction benefits. Offers that explain the experience in one sentence, show a rounded ALL price, and feel easy for employers to approve are most likely to perform well.",
+      topCategories: [
+        "Wellness remains the most repeatable category",
+        "Meals help teams spend smaller monthly balances",
+        "Learning is a strong add-on for retention",
+      ],
+      pricingSuggestions: [
+        "Test one 3,000 ALL entry offer",
+        "Keep premium bundles under 6,000 ALL unless they include multiple services",
+        "Use clear package names instead of broad discounts",
+      ],
+      opportunities: [
+        "Create a lunch-and-wellness bundle",
+        "Add availability notes to reduce employer questions",
+        "Refresh cover images on your highest-value listings",
+      ],
+    });
+    setIsFetching(false);
+  }
 
   return (
     <div className="hairline bg-white rounded-3xl p-6 fade-up mb-10">
@@ -25,7 +63,7 @@ export function AIInsightsCard() {
           </div>
         </div>
         <button
-          onClick={() => refetch()}
+          onClick={refreshDemoInsights}
           disabled={isFetching}
           className="flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-2 hairline hover:bg-paper disabled:opacity-50"
         >
@@ -34,16 +72,6 @@ export function AIInsightsCard() {
         </button>
       </div>
 
-      {isFetching && !data && (
-        <div className="grid sm:grid-cols-3 gap-4">
-          {[0,1,2].map(i => <div key={i} className="h-32 bg-paper rounded-2xl animate-pulse" />)}
-        </div>
-      )}
-      {error && !isFetching && (
-        <div className="text-sm text-accent-red bg-accent-red/10 rounded-xl p-3">
-          {(error as any).message ?? "AI insights unavailable"}
-        </div>
-      )}
       {data && (
         <>
           <p className="text-sm text-ink leading-relaxed mb-5">{data.summary}</p>

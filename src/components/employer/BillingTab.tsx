@@ -31,6 +31,8 @@ export function BillingTab({ companyId }: { companyId: string }) {
   const [period, setPeriod] = useState<"monthly" | "yearly">("monthly");
   const [pending, setPending] = useState<string | null>(null);
   const [applyPoints, setApplyPoints] = useState(0);
+  const [demoCompany, setDemoCompany] = useState<any | null>(null);
+  const [demoInvoices, setDemoInvoices] = useState<any[]>([]);
 
   const { data } = useQuery({
     queryKey: ["company-billing", companyId],
@@ -47,8 +49,10 @@ export function BillingTab({ companyId }: { companyId: string }) {
     enabled: !!companyId,
   });
 
-  const currentPlan = data?.company?.plan ?? "starter";
-  const points = data?.company?.discount_points ?? 0;
+  const company = demoCompany ?? data?.company;
+  const invoices = [...demoInvoices, ...((data?.invoices ?? []) as any[])];
+  const currentPlan = company?.plan ?? "starter";
+  const points = company?.discount_points ?? 0;
 
   async function onSwitch(planId: "starter" | "growth" | "enterprise") {
     if (!confirm(`Switch to ${PLAN_PRICES[planId].label} (${period})?`)) return;
@@ -58,6 +62,34 @@ export function BillingTab({ companyId }: { companyId: string }) {
       toast.success(res.amount === 0
         ? `Activated ${PLAN_PRICES[planId].label}`
         : `Charged ${formatAll(res.amount)}${res.applied ? ` · ${res.applied} pts applied` : ""}`);
+      if ((res as any).demo) {
+        const renewsAt = new Date();
+        if (period === "monthly") renewsAt.setMonth(renewsAt.getMonth() + 1);
+        else renewsAt.setFullYear(renewsAt.getFullYear() + 1);
+
+        setDemoCompany({
+          ...(data?.company ?? {}),
+          plan: planId,
+          plan_period: period,
+          plan_renews_at: renewsAt.toISOString(),
+          plan_seats: PLAN_PRICES[planId].seats,
+          discount_points: Math.max(0, points - res.applied),
+        });
+        if (PLAN_PRICES[planId][period] > 0) {
+          setDemoInvoices((current) => [
+            {
+              id: `demo-${Date.now()}`,
+              created_at: new Date().toISOString(),
+              plan: planId,
+              plan_period: period,
+              discount_points_applied: res.applied,
+              amount_all: res.amount,
+              status: "paid",
+            },
+            ...current,
+          ]);
+        }
+      }
       setApplyPoints(0);
       qc.invalidateQueries({ queryKey: ["company-billing", companyId] });
       qc.invalidateQueries({ queryKey: ["company-quests", companyId] });
@@ -75,7 +107,7 @@ export function BillingTab({ companyId }: { companyId: string }) {
         <h1 className="font-serif text-5xl tracking-tight">Plans & billing.</h1>
         <p className="text-ink-soft mt-3 max-w-xl">
           Pick the plan that fits your team. Currently on <span className="font-semibold text-ink">{PLAN_PRICES[currentPlan as keyof typeof PLAN_PRICES].label}</span>
-          {data?.company?.plan_renews_at ? ` · renews ${new Date(data.company.plan_renews_at).toLocaleDateString()}` : ""}.
+          {company?.plan_renews_at ? ` · renews ${new Date(company.plan_renews_at).toLocaleDateString()}` : ""}.
         </p>
       </div>
 
@@ -153,7 +185,7 @@ export function BillingTab({ companyId }: { companyId: string }) {
 
       <div>
         <h2 className="font-serif text-3xl mb-4">Invoice history</h2>
-        {(data?.invoices ?? []).length === 0 ? (
+        {invoices.length === 0 ? (
           <div className="hairline rounded-3xl p-12 text-center text-ink-soft">No invoices yet.</div>
         ) : (
           <div className="hairline rounded-3xl bg-white overflow-hidden">
@@ -168,7 +200,7 @@ export function BillingTab({ companyId }: { companyId: string }) {
                 </tr>
               </thead>
               <tbody>
-                {data!.invoices.map((inv: any) => (
+                {invoices.map((inv: any) => (
                   <tr key={inv.id} className="border-b border-border-soft last:border-0">
                     <td className="p-4">{new Date(inv.created_at).toLocaleDateString()}</td>
                     <td className="p-4 capitalize">{inv.plan} · {inv.plan_period}</td>

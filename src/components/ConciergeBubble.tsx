@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
 import { useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, X, Send, Plus, Sparkles, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +6,11 @@ import { formatAll } from "@/lib/i18n";
 import { toast } from "sonner";
 
 type Variant = "employee" | "provider";
+type LocalMessage = {
+  id: string;
+  role: "user" | "assistant";
+  parts: Array<{ type: "text"; text: string }>;
+};
 
 const GREETINGS: Record<Variant, { title: string; subtitle: string; prompts: string[] }> = {
   employee: {
@@ -30,19 +33,47 @@ const GREETINGS: Record<Variant, { title: string; subtitle: string; prompts: str
   },
 };
 
+const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+function cannedReply(input: string, variant: Variant) {
+  const q = input.toLowerCase();
+
+  if (variant === "provider") {
+    if (q.includes("price") || q.includes("pricing") || q.includes("yoga")) {
+      return "For a yoga class in Tirana, price the entry offer around 2,500-3,000 ALL per session, or 8,000-10,000 ALL for a 4-class pack. Keep the title concrete, like “After-work yoga pack”, so employers understand the value fast.";
+    }
+    if (q.includes("idea") || q.includes("wellness")) {
+      return "Try these three demo offers: after-work yoga pack at 9,000 ALL, recovery massage at 3,500 ALL, and gym day pass plus smoothie at 2,500 ALL. The strongest one for PERX is usually the bundle because it feels like a complete benefit.";
+    }
+    if (q.includes("sell") || q.includes("category") || q.includes("best")) {
+      return "Wellness and meals are the easiest categories to sell because employees can use them every month. Travel works better as a premium perk, especially when it is packaged as a weekend experience under 6,000 ALL.";
+    }
+    return "For the demo, I’d make the offer specific, easy to redeem, and rounded to the nearest 500 ALL. A strong listing has a clear package name, one concrete included benefit, and a price employers can approve without extra questions.";
+  }
+
+  if (q.includes("sunday") || q.includes("relax")) {
+    return "For a relaxing Sunday under 8,000 ALL, I’d pick a spa or massage benefit around 3,500 ALL, then add a calm brunch or coffee stop around 2,500 ALL. You still stay comfortably inside the wallet.";
+  }
+  if (q.includes("healthy") || q.includes("blloku")) {
+    return "Healthy week in Blloku: start with a gym or yoga pass around 3,000 ALL, add a clean lunch benefit around 2,500 ALL, and keep one wellness slot free for recovery. Simple, useful, and easy to repeat.";
+  }
+  if (q.includes("date") || q.includes("night")) {
+    return "For date night in Tirana, use a dinner benefit around 4,000 ALL and pair it with a small experience like dessert, cinema, or a late coffee. It feels premium without burning the whole monthly wallet.";
+  }
+  if (q.includes("travel") || q.includes("weekend")) {
+    return "For a weekend-style perk, I’d choose a guided hike or hotel-day package around 5,000-6,000 ALL. Travel benefits work best when the package clearly says what is included.";
+  }
+  return "I’d split the wallet into one everyday perk and one treat: about 3,000 ALL for wellness or meals, then 5,000-6,000 ALL for a premium experience. That makes the benefit feel useful now and still leaves room for choice.";
+}
+
 export function ConciergeBubble({ variant = "employee" }: { variant?: Variant } = {}) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [chatId, setChatId] = useState(() => crypto.randomUUID());
+  const [messages, setMessages] = useState<LocalMessage[]>([]);
+  const [status, setStatus] = useState<"ready" | "submitted">("ready");
   const qc = useQueryClient();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  const { messages, sendMessage, status, setMessages } = useChat({
-    id: chatId,
-    transport: new DefaultChatTransport({ api: "/api/chat", body: { variant } }),
-    onError: (e) => toast.error(e.message),
-  });
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -52,16 +83,27 @@ export function ConciergeBubble({ variant = "employee" }: { variant?: Variant } 
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  function submit() {
-    if (!input.trim() || status === "submitted" || status === "streaming") return;
-    sendMessage({ text: input.trim() });
+  async function submit() {
+    const text = input.trim();
+    if (!text || status === "submitted") return;
+    setMessages((current) => [
+      ...current,
+      { id: crypto.randomUUID(), role: "user", parts: [{ type: "text", text }] },
+    ]);
     setInput("");
+    setStatus("submitted");
+    await sleep(650);
+    setMessages((current) => [
+      ...current,
+      { id: crypto.randomUUID(), role: "assistant", parts: [{ type: "text", text: cannedReply(text, variant) }] },
+    ]);
+    setStatus("ready");
   }
 
   function newChat() {
     setMessages([]);
-    setChatId(crypto.randomUUID());
     setInput("");
+    setStatus("ready");
   }
 
   async function addToCart(offerId: string) {
@@ -168,7 +210,7 @@ export function ConciergeBubble({ variant = "employee" }: { variant?: Variant } 
                 </div>
               </div>
             ))}
-            {(status === "submitted" || status === "streaming") && (
+            {status === "submitted" && (
               <div className="text-xs text-ink-soft italic">Thinking…</div>
             )}
           </div>
@@ -184,7 +226,7 @@ export function ConciergeBubble({ variant = "employee" }: { variant?: Variant } 
               className="flex-1 resize-none px-3 py-2 outline-none text-sm bg-paper rounded-2xl max-h-24"
             />
             <button onClick={submit}
-              disabled={!input.trim() || status === "submitted" || status === "streaming"}
+              disabled={!input.trim() || status === "submitted"}
               className="size-10 bg-ink text-cream rounded-full grid place-items-center disabled:opacity-40 shrink-0 hover:bg-accent-red transition-colors">
               <Send className="size-4" />
             </button>

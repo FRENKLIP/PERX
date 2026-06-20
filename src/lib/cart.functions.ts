@@ -34,14 +34,12 @@ export const submitCartRequest = createServerFn({ method: "POST" })
       0,
     );
 
-    // Load employer policy
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: company, error: coErr } = await supabaseAdmin
-      .from("companies")
-      .select("policy_max_request_all, policy_allowed_categories, policy_auto_approve_below_all")
-      .eq("id", employerId)
-      .maybeSingle();
-    if (coErr) throw new Error(coErr.message);
+    // Load employer policy through the SECURITY DEFINER helper. Direct column
+    // reads on companies are intentionally restricted.
+    const { data: policyRows, error: coErr } = await supabase.rpc("get_employee_company_policy" as any, {
+      p_company_id: employerId,
+    });
+    const company = coErr ? null : Array.isArray(policyRows) ? (policyRows[0] ?? null) : policyRows;
 
     const maxAmt = company?.policy_max_request_all ?? null;
     const allowed = company?.policy_allowed_categories ?? null;

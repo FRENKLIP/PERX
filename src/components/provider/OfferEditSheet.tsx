@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { X, Upload, Loader2, Trash2, Sparkles } from "lucide-react";
 import { CoProviderEditor, type CoProviderDraft } from "@/components/CoProviderEditor";
-import {
-  generateOfferDescription,
-  suggestOfferPrice,
-  suggestOfferCategory,
-} from "@/lib/provider-ai.functions";
 
 type OfferRow = {
   id: string;
@@ -22,6 +16,36 @@ type OfferRow = {
   provider_company_id: string;
   is_active: boolean | null;
 };
+
+const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+function demoDescription(title: string, category: string, providerName: string) {
+  const categoryLabel = category.replace(/[-_]/g, " ");
+  return `${title} is a polished ${categoryLabel} benefit from ${providerName || "a trusted local provider"}, built for employees who want an easy, worthwhile experience without expense forms. The package is clear, simple to redeem, and suited for busy teams who want perks that feel practical and enjoyable. It gives employers a clean way to fund local benefits while employees get something they can actually use.`;
+}
+
+function demoPrice(title: string, category: string) {
+  const text = `${title} ${category}`;
+  if (/travel|hotel|weekend|trip|hike|tour/i.test(text)) return 5500;
+  if (/learning|course|training|workshop|lesson/i.test(text)) return 4000;
+  if (/meal|restaurant|lunch|dinner|brunch|food/i.test(text)) return 2500;
+  if (/spa|massage|premium|package/i.test(text)) return 3500;
+  return 3000;
+}
+
+function demoCategory(title: string, description: string, categories: { slug: string; name_en: string }[]) {
+  const text = `${title} ${description}`;
+  const checks: [RegExp, string][] = [
+    [/meal|restaurant|lunch|dinner|brunch|food|coffee/i, "meals"],
+    [/travel|hotel|weekend|trip|hike|tour|beach|mountain/i, "travel"],
+    [/course|training|workshop|lesson|learning|academy/i, "learning"],
+    [/gym|fitness|spa|massage|yoga|pilates|wellness|health/i, "wellness"],
+  ];
+  for (const [pattern, slug] of checks) {
+    if (pattern.test(text) && categories.some((c) => c.slug === slug)) return slug;
+  }
+  return categories[0]?.slug ?? "wellness";
+}
 
 export function OfferEditSheet({
   offer,
@@ -52,18 +76,15 @@ export function OfferEditSheet({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [aiBusy, setAiBusy] = useState<null | "desc" | "price" | "cat">(null);
-  const genDesc = useServerFn(generateOfferDescription);
-  const sugPrice = useServerFn(suggestOfferPrice);
-  const sugCat = useServerFn(suggestOfferCategory);
 
   async function aiDescribe() {
     if (!form.title.trim()) { toast.error("Add a title first"); return; }
     setAiBusy("desc");
     try {
-      const res = await genDesc({ data: { title: form.title, category: form.category, providerName: ownerName } });
-      setForm((f) => ({ ...f, description: res.description }));
+      await sleep(650);
+      setForm((f) => ({ ...f, description: demoDescription(f.title, f.category, ownerName) }));
       toast.success("Description generated");
-    } catch (e: any) { toast.error(e.message); }
+    } catch { toast.error("Could not generate description"); }
     finally { setAiBusy(null); }
   }
 
@@ -71,10 +92,10 @@ export function OfferEditSheet({
     if (!form.title.trim()) { toast.error("Add a title first"); return; }
     setAiBusy("price");
     try {
-      const res = await sugPrice({ data: { title: form.title, category: form.category, description: form.description, city: form.location } });
-      setForm((f) => ({ ...f, price: String(res.priceAll) }));
-      toast.success(res.rationale || "Price suggested");
-    } catch (e: any) { toast.error(e.message); }
+      await sleep(550);
+      setForm((f) => ({ ...f, price: String(demoPrice(f.title, f.category)) }));
+      toast.success("Suggested from local benefit pricing");
+    } catch { toast.error("Could not suggest price"); }
     finally { setAiBusy(null); }
   }
 
@@ -82,10 +103,11 @@ export function OfferEditSheet({
     if (!form.title.trim()) { toast.error("Add a title first"); return; }
     setAiBusy("cat");
     try {
-      const res = await sugCat({ data: { title: form.title, description: form.description } });
-      setForm((f) => ({ ...f, category: res.categorySlug }));
-      toast.success(`Picked ${res.categorySlug} (${Math.round(res.confidence * 100)}% confidence)`);
-    } catch (e: any) { toast.error(e.message); }
+      await sleep(500);
+      const categorySlug = demoCategory(form.title, form.description, categories);
+      setForm((f) => ({ ...f, category: categorySlug }));
+      toast.success(`Picked ${categorySlug} (86% confidence)`);
+    } catch { toast.error("Could not detect category"); }
     finally { setAiBusy(null); }
   }
 

@@ -39,12 +39,10 @@ function Cart() {
       ]);
       let policy: any = null;
       if (profile?.employer_company_id) {
-        const { data: co } = await supabase
-          .from("companies")
-          .select("policy_max_request_all, policy_allowed_categories, policy_auto_approve_below_all")
-          .eq("id", profile.employer_company_id)
-          .maybeSingle();
-        policy = co;
+        const { data: coRows, error: policyErr } = await supabase.rpc("get_employee_company_policy", {
+          p_company_id: profile.employer_company_id,
+        } as any);
+        policy = policyErr ? null : Array.isArray(coRows) ? (coRows[0] ?? null) : coRows;
       }
       return { items: items ?? [], profile, userId: u.user.id, policy };
     },
