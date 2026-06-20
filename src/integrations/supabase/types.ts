@@ -845,6 +845,27 @@ export type Database = {
     }
     Functions: {
       gen_redemption_code: { Args: never; Returns: string }
+      get_company_billing: {
+        Args: { p_company_id: string }
+        Returns: {
+          discount_points: number
+          plan: string
+          plan_period: string
+          plan_renews_at: string
+          plan_seats: number
+        }[]
+      }
+      get_company_policy: {
+        Args: { p_company_id: string }
+        Returns: {
+          id: string
+          name: string
+          policy_allowed_categories: string[]
+          policy_auto_approve_below_all: number
+          policy_default_monthly_budget_all: number
+          policy_max_request_all: number
+        }[]
+      }
       has_company_role: {
         Args: {
           _company_id: string
