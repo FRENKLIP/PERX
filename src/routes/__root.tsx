@@ -89,6 +89,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Lovable App" },
       { name: "twitter:description", content: "Benefit Buddy is a two-sided marketplace connecting employees with desired benefits and employers with a modern reward solution." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/683c0a8a-0198-47da-9d38-08d990df9ca4/id-preview-264278ff--28887a83-7f49-4071-b263-4e01733f8a6e.lovable.app-1781901210153.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/683c0a8a-0198-47da-9d38-08d990df9ca4/id-preview-264278ff--28887a83-7f49-4071-b263-4e01733f8a6e.lovable.app-1781901210153.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
