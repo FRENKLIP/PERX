@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll, useLocale } from "@/lib/i18n";
-import { Trash2 } from "lucide-react";
+import { Trash2, Coins } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { WalletRing } from "@/components/WalletRing";
@@ -25,6 +25,7 @@ function Cart() {
   const [note, setNote] = useState("");
   const [packageName, setPackageName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [pointsToUse, setPointsToUse] = useState(0);
   const submitFn = useServerFn(submitCartRequest);
 
   const { data } = useQuery({
@@ -51,6 +52,10 @@ function Cart() {
 
   const total = (data?.items ?? []).reduce((s: number, it: any) => s + (it.offers?.price_all ?? 0) * (it.qty ?? 1), 0);
   const budget = data?.profile?.monthly_budget_all ?? 25000;
+  const pointsBalance: number = data?.profile?.discount_points ?? 0;
+  const maxPoints = Math.min(pointsBalance, Math.floor(total * 0.5));
+  const safePoints = Math.min(pointsToUse, maxPoints);
+  const totalAfter = Math.max(0, total - safePoints);
   const employerId = data?.profile?.employer_company_id;
   const policy = data?.policy;
   const maxAmt: number | null = policy?.policy_max_request_all ?? null;
@@ -74,7 +79,7 @@ function Cart() {
     if ((data.items ?? []).length === 0) return;
     setSubmitting(true);
     try {
-      const result = await submitFn({ data: { note, packageName } });
+      const result = await submitFn({ data: { note, packageName, pointsToUse: safePoints } });
       qc.invalidateQueries();
       if (result.autoApproved) {
         toast.success("Auto-approved · payment routed");
@@ -134,14 +139,41 @@ function Cart() {
         <aside className="md:col-span-5">
           <div className="md:sticky md:top-24 hairline bg-white rounded-3xl p-8 fade-up">
             <div className="flex justify-center mb-6">
-              <WalletRing spent={total} budget={budget} size={180} />
+              <WalletRing spent={totalAfter} budget={budget} size={180} />
             </div>
             <div className="text-center mb-6">
               <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft">This request</div>
-              <div className="font-serif text-4xl mt-1">{formatAll(total)}</div>
+              <div className="font-serif text-4xl mt-1">{formatAll(totalAfter)}</div>
+              {safePoints > 0 && (
+                <div className="text-xs text-sage mt-1">−{formatAll(safePoints)} with {safePoints} pts</div>
+              )}
             </div>
             {(data?.items ?? []).length > 0 && (
               <>
+                {pointsBalance > 0 && total > 0 && (
+                  <div className="bg-paper rounded-2xl p-4 mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 text-sm font-semibold">
+                        <Coins className="size-4 text-accent-red" />
+                        Use points
+                      </div>
+                      <div className="text-xs text-ink-soft tabular-nums">{safePoints} / {maxPoints}</div>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={maxPoints}
+                      step={50}
+                      value={safePoints}
+                      onChange={(e) => setPointsToUse(parseInt(e.target.value, 10))}
+                      className="w-full accent-ink"
+                    />
+                    <div className="flex items-center justify-between text-[10px] text-ink-soft mt-1">
+                      <span>Balance: {pointsBalance} pts</span>
+                      <button type="button" onClick={() => setPointsToUse(maxPoints)} className="font-semibold text-ink hover:text-accent-red">Use max</button>
+                    </div>
+                  </div>
+                )}
                 <input value={packageName} onChange={(e) => setPackageName(e.target.value)} placeholder="Name this package (optional)" className="w-full bg-paper rounded-xl px-4 py-3 text-sm mb-3 outline-none placeholder:text-ink-soft/60" />
                 <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note to your employer (optional)" className="w-full bg-paper rounded-xl px-4 py-3 text-sm mb-4 outline-none placeholder:text-ink-soft/60" rows={2} />
                 {overCap && (
@@ -159,8 +191,8 @@ function Cart() {
                     Under {formatAll(autoBelow!)} — will auto-approve.
                   </div>
                 )}
-                <button onClick={submit} disabled={submitting || total > budget || blocked} className="w-full bg-ink text-cream rounded-full py-4 font-semibold disabled:opacity-50 hover:bg-accent-red transition-colors">
-                  {submitting ? "Sending…" : total > budget ? "Over budget" : overCap ? "Over employer cap" : disallowedItems.length > 0 ? "Remove blocked items" : willAutoApprove ? "Send · auto-approve" : t("submit_for_approval")}
+                <button onClick={submit} disabled={submitting || totalAfter > budget || blocked} className="w-full bg-ink text-cream rounded-full py-4 font-semibold disabled:opacity-50 hover:bg-accent-red transition-colors">
+                  {submitting ? "Sending…" : totalAfter > budget ? "Over budget" : overCap ? "Over employer cap" : disallowedItems.length > 0 ? "Remove blocked items" : willAutoApprove ? "Send · auto-approve" : t("submit_for_approval")}
                 </button>
                 <p className="text-xs text-ink-soft text-center mt-4">Your employer approves and payment routes directly to providers.</p>
               </>
