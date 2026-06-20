@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, X, Building2, MapPin, Wallet, Globe, Users, ShieldCheck, Sparkles } from "lucide-react";
+import { LogOut, X, Building2, MapPin, Wallet, Globe, Users, ShieldCheck, Sparkles, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatAll } from "@/lib/i18n";
 import { avatarFor } from "@/lib/avatar";
@@ -178,6 +178,7 @@ export function ProfileDrawer({
   const committedThisMonth = budget?.committed ?? 0;
   const remaining = Math.max(monthlyBudget - committedThisMonth, 0);
   const utilPct = monthlyBudget > 0 ? Math.min(100, Math.round((committedThisMonth / monthlyBudget) * 100)) : 0;
+  const points = profile?.discount_points ?? 0;
 
   return (
     <>
@@ -344,6 +345,34 @@ export function ProfileDrawer({
               </div>
               <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft mt-2">{utilPct}% used</div>
             </div>
+          </div>
+        )}
+
+        {/* Employee discount points (quests credits) */}
+        {isEmployee && (
+          <div className="px-6 pt-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft mb-3">
+              Quest credits
+            </div>
+            <div className="hairline rounded-2xl bg-ink text-cream p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-full bg-cream/10 grid place-items-center">
+                  <Coins className="size-5" />
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-cream/60">Balance</div>
+                  <div className="font-serif text-3xl tracking-tight leading-none mt-1 tabular-nums">{points}</div>
+                </div>
+              </div>
+              <Link
+                to="/quests"
+                onClick={onClose}
+                className="text-[10px] font-bold uppercase tracking-[0.18em] bg-cream text-ink rounded-full px-4 py-2 hover:bg-accent-red hover:text-cream transition-colors"
+              >
+                Earn more
+              </Link>
+            </div>
+            <p className="text-[11px] text-ink-soft mt-2">1 credit = 1 ALL off at checkout. Cap of 50% per request.</p>
           </div>
         )}
 
