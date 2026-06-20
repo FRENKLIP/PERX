@@ -124,9 +124,8 @@ function Landing() {
       {/* HERO */}
       <section id="top" className="relative min-h-screen flex items-center justify-center overflow-hidden fade-up">
         <img
-          src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=2000&q=80"
-          alt=""
-          aria-hidden
+          src="/__l5e/assets-v1/f503984d-25ae-46a0-9887-3b6dc985c3b6/tirana-hero.png"
+          alt="Tirana cityscape at sunset"
           className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-cream via-cream/60 to-cream pointer-events-none" />
@@ -156,9 +155,10 @@ function Landing() {
 
       {/* Editorial parallax spread */}
       <section className="relative h-[70vh] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center scale-110"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1800')" }}
+        <img
+          src="/__l5e/assets-v1/f503984d-25ae-46a0-9887-3b6dc985c3b6/tirana-hero.png"
+          alt="Tirana skyline at golden hour"
+          className="absolute inset-0 w-full h-full object-cover scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-transparent" />
         <div className="relative max-w-5xl mx-auto px-6 h-full flex flex-col justify-end pb-20">
