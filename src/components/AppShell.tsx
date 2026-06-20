@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Languages, Home, Store, ShoppingBag, Inbox, BarChart3, Wrench, Heart } from "lucide-react";
 import { ProfileDrawer } from "@/components/ProfileDrawer";
 import { avatarFor } from "@/lib/avatar";
+import { ConciergeBubble } from "@/components/ConciergeBubble";
 
 type Role = "employee" | "employer_admin" | "provider_admin";
 
@@ -66,9 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="hidden md:flex items-center gap-1 text-sm">
             {isEmployee && <NavTab to="/app" label={t("home")} />}
             {isEmployee && <NavTab to="/marketplace" label={t("marketplace")} />}
-            {isEmployee && <NavTab to="/concierge" label={t("concierge")} />}
             {isEmployee && <NavTab to="/saved" label="Saved" />}
-            {isEmployee && <NavTab to="/cart" label={`${t("cart")}${ctx?.cartCount ? ` · ${ctx.cartCount}` : ""}`} />}
             {isEmployee && <NavTab to="/requests" label={t("requests")} />}
             {isEmployer && <NavTab to="/employer" label={t("employer_dashboard")} />}
             {isProvider && <NavTab to="/provider" label={t("provider_dashboard")} />}
@@ -81,6 +80,21 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Languages className="size-4" />
             </button>
+            {isEmployee && (
+              <Link
+                to="/cart"
+                className="relative size-9 rounded-full hairline hover:bg-paper grid place-items-center"
+                title="Cart"
+                aria-label="Open cart"
+              >
+                <ShoppingBag className="size-4" />
+                {ctx?.cartCount ? (
+                  <span className="absolute -top-1 -right-1 size-4 rounded-full bg-accent-red text-cream text-[9px] font-bold grid place-items-center">
+                    {ctx.cartCount}
+                  </span>
+                ) : null}
+              </Link>
+            )}
             <button
               onClick={() => setProfileOpen(true)}
               className="size-9 rounded-full overflow-hidden bg-paper ring-1 ring-border-soft hover:ring-2 hover:ring-accent-red/40 transition"
@@ -100,7 +114,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           <BottomTab to="/app" icon={Home} />
           <BottomTab to="/marketplace" icon={Store} />
           <BottomTab to="/saved" icon={Heart} />
-          <BottomTab to="/cart" icon={ShoppingBag} badge={ctx?.cartCount ?? 0} />
           <BottomTab to="/requests" icon={Inbox} />
         </div>
       )}
@@ -111,6 +124,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
       <ProfileDrawer open={profileOpen} onClose={() => setProfileOpen(false)} ctx={ctx} onSignOut={signOut} />
+      {isEmployee && <ConciergeBubble />}
     </div>
   );
 }
