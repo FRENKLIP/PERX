@@ -23,12 +23,12 @@ export const recomputeQuests = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await assertEmployerAdmin(supabase, userId, data.companyId);
-
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: defs }, { data: employees }, { data: approved }, { data: company }] = await Promise.all([
       supabase.from("quest_definitions").select("*").order("sort_order"),
       supabase.from("profiles").select("id").eq("employer_company_id", data.companyId),
       supabase.from("requests").select("id").eq("employer_company_id", data.companyId).eq("status", "approved"),
-      supabase.from("companies")
+      supabaseAdmin.from("companies")
         .select("policy_max_request_all, policy_allowed_categories, policy_auto_approve_below_all")
         .eq("id", data.companyId)
         .maybeSingle(),
@@ -97,12 +97,12 @@ export const claimQuest = createServerFn({ method: "POST" })
       .eq("id", row.id)
       .is("claimed_at", null);
     if (claimErr) throw new Error(claimErr.message);
-
-    const { data: company, error: cErr } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: company, error: cErr } = await supabaseAdmin
       .from("companies").select("discount_points").eq("id", data.companyId).maybeSingle();
     if (cErr) throw new Error(cErr.message);
     const newPoints = (company?.discount_points ?? 0) + def.points;
-    const { error: upErr } = await supabase
+    const { error: upErr } = await supabaseAdmin
       .from("companies").update({ discount_points: newPoints }).eq("id", data.companyId);
     if (upErr) throw new Error(upErr.message);
 
