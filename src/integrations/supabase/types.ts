@@ -253,6 +253,80 @@ export type Database = {
           },
         ]
       }
+      employee_quest_definitions: {
+        Row: {
+          created_at: string
+          description: string
+          metric: string
+          points: number
+          slug: string
+          sort_order: number
+          target: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          metric: string
+          points: number
+          slug: string
+          sort_order?: number
+          target?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          metric?: string
+          points?: number
+          slug?: string
+          sort_order?: number
+          target?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      employee_quests: {
+        Row: {
+          claimed_at: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          progress: number
+          quest_slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          quest_slug: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          quest_slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_quests_quest_slug_fkey"
+            columns: ["quest_slug"]
+            isOneToOne: false
+            referencedRelation: "employee_quest_definitions"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           collection_id: string | null
@@ -438,10 +512,38 @@ export type Database = {
           },
         ]
       }
+      points_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          reason: string
+          ref_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          reason: string
+          ref_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          reason?: string
+          ref_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
+          discount_points: number
           employer_company_id: string | null
           full_name: string | null
           id: string
@@ -451,6 +553,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          discount_points?: number
           employer_company_id?: string | null
           full_name?: string | null
           id: string
@@ -460,6 +563,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          discount_points?: number
           employer_company_id?: string | null
           full_name?: string | null
           id?: string
@@ -576,11 +680,13 @@ export type Database = {
           created_at: string
           decided_at: string | null
           decided_by: string | null
+          discount_all: number
           employee_id: string
           employer_company_id: string
           id: string
           note: string | null
           pair_invitation_id: string | null
+          points_redeemed: number
           redeemed_at: string | null
           redeemed_by: string | null
           redemption_code: string | null
@@ -592,11 +698,13 @@ export type Database = {
           created_at?: string
           decided_at?: string | null
           decided_by?: string | null
+          discount_all?: number
           employee_id: string
           employer_company_id: string
           id?: string
           note?: string | null
           pair_invitation_id?: string | null
+          points_redeemed?: number
           redeemed_at?: string | null
           redeemed_by?: string | null
           redemption_code?: string | null
@@ -608,11 +716,13 @@ export type Database = {
           created_at?: string
           decided_at?: string | null
           decided_by?: string | null
+          discount_all?: number
           employee_id?: string
           employer_company_id?: string
           id?: string
           note?: string | null
           pair_invitation_id?: string | null
+          points_redeemed?: number
           redeemed_at?: string | null
           redeemed_by?: string | null
           redemption_code?: string | null
