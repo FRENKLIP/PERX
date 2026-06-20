@@ -35,7 +35,8 @@ export const submitCartRequest = createServerFn({ method: "POST" })
     );
 
     // Load employer policy
-    const { data: company, error: coErr } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: company, error: coErr } = await supabaseAdmin
       .from("companies")
       .select("policy_max_request_all, policy_allowed_categories, policy_auto_approve_below_all")
       .eq("id", employerId)

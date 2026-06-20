@@ -33,9 +33,9 @@ export const changePlan = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await assertEmployerAdmin(supabase, userId, data.companyId);
-
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const base = PLAN_PRICES[data.plan][data.period];
-    const { data: company, error: cErr } = await supabase
+    const { data: company, error: cErr } = await supabaseAdmin
       .from("companies").select("discount_points").eq("id", data.companyId).maybeSingle();
     if (cErr) throw new Error(cErr.message);
 
@@ -48,7 +48,7 @@ export const changePlan = createServerFn({ method: "POST" })
     if (data.period === "monthly") renewsAt.setMonth(renewsAt.getMonth() + 1);
     else renewsAt.setFullYear(renewsAt.getFullYear() + 1);
 
-    const { error: planErr } = await supabase.from("companies").update({
+    const { error: planErr } = await supabaseAdmin.from("companies").update({
       plan: data.plan,
       plan_period: data.period,
       plan_renews_at: renewsAt.toISOString(),
