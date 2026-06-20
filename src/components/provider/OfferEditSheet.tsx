@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { X, Upload, Loader2, Trash2 } from "lucide-react";
+import { X, Upload, Loader2, Trash2, Sparkles } from "lucide-react";
 import { CoProviderEditor, type CoProviderDraft } from "@/components/CoProviderEditor";
+import {
+  generateOfferDescription,
+  suggestOfferPrice,
+  suggestOfferCategory,
+} from "@/lib/provider-ai.functions";
 
 type OfferRow = {
   id: string;
@@ -45,6 +51,43 @@ export function OfferEditSheet({
   const [initialOtherIds, setInitialOtherIds] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [aiBusy, setAiBusy] = useState<null | "desc" | "price" | "cat">(null);
+  const genDesc = useServerFn(generateOfferDescription);
+  const sugPrice = useServerFn(suggestOfferPrice);
+  const sugCat = useServerFn(suggestOfferCategory);
+
+  async function aiDescribe() {
+    if (!form.title.trim()) { toast.error("Add a title first"); return; }
+    setAiBusy("desc");
+    try {
+      const res = await genDesc({ data: { title: form.title, category: form.category, providerName: ownerName } });
+      setForm((f) => ({ ...f, description: res.description }));
+      toast.success("Description generated");
+    } catch (e: any) { toast.error(e.message); }
+    finally { setAiBusy(null); }
+  }
+
+  async function aiPrice() {
+    if (!form.title.trim()) { toast.error("Add a title first"); return; }
+    setAiBusy("price");
+    try {
+      const res = await sugPrice({ data: { title: form.title, category: form.category, description: form.description, city: form.location } });
+      setForm((f) => ({ ...f, price: String(res.priceAll) }));
+      toast.success(res.rationale || "Price suggested");
+    } catch (e: any) { toast.error(e.message); }
+    finally { setAiBusy(null); }
+  }
+
+  async function aiCategory() {
+    if (!form.title.trim()) { toast.error("Add a title first"); return; }
+    setAiBusy("cat");
+    try {
+      const res = await sugCat({ data: { title: form.title, description: form.description } });
+      setForm((f) => ({ ...f, category: res.categorySlug }));
+      toast.success(`Picked ${res.categorySlug} (${Math.round(res.confidence * 100)}% confidence)`);
+    } catch (e: any) { toast.error(e.message); }
+    finally { setAiBusy(null); }
+  }
 
   useEffect(() => {
     (async () => {
@@ -194,16 +237,34 @@ export function OfferEditSheet({
 
         <form onSubmit={save} className="p-6 grid sm:grid-cols-2 gap-4">
           <EField label="Title" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-          <EField label="Price (ALL)" type="number" value={form.price} onChange={(v) => setForm({ ...form, price: v })} />
+          <label className="block">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 flex items-center justify-between">
+              Price (ALL)
+              <button type="button" onClick={aiPrice} disabled={aiBusy !== null} className="text-accent-red normal-case tracking-normal text-xs inline-flex items-center gap-1 hover:underline disabled:opacity-50">
+                {aiBusy === "price" ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />} Suggest
+              </button>
+            </span>
+            <input required type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none" />
+          </label>
           <EField label="Location" value={form.location} onChange={(v) => setForm({ ...form, location: v })} />
           <label className="block">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Category</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 flex items-center justify-between">
+              Category
+              <button type="button" onClick={aiCategory} disabled={aiBusy !== null} className="text-accent-red normal-case tracking-normal text-xs inline-flex items-center gap-1 hover:underline disabled:opacity-50">
+                {aiBusy === "cat" ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />} Auto-detect
+              </button>
+            </span>
             <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none">
               {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name_en}</option>)}
             </select>
           </label>
           <label className="block sm:col-span-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 block">Description</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-soft mb-2 flex items-center justify-between">
+              Description
+              <button type="button" onClick={aiDescribe} disabled={aiBusy !== null} className="text-accent-red normal-case tracking-normal text-xs inline-flex items-center gap-1 hover:underline disabled:opacity-50">
+                {aiBusy === "desc" ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />} Generate with AI
+              </button>
+            </span>
             <textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full bg-paper rounded-2xl px-4 py-3 outline-none" rows={4} />
           </label>
 

@@ -19,7 +19,6 @@ import { Route as AuthenticatedRequestsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedProviderRouteImport } from './routes/_authenticated/provider'
 import { Route as AuthenticatedMarketplaceRouteImport } from './routes/_authenticated/marketplace'
 import { Route as AuthenticatedEmployerRouteImport } from './routes/_authenticated/employer'
-import { Route as AuthenticatedConciergeRouteImport } from './routes/_authenticated/concierge'
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiPublicSeedDemoRouteImport } from './routes/api/public/seed-demo'
@@ -76,11 +75,6 @@ const AuthenticatedEmployerRoute = AuthenticatedEmployerRouteImport.update({
   path: '/employer',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedConciergeRoute = AuthenticatedConciergeRouteImport.update({
-  id: '/concierge',
-  path: '/concierge',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedCartRoute = AuthenticatedCartRouteImport.update({
   id: '/cart',
   path: '/cart',
@@ -113,7 +107,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AuthenticatedAppRoute
   '/cart': typeof AuthenticatedCartRoute
-  '/concierge': typeof AuthenticatedConciergeRoute
   '/employer': typeof AuthenticatedEmployerRoute
   '/marketplace': typeof AuthenticatedMarketplaceRoute
   '/provider': typeof AuthenticatedProviderRoute
@@ -130,7 +123,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AuthenticatedAppRoute
   '/cart': typeof AuthenticatedCartRoute
-  '/concierge': typeof AuthenticatedConciergeRoute
   '/employer': typeof AuthenticatedEmployerRoute
   '/marketplace': typeof AuthenticatedMarketplaceRoute
   '/provider': typeof AuthenticatedProviderRoute
@@ -149,7 +141,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/cart': typeof AuthenticatedCartRoute
-  '/_authenticated/concierge': typeof AuthenticatedConciergeRoute
   '/_authenticated/employer': typeof AuthenticatedEmployerRoute
   '/_authenticated/marketplace': typeof AuthenticatedMarketplaceRoute
   '/_authenticated/provider': typeof AuthenticatedProviderRoute
@@ -168,7 +159,6 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/cart'
-    | '/concierge'
     | '/employer'
     | '/marketplace'
     | '/provider'
@@ -185,7 +175,6 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/cart'
-    | '/concierge'
     | '/employer'
     | '/marketplace'
     | '/provider'
@@ -203,7 +192,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/_authenticated/app'
     | '/_authenticated/cart'
-    | '/_authenticated/concierge'
     | '/_authenticated/employer'
     | '/_authenticated/marketplace'
     | '/_authenticated/provider'
@@ -298,13 +286,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmployerRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/concierge': {
-      id: '/_authenticated/concierge'
-      path: '/concierge'
-      fullPath: '/concierge'
-      preLoaderRoute: typeof AuthenticatedConciergeRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/cart': {
       id: '/_authenticated/cart'
       path: '/cart'
@@ -346,7 +327,6 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
-  AuthenticatedConciergeRoute: typeof AuthenticatedConciergeRoute
   AuthenticatedEmployerRoute: typeof AuthenticatedEmployerRoute
   AuthenticatedMarketplaceRoute: typeof AuthenticatedMarketplaceRoute
   AuthenticatedProviderRoute: typeof AuthenticatedProviderRoute
@@ -359,7 +339,6 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRoute,
   AuthenticatedCartRoute: AuthenticatedCartRoute,
-  AuthenticatedConciergeRoute: AuthenticatedConciergeRoute,
   AuthenticatedEmployerRoute: AuthenticatedEmployerRoute,
   AuthenticatedMarketplaceRoute: AuthenticatedMarketplaceRoute,
   AuthenticatedProviderRoute: AuthenticatedProviderRoute,
