@@ -156,8 +156,8 @@ function Landing() {
       {/* Editorial parallax spread */}
       <section className="relative h-[70vh] overflow-hidden">
         <img
-          src="/__l5e/assets-v1/f503984d-25ae-46a0-9887-3b6dc985c3b6/tirana-hero.png"
-          alt="Tirana skyline at golden hour"
+          src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=80"
+          alt="Boutique hotel interior at golden hour"
           className="absolute inset-0 w-full h-full object-cover scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-transparent" />
